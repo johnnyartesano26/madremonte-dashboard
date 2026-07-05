@@ -1,0 +1,2985 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bar Madre Monte · Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+/* ── Bar Madre Monte · Dashboard ── */
+:root {
+  --bg-page: #faf7f0;
+  --bg-card: #ffffff;
+  --text: #3d2a1d;
+  --text-body: #6b5a4a;
+  --text-dim: #8c7b6b;
+  --line: #e0d6c8;
+  --gold: #c88a3d;
+  --gold-light: #e8a84c;
+  --green: #4caf50;
+  --amber: #ffc107;
+  --red: #e57373;
+  --shadow: 0 3px 14px rgba(60,40,20,.07);
+  --shadow-hover: 0 8px 28px rgba(60,40,20,.12);
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg-page);
+  background-image: radial-gradient(ellipse 700px 400px at 10% 0%, rgba(200,138,61,.04) 0%, transparent 55%);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+
+/* ── Topbar ── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 14px;
+  padding: 16px 28px;
+  background: rgba(255,255,255,.94);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 1px 10px rgba(60,40,20,.04);
+}
+.brand h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px; font-weight: 700; color: var(--text);
+}
+.brand h1 span { color: var(--gold); }
+.subtitle {
+  color: var(--text-dim); font-size: 11px; font-weight: 400;
+  text-transform: uppercase; letter-spacing: .5px; margin-top: 2px;
+}
+.topbar-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pill {
+  background: #f5efe6; color: var(--text-dim);
+  padding: 7px 16px; border-radius: 999px; font-size: 12px;
+  border: 1px solid var(--line);
+}
+.select-hoja {
+  padding: 8px 14px; border-radius: 10px; border: 1px solid var(--gold);
+  font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text);
+  background: #fff; cursor: pointer; min-width: 200px;
+}
+.select-hoja:hover { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(200,138,61,.10); }
+.btn-exportar {
+  padding: 8px 18px; border-radius: 10px; border: 1px solid var(--gold);
+  background: #fff; color: var(--gold); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all .2s ease; font-family: 'Inter', sans-serif;
+}
+.btn-exportar:hover { background: var(--gold); color: #fff; }
+
+/* ── Main ── */
+main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; }
+
+/* ── KPIs ── */
+.kpi-grid {
+  display: grid; gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  margin-bottom: 32px;
+}
+.kpi-card {
+  background: var(--bg-card); border-radius: var(--radius);
+  padding: 18px 16px; box-shadow: var(--shadow);
+  border-left: 4px solid var(--gold);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.kpi-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+.kpi-card .kpi-icon { font-size: 22px; margin-bottom: 4px; }
+.kpi-card .kpi-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .5px; }
+.kpi-card .kpi-valor { font-size: 22px; font-weight: 700; color: var(--text); margin-top: 4px; }
+.kpi-card .kpi-sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+/* ── Charts ── */
+.charts-row {
+  display: flex; gap: 20px; margin-bottom: 24px; flex-wrap: wrap;
+}
+.chart-card {
+  flex: 1; min-width: 320px;
+  background: var(--bg-card); border-radius: var(--radius);
+  padding: 22px 20px; box-shadow: var(--shadow);
+}
+.chart-card-wide { flex: 2; min-width: 400px; }
+.chart-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--gold);
+  display: inline-block;
+}
+.chart-wrap { position: relative; width: 100%; }
+.chart-wrap canvas { width: 100% !important; max-height: 300px; }
+
+/* ── Tabla ── */
+.tabla-section {
+  background: var(--bg-card); border-radius: var(--radius);
+  padding: 22px 20px; box-shadow: var(--shadow);
+}
+.tabla-header {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; margin-bottom: 16px;
+}
+.tabla-header h3 { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600; }
+.input-busqueda {
+  padding: 8px 16px; border-radius: 10px; border: 1px solid var(--line);
+  font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text);
+  min-width: 200px;
+}
+.input-busqueda:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(200,138,61,.10); }
+.tabla-wrap { overflow-x: auto; }
+table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+}
+table thead th {
+  background: #f5efe6; color: var(--text); padding: 10px 12px;
+  text-align: left; font-weight: 600; cursor: pointer; white-space: nowrap;
+  border-bottom: 2px solid var(--line);
+}
+table thead th:hover { color: var(--gold); }
+table thead th.sorted::after {
+  content: ' ▾'; font-size: 10px; color: var(--gold);
+}
+table tbody td {
+  padding: 9px 12px; border-bottom: 1px solid var(--line);
+  color: var(--text-body);
+}
+table tbody tr:hover { background: rgba(200,138,61,.04); }
+.numero { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ── Footer ── */
+.footer {
+  text-align: center; padding: 20px; margin-top: 20px;
+  border-top: 1px solid var(--line);
+  color: var(--text-dim); font-size: 12px; line-height: 1.8;
+}
+.footer strong { font-size: 13px; color: var(--text); display: block; margin-bottom: 2px; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .topbar { padding: 14px 16px; }
+  .brand h1 { font-size: 20px; }
+  .kpi-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .chart-card { min-width: 100%; }
+  .chart-card-wide { min-width: 100%; }
+}
+
+::-webkit-scrollbar { width: 7px; }
+::-webkit-scrollbar-track { background: #f5f0e8; }
+::-webkit-scrollbar-thumb { background: rgba(200,138,61,.25); border-radius: 3px; }
+
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <h1>🍺 Bar Madre Monte</h1>
+    <p class="subtitle">Dashboard de Arqueo de Cierre</p>
+  </div>
+  <div class="topbar-meta">
+    <span id="fecha-actualizacion" class="pill"></span>
+    <select id="selector-hoja" class="select-hoja"><option>Cargando...</option></select>
+    <button id="btn-exportar" class="btn-exportar" title="Exportar a CSV">📥 CSV</button>
+  </div>
+</header>
+
+<main>
+  <!-- KPIs -->
+  <section class="kpi-grid" id="kpi-grid"></section>
+
+  <!-- Gráficos -->
+  <section class="charts-row">
+    <div class="chart-card">
+      <h3>📈 Ventas por Día</h3>
+      <div class="chart-wrap"><canvas id="chart-ventas"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>💰 Composición de Pagos</h3>
+      <div class="chart-wrap"><canvas id="chart-pagos"></canvas></div>
+    </div>
+  </section>
+
+  <section class="charts-row">
+    <div class="chart-card chart-card-wide">
+      <h3>📊 Desglose por Método de Pago</h3>
+      <div class="chart-wrap"><canvas id="chart-desglose"></canvas></div>
+    </div>
+  </section>
+
+  <!-- Tabla -->
+  <section class="tabla-section">
+    <div class="tabla-header">
+      <h3>📋 Datos por Día</h3>
+      <div class="tabla-search">
+        <input type="text" id="busqueda-tabla" placeholder="Buscar..." class="input-busqueda">
+      </div>
+    </div>
+    <div class="tabla-wrap">
+      <table id="tabla-datos">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <strong>Bar Madre Monte · Arqueo de Cierre</strong>
+  Datos extraídos de Google Sheets · Noviembre 2025
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>window.BAR_DATA = {
+  "hojas": [
+    {
+      "nombre": "Arqueo Cierre de bar Noviembre 2025",
+      "columnas": [
+        {
+          "key": "fecha",
+          "label": "Fecha"
+        },
+        {
+          "key": "cierreAlegra",
+          "label": "Cierre Alegra",
+          "tipo": "dinero"
+        },
+        {
+          "key": "cierreFormato",
+          "label": "Cierre Formato",
+          "tipo": "dinero"
+        },
+        {
+          "key": "efectivo",
+          "label": "Efectivo",
+          "tipo": "dinero"
+        },
+        {
+          "key": "transferencias",
+          "label": "Transferencias",
+          "tipo": "dinero"
+        },
+        {
+          "key": "datafono",
+          "label": "Datafono",
+          "tipo": "dinero"
+        },
+        {
+          "key": "propinas",
+          "label": "Propinas",
+          "tipo": "dinero"
+        },
+        {
+          "key": "observaciones",
+          "label": "Observaciones",
+          "tipo": "texto"
+        }
+      ],
+      "datos": [
+        {
+          "fecha": "2001-11-01 00:00:00",
+          "cierreAlegra": 1342000,
+          "cierreFormato": 1565075,
+          "efectivo": 398000,
+          "transferencias": 493000,
+          "datafono": 451000,
+          "propinas": 110000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2002-11-01 00:00:00",
+          "cierreAlegra": 991000,
+          "cierreFormato": 895720,
+          "efectivo": 50000,
+          "transferencias": 420000,
+          "datafono": 521000,
+          "propinas": 60000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2004-11-01 00:00:00",
+          "cierreAlegra": 222000,
+          "cierreFormato": 0,
+          "efectivo": 90000,
+          "transferencias": 132000,
+          "datafono": 0,
+          "propinas": 15092,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2005-11-01 00:00:00",
+          "cierreAlegra": 269000,
+          "cierreFormato": 541765,
+          "efectivo": 155000,
+          "transferencias": 60000,
+          "datafono": 54000,
+          "propinas": 11000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2006-11-01 00:00:00",
+          "cierreAlegra": 163500,
+          "cierreFormato": 328785,
+          "efectivo": 42500,
+          "transferencias": 121000,
+          "datafono": 0,
+          "propinas": 11000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2007-11-01 00:00:00",
+          "cierreAlegra": 853000,
+          "cierreFormato": 1086980,
+          "efectivo": 100000,
+          "transferencias": 672000,
+          "datafono": 81000,
+          "propinas": 78000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2008-11-01 00:00:00",
+          "cierreAlegra": 2107000,
+          "cierreFormato": 1581595,
+          "efectivo": 616000,
+          "transferencias": 592000,
+          "datafono": 899000,
+          "propinas": 161000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2009-11-01 00:00:00",
+          "cierreAlegra": 434000,
+          "cierreFormato": 0,
+          "efectivo": 338000,
+          "transferencias": 96000,
+          "datafono": 0,
+          "propinas": 16297,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2011-11-01 00:00:00",
+          "cierreAlegra": 755500,
+          "cierreFormato": 0,
+          "efectivo": 278500,
+          "transferencias": 350000,
+          "datafono": 101869,
+          "propinas": 68519,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2012-11-01 00:00:00",
+          "cierreAlegra": 1085000,
+          "cierreFormato": 1145975,
+          "efectivo": 84000,
+          "transferencias": 26000,
+          "datafono": 1066000,
+          "propinas": 84000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2013-11-01 00:00:00",
+          "cierreAlegra": 115000,
+          "cierreFormato": 334535,
+          "efectivo": 10000,
+          "transferencias": 105000,
+          "datafono": 0,
+          "propinas": 9000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2014-11-01 00:00:00",
+          "cierreAlegra": 2056000,
+          "cierreFormato": 1464180,
+          "efectivo": 194000,
+          "transferencias": 385000,
+          "datafono": 1705000,
+          "propinas": 159000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2015-11-01 00:00:00",
+          "cierreAlegra": 1631500,
+          "cierreFormato": 1248210,
+          "efectivo": 281500,
+          "transferencias": 734000,
+          "datafono": 647200,
+          "propinas": 110000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2016-11-01 00:00:00",
+          "cierreAlegra": 206000,
+          "cierreFormato": 164450,
+          "efectivo": 0,
+          "transferencias": 101000,
+          "datafono": 116000,
+          "propinas": 21000,
+          "observaciones": "Sin retiro efectivo."
+        },
+        {
+          "fecha": "2017-11-01 00:00:00",
+          "cierreAlegra": 79000,
+          "cierreFormato": 0,
+          "efectivo": 79000,
+          "transferencias": 0,
+          "datafono": 0,
+          "propinas": 7522,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2018-11-01 00:00:00",
+          "cierreAlegra": 150000,
+          "cierreFormato": 0,
+          "efectivo": 150000,
+          "transferencias": 0,
+          "datafono": 0,
+          "propinas": 14230,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2019-11-01 00:00:00",
+          "cierreAlegra": 464000,
+          "cierreFormato": 320275,
+          "efectivo": 14000,
+          "transferencias": 196000,
+          "datafono": 276000,
+          "propinas": 35000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2020-11-01 00:00:00",
+          "cierreAlegra": 251000,
+          "cierreFormato": 290950,
+          "efectivo": 24000,
+          "transferencias": 227000,
+          "datafono": 0,
+          "propinas": 20000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2021-11-01 00:00:00",
+          "cierreAlegra": 1302500,
+          "cierreFormato": 1176795,
+          "efectivo": 239000,
+          "transferencias": 839500,
+          "datafono": 252000,
+          "propinas": 120000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2022-11-01 00:00:00",
+          "cierreAlegra": 1100000,
+          "cierreFormato": 1156785,
+          "efectivo": 91000,
+          "transferencias": 546000,
+          "datafono": 597000,
+          "propinas": 92000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2023-11-01 00:00:00",
+          "cierreAlegra": 252985,
+          "cierreFormato": 0,
+          "efectivo": 42000,
+          "transferencias": 100000,
+          "datafono": 121500,
+          "propinas": 22800,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2024-11-01 00:00:00",
+          "cierreAlegra": 1152111,
+          "cierreFormato": 634110,
+          "efectivo": 538000,
+          "transferencias": 379000,
+          "datafono": 124126,
+          "propinas": 36185,
+          "observaciones": "Dia 24 cita medica Juan Diego, asi que el turno quedo mezclado de los dias 24 y 25. Jose no habia cerrado previamente el turno día 24."
+        },
+        {
+          "fecha": "2026-11-01 00:00:00",
+          "cierreAlegra": 429500,
+          "cierreFormato": 302795,
+          "efectivo": 202500,
+          "transferencias": 80000,
+          "datafono": 147000,
+          "propinas": 22000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2027-11-01 00:00:00",
+          "cierreAlegra": 526000,
+          "cierreFormato": 539465,
+          "efectivo": 202000,
+          "transferencias": 249000,
+          "datafono": 75000,
+          "propinas": 33000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2028-11-01 00:00:00",
+          "cierreAlegra": 1681000,
+          "cierreFormato": 1339060,
+          "efectivo": 340000,
+          "transferencias": 706000,
+          "datafono": 635000,
+          "propinas": 148000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2029-11-01 00:00:00",
+          "cierreAlegra": 214000,
+          "cierreFormato": 219650,
+          "efectivo": 0,
+          "transferencias": 182000,
+          "datafono": 32000,
+          "propinas": 10778,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2030-11-01 00:00:00",
+          "cierreAlegra": 970000,
+          "cierreFormato": 921380,
+          "efectivo": 285000,
+          "transferencias": 584000,
+          "datafono": 110000,
+          "propinas": 80000,
+          "observaciones": ""
+        }
+      ]
+    },
+    {
+      "nombre": "Arqueo Cierre de bar Dicembre 2025",
+      "columnas": [
+        {
+          "key": "fecha",
+          "label": "Fecha"
+        },
+        {
+          "key": "cierreAlegra",
+          "label": "Cierre Alegra",
+          "tipo": "dinero"
+        },
+        {
+          "key": "cierreFormato",
+          "label": "Cierre Formato",
+          "tipo": "dinero"
+        },
+        {
+          "key": "efectivo",
+          "label": "Efectivo",
+          "tipo": "dinero"
+        },
+        {
+          "key": "transferencias",
+          "label": "Transferencias",
+          "tipo": "dinero"
+        },
+        {
+          "key": "datafono",
+          "label": "Datafono",
+          "tipo": "dinero"
+        },
+        {
+          "key": "propinas",
+          "label": "Propinas",
+          "tipo": "dinero"
+        },
+        {
+          "key": "observaciones",
+          "label": "Observaciones",
+          "tipo": "texto"
+        }
+      ],
+      "datos": [
+        {
+          "fecha": "2025-12-02 00:00:00",
+          "cierreAlegra": 177300,
+          "cierreFormato": 219075,
+          "efectivo": 103000,
+          "transferencias": 62000,
+          "datafono": 0,
+          "propinas": 4300,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-03 00:00:00",
+          "cierreAlegra": 301000,
+          "cierreFormato": 167785,
+          "efectivo": 180000,
+          "transferencias": 26000,
+          "datafono": 95000,
+          "propinas": 9000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-04 00:00:00",
+          "cierreAlegra": 433500,
+          "cierreFormato": 417565,
+          "efectivo": 202500,
+          "transferencias": 231000,
+          "datafono": 0,
+          "propinas": 29856,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-05 00:00:00",
+          "cierreAlegra": 1246000,
+          "cierreFormato": 747385,
+          "efectivo": 614000,
+          "transferencias": 76000,
+          "datafono": 556000,
+          "propinas": 82000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-06 00:00:00",
+          "cierreAlegra": 921500,
+          "cierreFormato": 529345,
+          "efectivo": 138500,
+          "transferencias": 346000,
+          "datafono": 437000,
+          "propinas": 92800,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-07 00:00:00",
+          "cierreAlegra": 404000,
+          "cierreFormato": 205735,
+          "efectivo": 58000,
+          "transferencias": 295000,
+          "datafono": 51000,
+          "propinas": 27374,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-09 00:00:00",
+          "cierreAlegra": 92000,
+          "cierreFormato": 209875,
+          "efectivo": 24000,
+          "transferencias": 0,
+          "datafono": 68000,
+          "propinas": 0,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-10 00:00:00",
+          "cierreAlegra": 343000,
+          "cierreFormato": 258290,
+          "efectivo": 71000,
+          "transferencias": 30000,
+          "datafono": 242000,
+          "propinas": 25000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-11 00:00:00",
+          "cierreAlegra": 252000,
+          "cierreFormato": 189290,
+          "efectivo": 70000,
+          "transferencias": 0,
+          "datafono": 182000,
+          "propinas": 16333,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-12 00:00:00",
+          "cierreAlegra": 2153000,
+          "cierreFormato": 1560090,
+          "efectivo": 515800,
+          "transferencias": 502000,
+          "datafono": 1135200,
+          "propinas": 194200,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-13 00:00:00",
+          "cierreAlegra": 1005000,
+          "cierreFormato": 517730,
+          "efectivo": 44000,
+          "transferencias": 584000,
+          "datafono": 377000,
+          "propinas": 85000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-14 00:00:00",
+          "cierreAlegra": 76000,
+          "cierreFormato": 66930,
+          "efectivo": 34000,
+          "transferencias": 42000,
+          "datafono": 0,
+          "propinas": 3148,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-16 00:00:00",
+          "cierreAlegra": 452000,
+          "cierreFormato": 158010,
+          "efectivo": 111000,
+          "transferencias": 123000,
+          "datafono": 218000,
+          "propinas": 35981,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-17 00:00:00",
+          "cierreAlegra": 473000,
+          "cierreFormato": 342010,
+          "efectivo": 142000,
+          "transferencias": 48000,
+          "datafono": 283000,
+          "propinas": 20000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-18 00:00:00",
+          "cierreAlegra": 1786500,
+          "cierreFormato": 1577800,
+          "efectivo": 130000,
+          "transferencias": 493500,
+          "datafono": 1163000,
+          "propinas": 174000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-19 00:00:00",
+          "cierreAlegra": 306000,
+          "cierreFormato": 287845,
+          "efectivo": 191000,
+          "transferencias": 0,
+          "datafono": 115000,
+          "propinas": 14000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-20 00:00:00",
+          "cierreAlegra": 1630926,
+          "cierreFormato": 1842760,
+          "efectivo": 507000,
+          "transferencias": 642000,
+          "datafono": 481926,
+          "propinas": 115648,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-21 00:00:00",
+          "cierreAlegra": 292500,
+          "cierreFormato": 257600,
+          "efectivo": 110500,
+          "transferencias": 182000,
+          "datafono": 0,
+          "propinas": 7000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-23 00:00:00",
+          "cierreAlegra": 582000,
+          "cierreFormato": 409860,
+          "efectivo": 241000,
+          "transferencias": 60000,
+          "datafono": 281000,
+          "propinas": 36971,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-24 00:00:00",
+          "cierreAlegra": 690500,
+          "cierreFormato": 623645,
+          "efectivo": 310000,
+          "transferencias": 251500,
+          "datafono": 129000,
+          "propinas": 39000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-26 00:00:00",
+          "cierreAlegra": 421500,
+          "cierreFormato": 425730,
+          "efectivo": 17000,
+          "transferencias": 168500,
+          "datafono": 236000,
+          "propinas": 28000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-27 00:00:00",
+          "cierreAlegra": 1493500,
+          "cierreFormato": 1090200,
+          "efectivo": 379000,
+          "transferencias": 296500,
+          "datafono": 818000,
+          "propinas": 119556,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-28 00:00:00",
+          "cierreAlegra": 246000,
+          "cierreFormato": 236440,
+          "efectivo": 0,
+          "transferencias": 140000,
+          "datafono": 106000,
+          "propinas": 19908,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-30 00:00:00",
+          "cierreAlegra": 564000,
+          "cierreFormato": 302220,
+          "efectivo": 130000,
+          "transferencias": 97000,
+          "datafono": 337000,
+          "propinas": 30427,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2025-12-31 00:00:00",
+          "cierreAlegra": 415000,
+          "cierreFormato": 355695,
+          "efectivo": 232000,
+          "transferencias": 85000,
+          "datafono": 98000,
+          "propinas": 21000,
+          "observaciones": ""
+        }
+      ]
+    },
+    {
+      "nombre": "Arqueo Cierre de bar Enero 2026",
+      "columnas": [
+        {
+          "key": "fecha",
+          "label": "Fecha"
+        },
+        {
+          "key": "cierreAlegra",
+          "label": "Cierre Alegra",
+          "tipo": "dinero"
+        },
+        {
+          "key": "cierreFormato",
+          "label": "Cierre Formato",
+          "tipo": "dinero"
+        },
+        {
+          "key": "efectivo",
+          "label": "Efectivo",
+          "tipo": "dinero"
+        },
+        {
+          "key": "transferencias",
+          "label": "Transferencias",
+          "tipo": "dinero"
+        },
+        {
+          "key": "datafono",
+          "label": "Datafono",
+          "tipo": "dinero"
+        },
+        {
+          "key": "propinas",
+          "label": "Propinas",
+          "tipo": "dinero"
+        },
+        {
+          "key": "observaciones",
+          "label": "Observaciones",
+          "tipo": "texto"
+        }
+      ],
+      "datos": [
+        {
+          "fecha": "2026-01-02 00:00:00",
+          "cierreAlegra": 0,
+          "cierreFormato": 416760,
+          "efectivo": 175000,
+          "transferencias": 406000,
+          "datafono": 113000,
+          "propinas": 49000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-03 00:00:00",
+          "cierreAlegra": 733000,
+          "cierreFormato": 461495,
+          "efectivo": 458000,
+          "transferencias": 158000,
+          "datafono": 117000,
+          "propinas": 42000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-04 00:00:00",
+          "cierreAlegra": 356000,
+          "cierreFormato": 60950,
+          "efectivo": 109000,
+          "transferencias": 33000,
+          "datafono": 214000,
+          "propinas": 22374,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-05 00:00:00",
+          "cierreAlegra": 2001000,
+          "cierreFormato": 1513975,
+          "efectivo": 342000,
+          "transferencias": 798000,
+          "datafono": 861000,
+          "propinas": 173000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-06 00:00:00",
+          "cierreAlegra": 257000,
+          "cierreFormato": 227930,
+          "efectivo": 0,
+          "transferencias": 16000,
+          "datafono": 241000,
+          "propinas": 22481,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-07 00:00:00",
+          "cierreAlegra": 458000,
+          "cierreFormato": 501170,
+          "efectivo": 371000,
+          "transferencias": 56000,
+          "datafono": 31000,
+          "propinas": 26000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-08 00:00:00",
+          "cierreAlegra": 501000,
+          "cierreFormato": 562350,
+          "efectivo": 226000,
+          "transferencias": 194000,
+          "datafono": 81000,
+          "propinas": 31500,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-09 00:00:00",
+          "cierreAlegra": 1481500,
+          "cierreFormato": 663320,
+          "efectivo": 435000,
+          "transferencias": 327000,
+          "datafono": 719500,
+          "propinas": 0,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-10 00:00:00",
+          "cierreAlegra": 1076000,
+          "cierreFormato": 451950,
+          "efectivo": 336000,
+          "transferencias": 361000,
+          "datafono": 379000,
+          "propinas": 82000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-11 00:00:00",
+          "cierreAlegra": 478000,
+          "cierreFormato": 191130,
+          "efectivo": 93000,
+          "transferencias": 283000,
+          "datafono": 195000,
+          "propinas": 13682,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-13 00:00:00",
+          "cierreAlegra": 364000,
+          "cierreFormato": 284740,
+          "efectivo": 251000,
+          "transferencias": 0,
+          "datafono": 113000,
+          "propinas": 10515,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-14 00:00:00",
+          "cierreAlegra": 506000,
+          "cierreFormato": 417105,
+          "efectivo": 84000,
+          "transferencias": 120000,
+          "datafono": 302000,
+          "propinas": 36000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-15 00:00:00",
+          "cierreAlegra": 473000,
+          "cierreFormato": 318435,
+          "efectivo": 0,
+          "transferencias": 283000,
+          "datafono": 190000,
+          "propinas": 44000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-16 00:00:00",
+          "cierreAlegra": 1454000,
+          "cierreFormato": 875150,
+          "efectivo": 396000,
+          "transferencias": 220000,
+          "datafono": 838000,
+          "propinas": 113000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-17 00:00:00",
+          "cierreAlegra": 1081000,
+          "cierreFormato": 895620,
+          "efectivo": 340000,
+          "transferencias": 120000,
+          "datafono": 621000,
+          "propinas": 98744,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-18 00:00:00",
+          "cierreAlegra": 695000,
+          "cierreFormato": 572010,
+          "efectivo": 30000,
+          "transferencias": 129000,
+          "datafono": 536000,
+          "propinas": 57779,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-20 00:00:00",
+          "cierreAlegra": 1314000,
+          "cierreFormato": 725420,
+          "efectivo": 454000,
+          "transferencias": 56000,
+          "datafono": 804000,
+          "propinas": 106670,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-21 00:00:00",
+          "cierreAlegra": 452000,
+          "cierreFormato": 391920,
+          "efectivo": 102000,
+          "transferencias": 238000,
+          "datafono": 112000,
+          "propinas": 47000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-22 00:00:00",
+          "cierreAlegra": 524000,
+          "cierreFormato": 721970,
+          "efectivo": 214000,
+          "transferencias": 14000,
+          "datafono": 296000,
+          "propinas": 23000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-23 00:00:00",
+          "cierreAlegra": 426000,
+          "cierreFormato": 322460,
+          "efectivo": 115000,
+          "transferencias": 233000,
+          "datafono": 78000,
+          "propinas": 34000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-24 00:00:00",
+          "cierreAlegra": 1306000,
+          "cierreFormato": 605360,
+          "efectivo": 369000,
+          "transferencias": 521000,
+          "datafono": 416000,
+          "propinas": 107852,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-25 00:00:00",
+          "cierreAlegra": 312000,
+          "cierreFormato": 264960,
+          "efectivo": 0,
+          "transferencias": 282000,
+          "datafono": 30000,
+          "propinas": 20074,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-27 00:00:00",
+          "cierreAlegra": 792000,
+          "cierreFormato": 459885,
+          "efectivo": 445000,
+          "transferencias": 114000,
+          "datafono": 233000,
+          "propinas": 53000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-28 00:00:00",
+          "cierreAlegra": 77000,
+          "cierreFormato": 110170,
+          "efectivo": 30000,
+          "transferencias": 47000,
+          "datafono": 0,
+          "propinas": 0,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-29 00:00:00",
+          "cierreAlegra": 781000,
+          "cierreFormato": 600300,
+          "efectivo": 165000,
+          "transferencias": 349000,
+          "datafono": 267000,
+          "propinas": 60900,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-01-30 00:00:00",
+          "cierreAlegra": 933000,
+          "cierreFormato": 1053400,
+          "efectivo": 516000,
+          "transferencias": 288000,
+          "datafono": 129000,
+          "propinas": 71000,
+          "observaciones": "Día PROMO APA"
+        },
+        {
+          "fecha": "2026-01-31 00:00:00",
+          "cierreAlegra": 1234000,
+          "cierreFormato": 856175,
+          "efectivo": 177000,
+          "transferencias": 319000,
+          "datafono": 738000,
+          "propinas": 90000,
+          "observaciones": ""
+        }
+      ]
+    },
+    {
+      "nombre": "Arqueo Cierre de bar Febrero 2026",
+      "columnas": [
+        {
+          "key": "fecha",
+          "label": "Fecha"
+        },
+        {
+          "key": "cierreAlegra",
+          "label": "Cierre Alegra",
+          "tipo": "dinero"
+        },
+        {
+          "key": "cierreFormato",
+          "label": "Cierre Formato",
+          "tipo": "dinero"
+        },
+        {
+          "key": "efectivo",
+          "label": "Efectivo",
+          "tipo": "dinero"
+        },
+        {
+          "key": "transferencias",
+          "label": "Transferencias",
+          "tipo": "dinero"
+        },
+        {
+          "key": "datafono",
+          "label": "Datafono",
+          "tipo": "dinero"
+        },
+        {
+          "key": "propinas",
+          "label": "Propinas",
+          "tipo": "dinero"
+        },
+        {
+          "key": "observaciones",
+          "label": "Observaciones",
+          "tipo": "texto"
+        }
+      ],
+      "datos": [
+        {
+          "fecha": "2026-02-01 00:00:00",
+          "cierreAlegra": 242000,
+          "cierreFormato": 181240,
+          "efectivo": 128000,
+          "transferencias": 60000,
+          "datafono": 54000,
+          "propinas": 11852,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-03 00:00:00",
+          "cierreAlegra": 1224000,
+          "cierreFormato": 652165,
+          "efectivo": 590000,
+          "transferencias": 519000,
+          "datafono": 115000,
+          "propinas": 81276,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-04 00:00:00",
+          "cierreAlegra": 154000,
+          "cierreFormato": 261165,
+          "efectivo": 73000,
+          "transferencias": 81000,
+          "datafono": 0,
+          "propinas": 10000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-05 00:00:00",
+          "cierreAlegra": 581000,
+          "cierreFormato": 615480,
+          "efectivo": 267000,
+          "transferencias": 82000,
+          "datafono": 232000,
+          "propinas": 31000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-06 00:00:00",
+          "cierreAlegra": 1756000,
+          "cierreFormato": 1534905,
+          "efectivo": 308000,
+          "transferencias": 318000,
+          "datafono": 1130000,
+          "propinas": 0,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-07 00:00:00",
+          "cierreAlegra": 795000,
+          "cierreFormato": 553495,
+          "efectivo": 17000,
+          "transferencias": 177000,
+          "datafono": 601000,
+          "propinas": 62000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-08 00:00:00",
+          "cierreAlegra": 195000,
+          "cierreFormato": 148810,
+          "efectivo": 30000,
+          "transferencias": 30000,
+          "datafono": 135000,
+          "propinas": 12796,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-10 00:00:00",
+          "cierreAlegra": 1214500,
+          "cierreFormato": 869170,
+          "efectivo": 252500,
+          "transferencias": 203000,
+          "datafono": 759000,
+          "propinas": 111000,
+          "observaciones": "CAMBIO DE PRECIOS 2025"
+        },
+        {
+          "fecha": "2026-02-11 00:00:00",
+          "cierreAlegra": 347000,
+          "cierreFormato": 266225,
+          "efectivo": 61000,
+          "transferencias": 179000,
+          "datafono": 107000,
+          "propinas": 26000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-12 00:00:00",
+          "cierreAlegra": 917000,
+          "cierreFormato": 781195,
+          "efectivo": 426000,
+          "transferencias": 62000,
+          "datafono": 429000,
+          "propinas": 83000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-13 00:00:00",
+          "cierreAlegra": 1072800,
+          "cierreFormato": 1071340,
+          "efectivo": 373000,
+          "transferencias": 642000,
+          "datafono": 57800,
+          "propinas": 95081,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-14 00:00:00",
+          "cierreAlegra": 857000,
+          "cierreFormato": 664240,
+          "efectivo": 242000,
+          "transferencias": 195000,
+          "datafono": 420000,
+          "propinas": 47000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-15 00:00:00",
+          "cierreAlegra": 2469500,
+          "cierreFormato": 1558595,
+          "efectivo": 776000,
+          "transferencias": 971500,
+          "datafono": 722000,
+          "propinas": 144766,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-17 00:00:00",
+          "cierreAlegra": 726000,
+          "cierreFormato": 394450,
+          "efectivo": 383000,
+          "transferencias": 43000,
+          "datafono": 300000,
+          "propinas": 62515,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-18 00:00:00",
+          "cierreAlegra": 321000,
+          "cierreFormato": 211600,
+          "efectivo": 57000,
+          "transferencias": 149000,
+          "datafono": 115000,
+          "propinas": 23000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-19 00:00:00",
+          "cierreAlegra": 460000,
+          "cierreFormato": 415955,
+          "efectivo": 60000,
+          "transferencias": 171000,
+          "datafono": 229000,
+          "propinas": 41000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-20 00:00:00",
+          "cierreAlegra": 1696000,
+          "cierreFormato": 1210835,
+          "efectivo": 200000,
+          "transferencias": 1037000,
+          "datafono": 459000,
+          "propinas": 151000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-21 00:00:00",
+          "cierreAlegra": 1574000,
+          "cierreFormato": 1184385,
+          "efectivo": 664000,
+          "transferencias": 474000,
+          "datafono": 436000,
+          "propinas": 66437,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-22 00:00:00",
+          "cierreAlegra": 432000,
+          "cierreFormato": 363745,
+          "efectivo": 38000,
+          "transferencias": 118000,
+          "datafono": 276000,
+          "propinas": 37037,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-24 00:00:00",
+          "cierreAlegra": 568000,
+          "cierreFormato": 284855,
+          "efectivo": 465000,
+          "transferencias": 103000,
+          "datafono": 0,
+          "propinas": 56000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-25 00:00:00",
+          "cierreAlegra": 495000,
+          "cierreFormato": 412160,
+          "efectivo": 130000,
+          "transferencias": 0,
+          "datafono": 365000,
+          "propinas": 29000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-26 00:00:00",
+          "cierreAlegra": 548000,
+          "cierreFormato": 665390,
+          "efectivo": 97000,
+          "transferencias": 0,
+          "datafono": 451000,
+          "propinas": 51000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-27 00:00:00",
+          "cierreAlegra": 2298000,
+          "cierreFormato": 1793770,
+          "efectivo": 91000,
+          "transferencias": 1230000,
+          "datafono": 977000,
+          "propinas": 224500,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-02-28 00:00:00",
+          "cierreAlegra": 3207040,
+          "cierreFormato": 1837010,
+          "efectivo": 891000,
+          "transferencias": 1134000,
+          "datafono": 1182040,
+          "propinas": 229249,
+          "observaciones": ""
+        }
+      ]
+    },
+    {
+      "nombre": "Arqueo Cierre de bar Marzo 2026",
+      "columnas": [
+        {
+          "key": "fecha",
+          "label": "Fecha"
+        },
+        {
+          "key": "cierreAlegra",
+          "label": "Cierre Alegra",
+          "tipo": "dinero"
+        },
+        {
+          "key": "cierreFormato",
+          "label": "Cierre Formato",
+          "tipo": "dinero"
+        },
+        {
+          "key": "efectivo",
+          "label": "Efectivo",
+          "tipo": "dinero"
+        },
+        {
+          "key": "transferencias",
+          "label": "Transferencias",
+          "tipo": "dinero"
+        },
+        {
+          "key": "datafono",
+          "label": "Datafono",
+          "tipo": "dinero"
+        },
+        {
+          "key": "propinas",
+          "label": "Propinas",
+          "tipo": "dinero"
+        },
+        {
+          "key": "observaciones",
+          "label": "Observaciones",
+          "tipo": "texto"
+        }
+      ],
+      "datos": [
+        {
+          "fecha": "2026-03-01 00:00:00",
+          "cierreAlegra": 453000,
+          "cierreFormato": 300840,
+          "efectivo": 145000,
+          "transferencias": 120000,
+          "datafono": 188000,
+          "propinas": 22000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-03 00:00:00",
+          "cierreAlegra": 671500,
+          "cierreFormato": 287155,
+          "efectivo": 382500,
+          "transferencias": 114000,
+          "datafono": 175000,
+          "propinas": 53181,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-04 00:00:00",
+          "cierreAlegra": 301000,
+          "cierreFormato": 289340,
+          "efectivo": 126000,
+          "transferencias": 0,
+          "datafono": 175000,
+          "propinas": 12000,
+          "observaciones": "REAL Transferencia 133.000 Datafono 42.000"
+        },
+        {
+          "fecha": "2026-03-05 00:00:00",
+          "cierreAlegra": 259000,
+          "cierreFormato": 334190,
+          "efectivo": 38000,
+          "transferencias": 0,
+          "datafono": 221000,
+          "propinas": 20200,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-06 00:00:00",
+          "cierreAlegra": 1121000,
+          "cierreFormato": 957950,
+          "efectivo": 121000,
+          "transferencias": 208000,
+          "datafono": 792000,
+          "propinas": 82900,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-07 00:00:00",
+          "cierreAlegra": 56000,
+          "cierreFormato": 41745,
+          "efectivo": 0,
+          "transferencias": 18000,
+          "datafono": 38000,
+          "propinas": 0,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-10 00:00:00",
+          "cierreAlegra": 977000,
+          "cierreFormato": 532910,
+          "efectivo": 375000,
+          "transferencias": 205000,
+          "datafono": 397000,
+          "propinas": 57000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-11 00:00:00",
+          "cierreAlegra": 401000,
+          "cierreFormato": 459770,
+          "efectivo": 32000,
+          "transferencias": 325000,
+          "datafono": 44000,
+          "propinas": 32000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-12 00:00:00",
+          "cierreAlegra": 573000,
+          "cierreFormato": 485990,
+          "efectivo": 80000,
+          "transferencias": 0,
+          "datafono": 493000,
+          "propinas": 50600,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-13 00:00:00",
+          "cierreAlegra": 1528000,
+          "cierreFormato": 944840,
+          "efectivo": 300000,
+          "transferencias": 767000,
+          "datafono": 461000,
+          "propinas": 101000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-14 00:00:00",
+          "cierreAlegra": 964000,
+          "cierreFormato": 670795,
+          "efectivo": 116000,
+          "transferencias": 255000,
+          "datafono": 593000,
+          "propinas": 67600,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-15 00:00:00",
+          "cierreAlegra": 112000,
+          "cierreFormato": 120635,
+          "efectivo": 18000,
+          "transferencias": 0,
+          "datafono": 94000,
+          "propinas": 9000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-16 00:00:00",
+          "cierreAlegra": 325000,
+          "cierreFormato": 616170,
+          "efectivo": 37000,
+          "transferencias": 187000,
+          "datafono": 101000,
+          "propinas": 0,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-17 00:00:00",
+          "cierreAlegra": 896000,
+          "cierreFormato": 557865,
+          "efectivo": 341000,
+          "transferencias": 199000,
+          "datafono": 356000,
+          "propinas": 76459,
+          "observaciones": "Dia Promo 2x3 Stout (4 promos)"
+        },
+        {
+          "fecha": "2026-03-18 00:00:00",
+          "cierreAlegra": 528000,
+          "cierreFormato": 179860,
+          "efectivo": 176000,
+          "transferencias": 151000,
+          "datafono": 201000,
+          "propinas": 23000,
+          "observaciones": "Dia Promo 2x3 Stout (1 promos)"
+        },
+        {
+          "fecha": "2026-03-19 00:00:00",
+          "cierreAlegra": 702000,
+          "cierreFormato": 654810,
+          "efectivo": 84000,
+          "transferencias": 42000,
+          "datafono": 576000,
+          "propinas": 68000,
+          "observaciones": "Dia Promo 2x3 Stout ( promos)"
+        },
+        {
+          "fecha": "2026-03-20 00:00:00",
+          "cierreAlegra": 667000,
+          "cierreFormato": 561890,
+          "efectivo": 237000,
+          "transferencias": 223000,
+          "datafono": 207000,
+          "propinas": 49685,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-21 00:00:00",
+          "cierreAlegra": 2551000,
+          "cierreFormato": 2077590,
+          "efectivo": 339000,
+          "transferencias": 693000,
+          "datafono": 1519000,
+          "propinas": 169000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-22 00:00:00",
+          "cierreAlegra": 1108000,
+          "cierreFormato": 841110,
+          "efectivo": 324000,
+          "transferencias": 261000,
+          "datafono": 523000,
+          "propinas": 57000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-24 00:00:00",
+          "cierreAlegra": 1057000,
+          "cierreFormato": 677360,
+          "efectivo": 394000,
+          "transferencias": 176000,
+          "datafono": 487000,
+          "propinas": 80100,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-25 00:00:00",
+          "cierreAlegra": 187000,
+          "cierreFormato": 280255,
+          "efectivo": 115000,
+          "transferencias": 40000,
+          "datafono": 32000,
+          "propinas": 11000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-26 00:00:00",
+          "cierreAlegra": 347000,
+          "cierreFormato": 382145,
+          "efectivo": 290000,
+          "transferencias": 0,
+          "datafono": 57000,
+          "propinas": 20000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-27 00:00:00",
+          "cierreAlegra": 260000,
+          "cierreFormato": 253345,
+          "efectivo": 148000,
+          "transferencias": 48000,
+          "datafono": 64000,
+          "propinas": 0,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-28 00:00:00",
+          "cierreAlegra": 2349000,
+          "cierreFormato": 1608505,
+          "efectivo": 363000,
+          "transferencias": 1220000,
+          "datafono": 766000,
+          "propinas": 132870,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-29 00:00:00",
+          "cierreAlegra": 327000,
+          "cierreFormato": 150190,
+          "efectivo": 128000,
+          "transferencias": 84000,
+          "datafono": 115000,
+          "propinas": 30000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-03-31 00:00:00",
+          "cierreAlegra": 1832500,
+          "cierreFormato": 1020395,
+          "efectivo": 803000,
+          "transferencias": 542500,
+          "datafono": 487000,
+          "propinas": 129526,
+          "observaciones": ""
+        }
+      ]
+    },
+    {
+      "nombre": "Arqueo Cierre de bar Abril 2026",
+      "columnas": [
+        {
+          "key": "fecha",
+          "label": "Fecha"
+        },
+        {
+          "key": "cierreAlegra",
+          "label": "Cierre Alegra",
+          "tipo": "dinero"
+        },
+        {
+          "key": "cierreFormato",
+          "label": "Cierre Formato",
+          "tipo": "dinero"
+        },
+        {
+          "key": "efectivo",
+          "label": "Efectivo",
+          "tipo": "dinero"
+        },
+        {
+          "key": "transferencias",
+          "label": "Transferencias",
+          "tipo": "dinero"
+        },
+        {
+          "key": "datafono",
+          "label": "Datafono",
+          "tipo": "dinero"
+        },
+        {
+          "key": "propinas",
+          "label": "Propinas",
+          "tipo": "dinero"
+        },
+        {
+          "key": "observaciones",
+          "label": "Observaciones",
+          "tipo": "texto"
+        }
+      ],
+      "datos": [
+        {
+          "fecha": "2026-04-01 00:00:00",
+          "cierreAlegra": 412000,
+          "cierreFormato": 551195,
+          "efectivo": 90000,
+          "transferencias": 156000,
+          "datafono": 166000,
+          "propinas": 25000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-04-02 00:00:00",
+          "cierreAlegra": 627000,
+          "cierreFormato": 520375,
+          "efectivo": 211000,
+          "transferencias": 72000,
+          "datafono": 344000,
+          "propinas": 50000,
+          "observaciones": "Jueves Santo"
+        },
+        {
+          "fecha": "2026-04-03 00:00:00",
+          "cierreAlegra": 611000,
+          "cierreFormato": 599840,
+          "efectivo": 166000,
+          "transferencias": 229000,
+          "datafono": 216000,
+          "propinas": 45300,
+          "observaciones": "Viernes Santo"
+        },
+        {
+          "fecha": "2026-04-04 00:00:00",
+          "cierreAlegra": 98000,
+          "cierreFormato": 75555,
+          "efectivo": 0,
+          "transferencias": 98000,
+          "datafono": 0,
+          "propinas": 7000,
+          "observaciones": "Sabado Santo"
+        },
+        {
+          "fecha": "2026-04-05 00:00:00",
+          "cierreAlegra": 146000,
+          "cierreFormato": 137080,
+          "efectivo": 18000,
+          "transferencias": 128000,
+          "datafono": 0,
+          "propinas": 8000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-04-07 00:00:00",
+          "cierreAlegra": 1454000,
+          "cierreFormato": 1127690,
+          "efectivo": 492500,
+          "transferencias": 471500,
+          "datafono": 490000,
+          "propinas": 118718,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-04-08 00:00:00",
+          "cierreAlegra": 656000,
+          "cierreFormato": 412735,
+          "efectivo": 207000,
+          "transferencias": 169000,
+          "datafono": 280000,
+          "propinas": 49000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-04-09 00:00:00",
+          "cierreAlegra": 1050000,
+          "cierreFormato": 627670,
+          "efectivo": 231000,
+          "transferencias": 0,
+          "datafono": 819000,
+          "propinas": 75000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-04-10 00:00:00",
+          "cierreAlegra": 792000,
+          "cierreFormato": 677005,
+          "efectivo": 78000,
+          "transferencias": 198000,
+          "datafono": 516000,
+          "propinas": 64000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-04-11 00:00:00",
+          "cierreAlegra": 1304000,
+          "cierreFormato": 1223715,
+          "efectivo": 202000,
+          "transferencias": 261000,
+          "datafono": 841000,
+          "propinas": 107226,
+          "observaciones": "Sin Johnny por estar en Sierra Blanca"
+        },
+        {
+          "fecha": "2026-04-12 00:00:00",
+          "cierreAlegra": 210000,
+          "cierreFormato": 21620,
+          "efectivo": 0,
+          "transferencias": 210000,
+          "datafono": 0,
+          "propinas": 0,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-04-14 00:00:00",
+          "cierreAlegra": 1139499,
+          "cierreFormato": 732090,
+          "efectivo": 726000,
+          "transferencias": 172000,
+          "datafono": 241499,
+          "propinas": 95625,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-04-15 00:00:00",
+          "cierreAlegra": 442000,
+          "cierreFormato": 340745,
+          "efectivo": 281000,
+          "transferencias": 6000,
+          "datafono": 155000,
+          "propinas": 38000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-04-16 00:00:00",
+          "cierreAlegra": 1077000,
+          "cierreFormato": 812245,
+          "efectivo": 138000,
+          "transferencias": 377000,
+          "datafono": 562000,
+          "propinas": 85074,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-04-17 00:00:00",
+          "cierreAlegra": 3363667,
+          "cierreFormato": 3470930,
+          "efectivo": 488000,
+          "transferencias": 1812667,
+          "datafono": 1063000,
+          "propinas": 192803,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-04-18 00:00:00",
+          "cierreAlegra": 1650000,
+          "cierreFormato": 1137465,
+          "efectivo": 792000,
+          "transferencias": 384000,
+          "datafono": 474000,
+          "propinas": 0,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-04-19 00:00:00",
+          "cierreAlegra": 409000,
+          "cierreFormato": 301760,
+          "efectivo": 38000,
+          "transferencias": 0,
+          "datafono": 371000,
+          "propinas": 22000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-04-21 00:00:00",
+          "cierreAlegra": 574000,
+          "cierreFormato": 246560,
+          "efectivo": 294000,
+          "transferencias": 209000,
+          "datafono": 71000,
+          "propinas": 42900,
+          "observaciones": "Pago a Daniela 108,000 dia; 14,000 Propinas"
+        },
+        {
+          "fecha": "2026-04-22 00:00:00",
+          "cierreAlegra": 94000,
+          "cierreFormato": 140530,
+          "efectivo": 0,
+          "transferencias": 0,
+          "datafono": 94000,
+          "propinas": 0,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-04-23 00:00:00",
+          "cierreAlegra": 737000,
+          "cierreFormato": 826735,
+          "efectivo": 345000,
+          "transferencias": 118000,
+          "datafono": 274000,
+          "propinas": 62000,
+          "observaciones": "5 promos de Jarra"
+        },
+        {
+          "fecha": "2026-04-24 00:00:00",
+          "cierreAlegra": 1040000,
+          "cierreFormato": 1062830,
+          "efectivo": 207000,
+          "transferencias": 317000,
+          "datafono": 516000,
+          "propinas": 76500,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-04-25 00:00:00",
+          "cierreAlegra": 1387000,
+          "cierreFormato": 1069385,
+          "efectivo": 243000,
+          "transferencias": 375000,
+          "datafono": 769000,
+          "propinas": 116548,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-04-26 00:00:00",
+          "cierreAlegra": 211000,
+          "cierreFormato": 188370,
+          "efectivo": 0,
+          "transferencias": 66000,
+          "datafono": 145000,
+          "propinas": 17000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-04-28 00:00:00",
+          "cierreAlegra": 681500,
+          "cierreFormato": 498295,
+          "efectivo": 259000,
+          "transferencias": 242500,
+          "datafono": 180000,
+          "propinas": 51341,
+          "observaciones": "Pago a Deniala 108.000 día; 17.000 Propinas"
+        },
+        {
+          "fecha": "2026-04-29 00:00:00",
+          "cierreAlegra": 752000,
+          "cierreFormato": 710700,
+          "efectivo": 185000,
+          "transferencias": 389000,
+          "datafono": 178000,
+          "propinas": 53000,
+          "observaciones": "4 Promos de Jarra (2 Irish, 1 IPA, 1 Golden)"
+        },
+        {
+          "fecha": "2026-04-30 00:00:00",
+          "cierreAlegra": 1911000,
+          "cierreFormato": 1508570,
+          "efectivo": 601000,
+          "transferencias": 70000,
+          "datafono": 1240000,
+          "propinas": 165000,
+          "observaciones": "13 Promos de Jarra (3 IPA, 1 APA, 5 Irish, 4 Stout)"
+        }
+      ]
+    },
+    {
+      "nombre": "Arqueo Cierre de bar Mayo 2026",
+      "columnas": [
+        {
+          "key": "fecha",
+          "label": "Fecha"
+        },
+        {
+          "key": "cierreAlegra",
+          "label": "Cierre Alegra",
+          "tipo": "dinero"
+        },
+        {
+          "key": "cierreFormato",
+          "label": "Cierre Formato",
+          "tipo": "dinero"
+        },
+        {
+          "key": "efectivo",
+          "label": "Efectivo",
+          "tipo": "dinero"
+        },
+        {
+          "key": "transferencias",
+          "label": "Transferencias",
+          "tipo": "dinero"
+        },
+        {
+          "key": "datafono",
+          "label": "Datafono",
+          "tipo": "dinero"
+        },
+        {
+          "key": "propinas",
+          "label": "Propinas",
+          "tipo": "dinero"
+        },
+        {
+          "key": "observaciones",
+          "label": "Observaciones",
+          "tipo": "texto"
+        }
+      ],
+      "datos": [
+        {
+          "fecha": "2026-05-01 00:00:00",
+          "cierreAlegra": 667000,
+          "cierreFormato": 872620,
+          "efectivo": 100000,
+          "transferencias": 197000,
+          "datafono": 370000,
+          "propinas": 59000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-05-02 00:00:00",
+          "cierreAlegra": 984500,
+          "cierreFormato": 528540,
+          "efectivo": 239000,
+          "transferencias": 385000,
+          "datafono": 360500,
+          "propinas": 95000,
+          "observaciones": "musica en vivo, pago 132,000"
+        },
+        {
+          "fecha": "2026-05-03 00:00:00",
+          "cierreAlegra": 172000,
+          "cierreFormato": 187200,
+          "efectivo": 57000,
+          "transferencias": 0,
+          "datafono": 115000,
+          "propinas": 15000,
+          "observaciones": "1 V Ipa comentario en google y tripadvisor"
+        },
+        {
+          "fecha": "2026-05-05 00:00:00",
+          "cierreAlegra": 2007000,
+          "cierreFormato": 1121940,
+          "efectivo": 858000,
+          "transferencias": 113000,
+          "datafono": 1036000,
+          "propinas": 165037,
+          "observaciones": "pago día de trabajo Daniela y entrega propinas a Paula"
+        },
+        {
+          "fecha": "2026-05-06 00:00:00",
+          "cierreAlegra": 94000,
+          "cierreFormato": 84755,
+          "efectivo": 94000,
+          "transferencias": 0,
+          "datafono": 0,
+          "propinas": 6000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-05-07 00:00:00",
+          "cierreAlegra": 223000,
+          "cierreFormato": 348450,
+          "efectivo": 0,
+          "transferencias": 191000,
+          "datafono": 32000,
+          "propinas": 16000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-05-08 00:00:00",
+          "cierreAlegra": 2315000,
+          "cierreFormato": 1726380,
+          "efectivo": 104000,
+          "transferencias": 1613000,
+          "datafono": 598000,
+          "propinas": 177000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-05-09 00:00:00",
+          "cierreAlegra": 965000,
+          "cierreFormato": 1165985,
+          "efectivo": 158000,
+          "transferencias": 218000,
+          "datafono": 589000,
+          "propinas": 66000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-05-10 00:00:00",
+          "cierreAlegra": 221000,
+          "cierreFormato": 75555,
+          "efectivo": 0,
+          "transferencias": 100000,
+          "datafono": 121000,
+          "propinas": 11000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-05-12 00:00:00",
+          "cierreAlegra": 1216000,
+          "cierreFormato": 834095,
+          "efectivo": 362000,
+          "transferencias": 334000,
+          "datafono": 520000,
+          "propinas": 92000,
+          "observaciones": "Pago día Daniela + propinas. Pago dia Paula, pendiente propinas"
+        },
+        {
+          "fecha": "2026-05-13 00:00:00",
+          "cierreAlegra": 145000,
+          "cierreFormato": 85330,
+          "efectivo": 38000,
+          "transferencias": 107000,
+          "datafono": 0,
+          "propinas": 7000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-05-14 00:00:00",
+          "cierreAlegra": 463000,
+          "cierreFormato": 711965,
+          "efectivo": 0,
+          "transferencias": 75000,
+          "datafono": 388000,
+          "propinas": 40000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-05-15 00:00:00",
+          "cierreAlegra": 942000,
+          "cierreFormato": 989690,
+          "efectivo": 127000,
+          "transferencias": 205000,
+          "datafono": 610000,
+          "propinas": 80870,
+          "observaciones": "Pago Propinas a Asusena 40.435"
+        },
+        {
+          "fecha": "2026-05-16 00:00:00",
+          "cierreAlegra": 1065000,
+          "cierreFormato": 875610,
+          "efectivo": 175000,
+          "transferencias": 356000,
+          "datafono": 534000,
+          "propinas": 95025,
+          "observaciones": "Pago Propinas a Asusena y a Paula  47.512 c/u"
+        },
+        {
+          "fecha": "2026-05-17 00:00:00",
+          "cierreAlegra": 521000,
+          "cierreFormato": 477595,
+          "efectivo": 34000,
+          "transferencias": 368000,
+          "datafono": 119000,
+          "propinas": 33000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-05-19 00:00:00",
+          "cierreAlegra": 1031500,
+          "cierreFormato": 724385,
+          "efectivo": 243500,
+          "transferencias": 458000,
+          "datafono": 330000,
+          "propinas": 68350,
+          "observaciones": "Pago Dia + propinas a Daniela"
+        },
+        {
+          "fecha": "2026-05-20 00:00:00",
+          "cierreAlegra": 0,
+          "cierreFormato": 85790,
+          "efectivo": 0,
+          "transferencias": 0,
+          "datafono": 0,
+          "propinas": 0,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-05-21 00:00:00",
+          "cierreAlegra": 762300,
+          "cierreFormato": 874920,
+          "efectivo": 342300,
+          "transferencias": 182000,
+          "datafono": 238000,
+          "propinas": 72800,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-05-22 00:00:00",
+          "cierreAlegra": 282000,
+          "cierreFormato": 545790,
+          "efectivo": 80000,
+          "transferencias": 148000,
+          "datafono": 54000,
+          "propinas": 17000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-05-23 00:00:00",
+          "cierreAlegra": 1352000,
+          "cierreFormato": 1039945,
+          "efectivo": 530000,
+          "transferencias": 427000,
+          "datafono": 395000,
+          "propinas": 78000,
+          "observaciones": "Pago Dia Napoleon + 26000 propinas"
+        },
+        {
+          "fecha": "2026-05-24 00:00:00",
+          "cierreAlegra": 298000,
+          "cierreFormato": 213325,
+          "efectivo": 0,
+          "transferencias": 298000,
+          "datafono": 0,
+          "propinas": 27000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-05-26 00:00:00",
+          "cierreAlegra": 776000,
+          "cierreFormato": 530265,
+          "efectivo": 312000,
+          "transferencias": 379000,
+          "datafono": 85000,
+          "propinas": 36500,
+          "observaciones": "Pago Daniela + Propinas. Abono 200.000 a Paula"
+        },
+        {
+          "fecha": "2026-05-27 00:00:00",
+          "cierreAlegra": 511000,
+          "cierreFormato": 562580,
+          "efectivo": 224000,
+          "transferencias": 0,
+          "datafono": 287000,
+          "propinas": 33000,
+          "observaciones": "Abono restante a Paula 205.000"
+        },
+        {
+          "fecha": "2026-05-28 00:00:00",
+          "cierreAlegra": 1212000,
+          "cierreFormato": 1302605,
+          "efectivo": 313000,
+          "transferencias": 667000,
+          "datafono": 232000,
+          "propinas": 49100,
+          "observaciones": "Pago Daniela + Propinas. 132.000"
+        },
+        {
+          "fecha": "2026-05-29 00:00:00",
+          "cierreAlegra": 1192000,
+          "cierreFormato": 711275,
+          "efectivo": 491000,
+          "transferencias": 485000,
+          "datafono": 216000,
+          "propinas": 64000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-05-30 00:00:00",
+          "cierreAlegra": 660600,
+          "cierreFormato": 681375,
+          "efectivo": 269000,
+          "transferencias": 231600,
+          "datafono": 160000,
+          "propinas": 35000,
+          "observaciones": "4 promos de jarra Irish"
+        }
+      ]
+    },
+    {
+      "nombre": "Arqueo Cierre de bar Junio 2026",
+      "columnas": [
+        {
+          "key": "fecha",
+          "label": "Fecha"
+        },
+        {
+          "key": "cierreAlegra",
+          "label": "Cierre Alegra",
+          "tipo": "dinero"
+        },
+        {
+          "key": "cierreFormato",
+          "label": "Cierre Formato",
+          "tipo": "dinero"
+        },
+        {
+          "key": "efectivo",
+          "label": "Efectivo",
+          "tipo": "dinero"
+        },
+        {
+          "key": "transferencias",
+          "label": "Transferencias",
+          "tipo": "dinero"
+        },
+        {
+          "key": "datafono",
+          "label": "Datafono",
+          "tipo": "dinero"
+        },
+        {
+          "key": "propinas",
+          "label": "Propinas",
+          "tipo": "dinero"
+        },
+        {
+          "key": "observaciones",
+          "label": "Observaciones",
+          "tipo": "texto"
+        }
+      ],
+      "datos": [
+        {
+          "fecha": "2026-06-01 00:00:00",
+          "cierreAlegra": 429000,
+          "cierreFormato": 239660,
+          "efectivo": 342000,
+          "transferencias": 30000,
+          "datafono": 57000,
+          "propinas": 19000,
+          "observaciones": "Propinas a Paula 9.500"
+        },
+        {
+          "fecha": "2026-06-02 00:00:00",
+          "cierreAlegra": 72000,
+          "cierreFormato": 85905,
+          "efectivo": 72000,
+          "transferencias": 0,
+          "datafono": 0,
+          "propinas": 0,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-06-03 00:00:00",
+          "cierreAlegra": 82000,
+          "cierreFormato": 237245,
+          "efectivo": 0,
+          "transferencias": 34000,
+          "datafono": 48000,
+          "propinas": 0,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-06-04 00:00:00",
+          "cierreAlegra": 917000,
+          "cierreFormato": 760150,
+          "efectivo": 144000,
+          "transferencias": 206000,
+          "datafono": 567000,
+          "propinas": 72892,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-06-05 00:00:00",
+          "cierreAlegra": 1366000,
+          "cierreFormato": 1149425,
+          "efectivo": 93000,
+          "transferencias": 631000,
+          "datafono": 642000,
+          "propinas": 102400,
+          "observaciones": "Propinas a Daniela 32.700"
+        },
+        {
+          "fecha": "2026-06-06 00:00:00",
+          "cierreAlegra": 1846000,
+          "cierreFormato": 1608160,
+          "efectivo": 281000,
+          "transferencias": 467000,
+          "datafono": 1098000,
+          "propinas": 0,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-06-07 00:00:00",
+          "cierreAlegra": 613000,
+          "cierreFormato": 512095,
+          "efectivo": 143000,
+          "transferencias": 331000,
+          "datafono": 139000,
+          "propinas": 44000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-06-09 00:00:00",
+          "cierreAlegra": 711500,
+          "cierreFormato": 424465,
+          "efectivo": 147500,
+          "transferencias": 207000,
+          "datafono": 357000,
+          "propinas": 64400,
+          "observaciones": "Pago propinas Daniela Gil 6.000 / Daniela Bermudez 21.300"
+        },
+        {
+          "fecha": "2026-06-10 00:00:00",
+          "cierreAlegra": 821000,
+          "cierreFormato": 854680,
+          "efectivo": 190000,
+          "transferencias": 379000,
+          "datafono": 252000,
+          "propinas": 53000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-06-11 00:00:00",
+          "cierreAlegra": 328000,
+          "cierreFormato": 434125,
+          "efectivo": 192000,
+          "transferencias": 102000,
+          "datafono": 34000,
+          "propinas": 17000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-06-12 00:00:00",
+          "cierreAlegra": 1049000,
+          "cierreFormato": 794535,
+          "efectivo": 103000,
+          "transferencias": 677000,
+          "datafono": 269000,
+          "propinas": 91500,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-06-13 00:00:00",
+          "cierreAlegra": 2026000,
+          "cierreFormato": 1410360,
+          "efectivo": 436000,
+          "transferencias": 518000,
+          "datafono": 1072000,
+          "propinas": 131000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-06-14 00:00:00",
+          "cierreAlegra": 243000,
+          "cierreFormato": 207690,
+          "efectivo": 67000,
+          "transferencias": 86000,
+          "datafono": 90000,
+          "propinas": 15000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-06-16 00:00:00",
+          "cierreAlegra": 516000,
+          "cierreFormato": 356500,
+          "efectivo": 152000,
+          "transferencias": 163000,
+          "datafono": 201000,
+          "propinas": 45000,
+          "observaciones": "Pago propinas Daniela 15.000"
+        },
+        {
+          "fecha": "2026-06-17 00:00:00",
+          "cierreAlegra": 503000,
+          "cierreFormato": 1001305,
+          "efectivo": 0,
+          "transferencias": 242000,
+          "datafono": 261000,
+          "propinas": 46407,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-06-18 00:00:00",
+          "cierreAlegra": 539000,
+          "cierreFormato": 599725,
+          "efectivo": 0,
+          "transferencias": 382000,
+          "datafono": 157000,
+          "propinas": 51000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-06-19 00:00:00",
+          "cierreAlegra": 1438000,
+          "cierreFormato": 1607010,
+          "efectivo": 209000,
+          "transferencias": 512000,
+          "datafono": 717000,
+          "propinas": 101537,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-06-20 00:00:00",
+          "cierreAlegra": 20000,
+          "cierreFormato": 40940,
+          "efectivo": 20000,
+          "transferencias": 0,
+          "datafono": 0,
+          "propinas": 0,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-06-23 00:00:00",
+          "cierreAlegra": 755000,
+          "cierreFormato": 605015,
+          "efectivo": 0,
+          "transferencias": 44000,
+          "datafono": 711000,
+          "propinas": 87000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-06-24 00:00:00",
+          "cierreAlegra": 763500,
+          "cierreFormato": 560970,
+          "efectivo": 290500,
+          "transferencias": 253000,
+          "datafono": 220000,
+          "propinas": 62000,
+          "observaciones": "Pago Daniela 102.000 + 20.500 = 122.500"
+        },
+        {
+          "fecha": "2026-06-25 00:00:00",
+          "cierreAlegra": 57000,
+          "cierreFormato": 60720,
+          "efectivo": 0,
+          "transferencias": 57000,
+          "datafono": 0,
+          "propinas": 0,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-06-26 00:00:00",
+          "cierreAlegra": 910000,
+          "cierreFormato": 853415,
+          "efectivo": 98000,
+          "transferencias": 505000,
+          "datafono": 307000,
+          "propinas": 76000,
+          "observaciones": "Pago Daniela propinas 38.000"
+        },
+        {
+          "fecha": "2026-06-27 00:00:00",
+          "cierreAlegra": 630000,
+          "cierreFormato": 504160,
+          "efectivo": 110000,
+          "transferencias": 298000,
+          "datafono": 222000,
+          "propinas": 60000,
+          "observaciones": "Pago Daniela propinas 15.000"
+        },
+        {
+          "fecha": "2026-06-28 00:00:00",
+          "cierreAlegra": 493000,
+          "cierreFormato": 373175,
+          "efectivo": 167000,
+          "transferencias": 0,
+          "datafono": 326000,
+          "propinas": 54000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-06-29 00:00:00",
+          "cierreAlegra": 829500,
+          "cierreFormato": 1102965,
+          "efectivo": 212000,
+          "transferencias": 451500,
+          "datafono": 166000,
+          "propinas": 79100,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-06-30 00:00:00",
+          "cierreAlegra": 938000,
+          "cierreFormato": 668265,
+          "efectivo": 319000,
+          "transferencias": 76000,
+          "datafono": 543000,
+          "propinas": 77400,
+          "observaciones": "Pago dia Daniela Gil 85.000 - Pago Dia Daniela Bermudez 130.000"
+        }
+      ]
+    },
+    {
+      "nombre": "Arqueo Cierre de bar Julio 2026",
+      "columnas": [
+        {
+          "key": "fecha",
+          "label": "Fecha"
+        },
+        {
+          "key": "cierreAlegra",
+          "label": "Cierre Alegra",
+          "tipo": "dinero"
+        },
+        {
+          "key": "cierreFormato",
+          "label": "Cierre Formato",
+          "tipo": "dinero"
+        },
+        {
+          "key": "efectivo",
+          "label": "Efectivo",
+          "tipo": "dinero"
+        },
+        {
+          "key": "transferencias",
+          "label": "Transferencias",
+          "tipo": "dinero"
+        },
+        {
+          "key": "datafono",
+          "label": "Datafono",
+          "tipo": "dinero"
+        },
+        {
+          "key": "propinas",
+          "label": "Propinas",
+          "tipo": "dinero"
+        },
+        {
+          "key": "observaciones",
+          "label": "Observaciones",
+          "tipo": "texto"
+        }
+      ],
+      "datos": [
+        {
+          "fecha": "2026-07-01 00:00:00",
+          "cierreAlegra": 725500,
+          "cierreFormato": 679420,
+          "efectivo": 58000,
+          "transferencias": 571500,
+          "datafono": 96000,
+          "propinas": 48500,
+          "observaciones": "Pago Daniela Gil 78.000"
+        },
+        {
+          "fecha": "2026-07-02 00:00:00",
+          "cierreAlegra": 416000,
+          "cierreFormato": 0,
+          "efectivo": 100000,
+          "transferencias": 38000,
+          "datafono": 278000,
+          "propinas": 59000,
+          "observaciones": ""
+        },
+        {
+          "fecha": "2026-07-03 00:00:00",
+          "cierreAlegra": 1499500,
+          "cierreFormato": 1740180,
+          "efectivo": 368500,
+          "transferencias": 467000,
+          "datafono": 664000,
+          "propinas": 87000,
+          "observaciones": "166.000 Cuenta de La Cifra Impar. Pago Daniela Gil 107.000"
+        }
+      ]
+    }
+  ],
+  "totales": {
+    "cierreAlegra": 166771728,
+    "cierreFormato": 133855300,
+    "efectivo": 43522100,
+    "transferencias": 54774767,
+    "datafono": 69678160,
+    "propinas": 11811979
+  },
+  "totalDias": 210
+};
+</script>
+<script>
+/* Bar Madre Monte · Dashboard de Arqueo */
+
+const DATA = window.BAR_DATA;
+let hojaActual = DATA.hojas[0];
+let chartVentas = null, chartPagos = null, chartDesglose = null;
+let columnaOrden = null, ordenAsc = false;
+
+/* ── Formateo ── */
+function fmtDinero(n) {
+  if (!n && n !== 0) return '-';
+  return '$' + Number(n).toLocaleString('es-CO');
+}
+function fmtFecha(f) {
+  return f.replace(/^nov-/, 'Nov ').replace(/^ene-/, 'Ene ').replace(/^feb-/, 'Feb ');
+}
+
+/* ── KPIs ── */
+function renderKPIs(hoja) {
+  const t = { cierreAlegra: 0, cierreFormato: 0, efectivo: 0, transferencias: 0, datafono: 0, propinas: 0 };
+  let diasConDatos = 0;
+  hoja.datos.forEach(d => {
+    t.cierreAlegra += d.cierreAlegra || 0;
+    t.cierreFormato += d.cierreFormato || 0;
+    t.efectivo += d.efectivo || 0;
+    t.transferencias += d.transferencias || 0;
+    t.datafono += d.datafono || 0;
+    t.propinas += d.propinas || 0;
+    if (d.cierreAlegra || d.cierreFormato) diasConDatos++;
+  });
+
+  const kpis = [
+    { icon: '🧾', label: 'Cierre Alegra', valor: fmtDinero(t.cierreAlegra), sub: 'Total acumulado' },
+    { icon: '📄', label: 'Cierre Formato', valor: fmtDinero(t.cierreFormato), sub: 'Total acumulado' },
+    { icon: '💵', label: 'Efectivo', valor: fmtDinero(t.efectivo), sub: Math.round(t.efectivo / Math.max(1, t.cierreAlegra) * 100) + '% del total' },
+    { icon: '🏦', label: 'Transferencias', valor: fmtDinero(t.transferencias), sub: Math.round(t.transferencias / Math.max(1, t.cierreAlegra) * 100) + '% del total' },
+    { icon: '💳', label: 'Datafono', valor: fmtDinero(t.datafono), sub: Math.round(t.datafono / Math.max(1, t.cierreAlegra) * 100) + '% del total' },
+    { icon: '❤️', label: 'Propinas', valor: fmtDinero(t.propinas), sub: diasConDatos + ' días con datos' },
+  ];
+
+  document.getElementById('kpi-grid').innerHTML = kpis.map(k =>
+    `<div class="kpi-card"><div class="kpi-icon">${k.icon}</div><div class="kpi-label">${k.label}</div><div class="kpi-valor">${k.valor}</div><div class="kpi-sub">${k.sub}</div></div>`
+  ).join('');
+}
+
+/* ── Gráficos ── */
+function renderCharts(hoja) {
+  const datos = hoja.datos.filter(d => d.cierreAlegra > 0 || d.cierreFormato > 0);
+  const labels = datos.map(d => fmtFecha(d.fecha));
+
+  // Chart 1: Ventas por día
+  if (chartVentas) chartVentas.destroy();
+  const ctx1 = document.getElementById('chart-ventas');
+  if (ctx1) {
+    chartVentas = new Chart(ctx1, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Alegra', data: datos.map(d => d.cierreAlegra), borderColor: '#c88a3d', backgroundColor: 'rgba(200,138,61,.08)', borderWidth: 2.5, pointRadius: 4, pointHoverRadius: 7, tension: .3, fill: true },
+          { label: 'Formato', data: datos.map(d => d.cierreFormato), borderColor: '#6b5a4a', backgroundColor: 'rgba(107,90,74,.05)', borderWidth: 2, pointRadius: 3, pointHoverRadius: 6, tension: .3, fill: true, borderDash: [5, 3] },
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        interaction: { intersect: false, mode: 'index' },
+        plugins: {
+          tooltip: {
+            callbacks: { label: (ctx) => ctx.dataset.label + ': ' + fmtDinero(ctx.raw) }
+          }
+        },
+        scales: {
+          y: {
+            ticks: { callback: v => '$' + (v / 1000).toFixed(0) + 'k' },
+            grid: { color: '#e8e0d6' }
+          },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  // Chart 2: Donut - Composición de pagos
+  if (chartPagos) chartPagos.destroy();
+  const ctx2 = document.getElementById('chart-pagos');
+  if (ctx2) {
+    const tPagos = { efectivo: 0, transferencias: 0, datafono: 0 };
+    datos.forEach(d => { tPagos.efectivo += d.efectivo; tPagos.transferencias += d.transferencias; tPagos.datafono += d.datafono; });
+    chartPagos = new Chart(ctx2, {
+      type: 'doughnut',
+      data: {
+        labels: ['Efectivo', 'Transferencias', 'Datafono'],
+        datasets: [{
+          data: [tPagos.efectivo, tPagos.transferencias, tPagos.datafono],
+          backgroundColor: ['#4caf50', '#2196f3', '#ff9800'],
+          borderColor: '#fff', borderWidth: 3,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: {
+          tooltip: { callbacks: { label: (ctx) => ctx.label + ': ' + fmtDinero(ctx.raw) } }
+        }
+      }
+    });
+  }
+
+  // Chart 3: Barras apiladas
+  if (chartDesglose) chartDesglose.destroy();
+  const ctx3 = document.getElementById('chart-desglose');
+  if (ctx3) {
+    chartDesglose = new Chart(ctx3, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Efectivo', data: datos.map(d => d.efectivo), backgroundColor: '#4caf50' },
+          { label: 'Transferencias', data: datos.map(d => d.transferencias), backgroundColor: '#2196f3' },
+          { label: 'Datafono', data: datos.map(d => d.datafono), backgroundColor: '#ff9800' },
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        scales: {
+          x: { stacked: true, grid: { display: false } },
+          y: { stacked: true, ticks: { callback: v => '$' + (v / 1000).toFixed(0) + 'k' }, grid: { color: '#e8e0d6' } }
+        },
+        plugins: {
+          tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ': ' + fmtDinero(ctx.raw) } }
+        }
+      }
+    });
+  }
+}
+
+/* ── Tabla ── */
+function renderTabla(hoja) {
+  const cols = hoja.columnas;
+  const thead = document.querySelector('#tabla-datos thead');
+  thead.innerHTML = '<tr>' + cols.map(c =>
+    `<th data-key="${c.key}" onclick="ordenarTabla('${c.key}')">${c.label}</th>`
+  ).join('') + '</tr>';
+
+  const datos = [...hoja.datos];
+  if (columnaOrden) {
+    datos.sort((a, b) => {
+      const va = a[columnaOrden] || '', vb = b[columnaOrden] || '';
+      const cmp = typeof va === 'string' ? va.localeCompare(vb) : va - vb;
+      return ordenAsc ? cmp : -cmp;
+    });
+    const th = document.querySelector(`th[data-key="${columnaOrden}"]`);
+    if (th) th.classList.add('sorted');
+  }
+
+  const tbody = document.querySelector('#tabla-datos tbody');
+  tbody.innerHTML = datos.map(d => '<tr>' + cols.map(c => {
+    const v = d[c.key];
+    let cls = '';
+    let val = v;
+    if (c.tipo === 'dinero') { cls = 'numero'; val = v ? fmtDinero(v) : '-'; }
+    if (c.key === 'fecha') val = fmtFecha(v || '');
+    if (!val && val !== 0) val = '';
+    return `<td class="${cls}">${val}</td>`;
+  }).join('') + '</tr>').join('');
+}
+
+function ordenarTabla(key) {
+  if (columnaOrden === key) { ordenAsc = !ordenAsc; }
+  else { columnaOrden = key; ordenAsc = true; }
+  renderTabla(hojaActual);
+}
+
+/* busqueda */
+document.getElementById('busqueda-tabla').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  const rows = document.querySelectorAll('#tabla-datos tbody tr');
+  rows.forEach(r => { r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none'; });
+});
+
+/* ── Exportar CSV ── */
+document.getElementById('btn-exportar').addEventListener('click', () => {
+  const cols = hojaActual.columnas;
+  let csv = cols.map(c => c.label).join(',') + '\n';
+  hojaActual.datos.forEach(d => {
+    csv += cols.map(c => { const v = d[c.key]; return v !== null && v !== undefined ? '"' + String(v).replace(/"/g, '""') + '"' : ''; }).join(',') + '\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'arqueo_bar.csv'; a.click();
+  URL.revokeObjectURL(url);
+});
+
+/* ── Selector de hojas ── */
+function initSelector() {
+  const sel = document.getElementById('selector-hoja');
+  sel.innerHTML = DATA.hojas.map((h, i) => `<option value="${i}">${h.nombre}</option>`).join('');
+  sel.addEventListener('change', () => {
+    hojaActual = DATA.hojas[sel.value];
+    columnaOrden = null; ordenAsc = false;
+    renderAll();
+  });
+}
+
+function renderAll() {
+  document.getElementById('fecha-actualizacion').textContent = 'Actualizado: ' + new Date().toISOString().split('T')[0];
+  renderKPIs(hojaActual);
+  renderCharts(hojaActual);
+  renderTabla(hojaActual);
+}
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', () => {
+  if (!window.BAR_DATA) { document.body.innerHTML = '<p style="padding:40px">Error: no se encontraron datos (window.BAR_DATA).</p>'; return; }
+  initSelector();
+  renderAll();
+});
+
+</script>
+</body>
+</html>
