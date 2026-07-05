@@ -171,6 +171,14 @@ main { max-width: 1200px; margin: 0 auto; padding: 30px 24px; }
   width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
   border: 2px dashed #aab4bd; background: transparent;
 }
+.dona-svg { position: relative; }
+.dona-tooltip {
+  display: none; position: absolute; pointer-events: none;
+  background: rgba(38,49,61,.92); color: #fff; padding: 8px 14px;
+  border-radius: 8px; font-size: 13px; line-height: 1.5; font-weight: 500;
+  white-space: nowrap; z-index: 20; box-shadow: 0 4px 14px rgba(0,0,0,.3);
+}
+.dona-svg path { pointer-events: all; }
 
 </style>
 </head>
@@ -391,6 +399,20 @@ function botellaSVG(estilo) {
 }
 
 /* ── Donut: Capacidad de Producción Instalada ── */
+function donaClick(e, el) {
+  e.stopPropagation();
+  const tt = document.getElementById("dona-tooltip");
+  const txt = el.getAttribute("data-tooltip") || "";
+  const rect = el.closest(".dona-section").getBoundingClientRect();
+  const svgRect = el.closest("svg").getBoundingClientRect();
+  const x = e.clientX - svgRect.left + 10;
+  const y = e.clientY - svgRect.top - tt.offsetHeight - 10;
+  tt.innerHTML = txt.replace(/\n/g, "<br>");
+  tt.style.left = x + "px";
+  tt.style.top = y + "px";
+  tt.style.display = "block";
+  setTimeout(() => { tt.style.display = "none"; }, 2000);
+}
 const ESTILO_NOMBRE = {
   "Golden Ale": "Golden · Siempre Viva",
   "IPA": "IPA · Vagabundo",
@@ -441,7 +463,8 @@ function donaCapacidad(data) {
 
     const d = `M${x1.toFixed(1)},${y1.toFixed(1)} A${R},${R} 0 ${la},1 ${x2.toFixed(1)},${y2.toFixed(1)} L${x3.toFixed(1)},${y3.toFixed(1)} A${innerR},${innerR} 0 ${la},0 ${x4.toFixed(1)},${y4.toFixed(1)} Z`;
     const col = colorEstilo(estilo);
-    paths += `<path class="dona-arc" d="${d}" fill="${col}" stroke="#fff" stroke-width="2"><title>${ESTILO_NOMBRE[estilo] || estilo}: ${pct}% (${info.litros} L)</title></path>\n`;
+    const tooltip = `${ESTILO_NOMBRE[estilo] || estilo}\n${pct}% (${info.litros} L)`;
+    paths += `<path class="dona-arc" d="${d}" fill="${col}" stroke="#fff" stroke-width="2" data-tooltip="${tooltip.replace(/"/g, '&quot;')}" onclick="donaClick(event, this)"><title>${ESTILO_NOMBRE[estilo] || estilo}: ${pct}% (${info.litros} L)</title></path>\n`;
     currentAngle += angDeg;
   });
 
@@ -456,7 +479,8 @@ function donaCapacidad(data) {
     const x3 = cx + innerR * Math.cos(er), y3 = cy + innerR * Math.sin(er);
     const x4 = cx + innerR * Math.cos(sr), y4 = cy + innerR * Math.sin(sr);
     const d = `M${x1.toFixed(1)},${y1.toFixed(1)} A${R},${R} 0 ${la},1 ${x2.toFixed(1)},${y2.toFixed(1)} L${x3.toFixed(1)},${y3.toFixed(1)} A${innerR},${innerR} 0 ${la},0 ${x4.toFixed(1)},${y4.toFixed(1)} Z`;
-    paths += `<path class="dona-arc" d="${d}" fill="#e3e9ef" stroke="#fff" stroke-width="2"><title>Disponible: ${Math.round(remaining/360*100)}% (${totCap - totOcup} L)</title></path>\n`;
+    const tooltipEmpty = `Disponible\n${Math.round(remaining/360*1000)/10}% (${totCap - totOcup} L)`;
+    paths += `<path class="dona-arc" d="${d}" fill="#e3e9ef" stroke="#fff" stroke-width="2" data-tooltip="${tooltipEmpty.replace(/"/g, '&quot;')}" onclick="donaClick(event, this)"><title>Disponible: ${Math.round(remaining/360*100)}% (${totCap - totOcup} L)</title></path>\n`;
   }
 
   const svg = `<svg width="280" height="280" viewBox="0 0 280 280" class="dona-svg">
@@ -483,7 +507,7 @@ function donaCapacidad(data) {
     <span class="dona-leyenda-pct">${pctDisponible}%</span>
   </div>`;
 
-  return `<div class="dona-wrap">${svg}<div class="dona-leyenda">${legendItems}</div></div>`;
+  return `<div class="dona-wrap">${svg}<div class="dona-leyenda">${legendItems}</div><div class="dona-tooltip" id="dona-tooltip"></div></div>`;
 }
 
 /* ── Render ── */
