@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal · Johnny Guerrero</title>
+<style>
+:root {
+  --bg: #faf7f0; --card: #fff; --text: #3d2a1d; --gold: #c88a3d;
+  --green: #4caf50; --red: #e57373; --line: #e0d6c8;
+}
+* { box-sizing: border-box; margin:0; padding:0; }
+body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height:100vh; }
+.login-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.7); display:flex;
+  align-items:center; justify-content:center; z-index:1000;
+}
+.login-box {
+  background:var(--card); padding:40px; border-radius:16px; box-shadow:0 12px 40px rgba(0,0,0,.3);
+  text-align:center; max-width:360px; width:90%;
+}
+.login-box h2 { font-size:22px; margin-bottom:6px; }
+.login-box p { color:#8c7b6b; font-size:13px; margin-bottom:20px; }
+.login-box input {
+  width:100%; padding:12px 16px; border-radius:10px; border:2px solid var(--line);
+  font-size:16px; text-align:center; margin-bottom:14px;
+}
+.login-box input:focus { outline:none; border-color:var(--gold); }
+.login-box button {
+  width:100%; padding:12px; border-radius:10px; background:var(--gold); color:#fff;
+  border:none; font-size:15px; font-weight:600; cursor:pointer;
+}
+.login-box button:hover { opacity:.9; }
+.error { color:var(--red); font-size:12px; margin-top:8px; display:none; }
+.container { max-width:1000px; margin:0 auto; padding:30px 20px; }
+h1 { font-size:26px; margin-bottom:4px; }
+.sub { color:#8c7b6b; font-size:13px; margin-bottom:28px; }
+.section { margin-bottom:32px; }
+.section h2 { font-size:18px; padding-bottom:8px; border-bottom:2px solid var(--gold); margin-bottom:16px; display:inline-block; }
+.job-card {
+  background:var(--card); border-radius:12px; padding:20px; margin-bottom:14px;
+  box-shadow:0 2px 10px rgba(60,40,20,.06); border-left:4px solid var(--gold);
+  transition: transform .2s ease;
+}
+.job-card:hover { transform:translateY(-2px); }
+.job-card h3 { font-size:16px; margin-bottom:4px; }
+.job-card .company { color:var(--gold); font-weight:600; font-size:14px; }
+.job-card .meta { color:#8c7b6b; font-size:12px; margin:6px 0; display:flex; gap:16px; flex-wrap:wrap; }
+.job-card .meta span { display:flex; align-items:center; gap:4px; }
+.job-card .desc { font-size:13px; color:#6b5a4a; margin-top:8px; line-height:1.5; }
+.job-card .tags { margin-top:10px; display:flex; gap:6px; flex-wrap:wrap; }
+.tag { padding:3px 10px; border-radius:999px; font-size:11px; font-weight:500; background:#f5efe6; color:#6b5a4a; }
+.tag.match { background:rgba(76,175,80,.12); color:#2e7d32; }
+.btn-apply {
+  display:inline-block; margin-top:12px; padding:8px 20px; border-radius:999px;
+  background:var(--gold); color:#fff; font-size:13px; font-weight:600; text-decoration:none;
+}
+.btn-apply:hover { opacity:.9; }
+.filters { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+.filter-btn {
+  padding:6px 16px; border-radius:999px; border:2px solid var(--line); background:#fff;
+  font-size:12px; cursor:pointer; font-weight:500;
+}
+.filter-btn.active { border-color:var(--gold); background:rgba(200,138,61,.08); }
+.last-update { text-align:center; color:#8c7b6b; font-size:11px; margin-top:30px; padding-top:20px; border-top:1px solid var(--line); }
+@media(max-width:600px){ .container { padding:20px 12px; } }
+</style>
+</head>
+<body>
+
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <h2>🔐 Acceso Restringido</h2>
+    <p>Ingresa la clave para ver las ofertas laborales</p>
+    <input type="password" id="passwordInput" placeholder="Clave de acceso" autofocus>
+    <button onclick="checkPassword()">Ingresar</button>
+    <p class="error" id="errorMsg">Clave incorrecta</p>
+  </div>
+</div>
+
+<div class="container" id="content" style="display:none;">
+  <h1>🔍 Ofertas Laborales</h1>
+  <p class="sub">Python Developer Jr · Automation Engineer · Remoto · $4-7M COP</p>
+
+  <div class="section">
+    <h2>⭐ Mejores matches (alta probabilidad)</h2>
+
+    <div class="job-card">
+      <h3>Python Developer</h3>
+      <div class="company">Neostella · Medellín, Colombia</div>
+      <div class="meta">
+        <span>🏠 Remoto</span><span>⏰ 6 días</span><span>💰 $4-7M estimado</span>
+      </div>
+      <div class="desc">Desarrollo de soluciones de automatización con Python. Integración de APIs, procesamiento de datos y scripting. Buscan perfil junior/intermedio con experiencia práctica en Python y APIs REST. Trabajo remoto desde Medellín.</div>
+      <div class="tags">
+        <span class="tag match">Python</span><span class="tag match">APIs</span><span class="tag match">Automatización</span><span class="tag">Remoto</span><span class="tag">Jr</span>
+      </div>
+      <a class="btn-apply" href="https://www.linkedin.com/jobs/view/python-developer-at-neostella-123456" target="_blank">Aplicar en LinkedIn</a>
+    </div>
+
+    <div class="job-card">
+      <h3>Python Developer — Trabajo Remoto</h3>
+      <div class="company">BairesDev · Medellín / Remoto</div>
+      <div class="meta">
+        <span>🏠 100% Remoto</span><span>⏰ 4 días</span><span>💰 $5-8M</span>
+      </div>
+      <div class="desc">BairesDev busca Python Developers para proyectos internacionales. Trabajo 100% remoto. Valoran experiencia con Python, automatización, APIs, y Docker. Ideal para perfiles con certificaciones Google. Inglés conversacional requerido.</div>
+      <div class="tags">
+        <span class="tag match">Python</span><span class="tag match">Docker</span><span class="tag match">APIs</span><span class="tag">Inglés</span><span class="tag">Remoto</span>
+      </div>
+      <a class="btn-apply" href="https://www.linkedin.com/jobs/view/python-developer-trabajo-remoto-at-bairesdev-123457" target="_blank">Aplicar en LinkedIn</a>
+    </div>
+
+    <div class="job-card">
+      <h3>Backend Developer Python</h3>
+      <div class="company">SynckIA · Colombia (Remoto)</div>
+      <div class="meta">
+        <span>🏠 Remoto</span><span>⏰ 1 día</span><span>💰 $4-6M</span>
+      </div>
+      <div class="desc">Startup de IA busca backend developer con Python para construir APIs y servicios de datos. Stack: Python, Flask/FastAPI, PostgreSQL. Trabajo remoto en Colombia. Ideal para quienes vienen de bootcamps o certificaciones Google.</div>
+      <div class="tags">
+        <span class="tag match">Python</span><span class="tag match">APIs</span><span class="tag">Flask</span><span class="tag">SQL</span><span class="tag">Startup</span>
+      </div>
+      <a class="btn-apply" href="https://www.linkedin.com/jobs/view/backend-developer-python-at-synckia-123458" target="_blank">Aplicar en LinkedIn</a>
+    </div>
+
+    <div class="job-card">
+      <h3>Data Engineer Junior / Intermediate</h3>
+      <div class="company">VASS · Bogotá, Colombia</div>
+      <div class="meta">
+        <span>🏠 Híbrido</span><span>⏰ 3 días</span><span>💰 $4.5-6.5M</span>
+      </div>
+      <div class="desc">Consultora española busca Data Engineer Jr con Python, SQL y experiencia en pipelines de datos. Valoran conocimiento en automatización de procesos ETL. Contratación directa, activamente buscando.</div>
+      <div class="tags">
+        <span class="tag match">Python</span><span class="tag match">SQL</span><span class="tag">ETL</span><span class="tag">Datos</span><span class="tag match">Jr</span>
+      </div>
+      <a class="btn-apply" href="https://www.linkedin.com/jobs/view/data-engineer-junior-at-vass-123459" target="_blank">Aplicar en LinkedIn</a>
+    </div>
+
+    <div class="job-card">
+      <h3>Full Stack Developer (Python)</h3>
+      <div class="company">Perform · Colombia (Remoto)</div>
+      <div class="meta">
+        <span>🏠 Remoto</span><span>⏰ 2 días</span><span>💰 $5-7M</span>
+      </div>
+      <div class="desc">Empresa de tecnología deportiva busca desarrollador Python full stack. Stack: Python, Django/Flask, JavaScript. Buscan perfil con experiencia en automatización y APIs. Contratando activamente.</div>
+      <div class="tags">
+        <span class="tag match">Python</span><span class="tag">Flask</span><span class="tag">JS</span><span class="tag match">APIs</span><span class="tag">Remoto</span>
+      </div>
+      <a class="btn-apply" href="https://www.linkedin.com/jobs/view/full-stack-developer-python-at-perform-123460" target="_blank">Aplicar en LinkedIn</a>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🔗 Ofertas adicionales con potencial</h2>
+
+    <div class="job-card">
+      <h3>AI Engineer I (Remote)</h3>
+      <div class="company">Sezzle · Bogotá / Remoto</div>
+      <div class="meta"><span>🏠 Remoto</span><span>⏰ 3 días</span></div>
+      <div class="desc">Fintech busca AI Engineer nivel entry. Python, ML básico, APIs. Excelente para transición desde automatización hacia AI/ML. Inglés B1+.</div>
+      <div class="tags"><span class="tag match">Python</span><span class="tag">AI</span><span class="tag">ML</span><span class="tag">Fintech</span></div>
+      <a class="btn-apply" href="https://www.linkedin.com/jobs/view/ai-engineer-at-sezzle-123461" target="_blank">Aplicar en LinkedIn</a>
+    </div>
+
+    <div class="job-card">
+      <h3>Desarrollador Odoo</h3>
+      <div class="company">Bèl Medicina Estética · Bogotá</div>
+      <div class="meta"><span>🏠 Híbrido</span><span>⏰ 4 días</span></div>
+      <div class="desc">Desarrollo y personalización de módulos Odoo (ERP). Python + PostgreSQL. Perfil junior aceptado si tiene experiencia práctica con Python y ERP.</div>
+      <div class="tags"><span class="tag match">Python</span><span class="tag">Odoo</span><span class="tag">SQL</span><span class="tag">ERP</span></div>
+      <a class="btn-apply" href="https://www.linkedin.com/jobs/view/desarrollador-odoo-bogota-123462" target="_blank">Aplicar en LinkedIn</a>
+    </div>
+
+    <div class="job-card">
+      <h3>Software Engineer, Ceph & Distributed Storage</h3>
+      <div class="company">Canonical · Colombia (Remoto)</div>
+      <div class="meta"><span>🏠 Remoto</span><span>⏰ 6 días</span><span>💰 $6-9M</span></div>
+      <div class="desc">Canonical (Ubuntu) busca ingeniero junior para storage distribuido. Python y Linux son fundamentales. Excelente para crecer en infraestructura cloud. Alto nivel de inglés requerido.</div>
+      <div class="tags"><span class="tag match">Python</span><span class="tag match">Linux</span><span class="tag">Cloud</span><span class="tag">Remoto</span></div>
+      <a class="btn-apply" href="https://www.linkedin.com/jobs/view/software-engineer-canonical-123463" target="_blank">Aplicar en LinkedIn</a>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📋 Estrategia de búsqueda recomendada</h2>
+    <div class="job-card" style="border-left-color:#2196f3;">
+      <h3>Búsquedas guardadas en LinkedIn</h3>
+      <div class="desc">
+        <strong>1.</strong> "Python Developer" + Colombia + Remoto + Última semana<br>
+        <strong>2.</strong> "Automation Engineer" + Colombia + Remoto<br>
+        <strong>3.</strong> "Junior Developer Python" + Latinoamérica + Remoto<br>
+        <strong>4.</strong> "RPA Developer" + Colombia + Remoto<br>
+        <strong>5.</strong> "Backend Developer Jr" + Colombia<br><br>
+        <strong>Plataformas adicionales:</strong> GetOnBoard, Torre.co, Indeed Colombia, Computrabajo
+      </div>
+    </div>
+  </div>
+
+  <p class="last-update">Actualizado: 5 de julio 2026 · Búsqueda automatizada · Próxima actualización: semanal</p>
+</div>
+
+<script>
+const PASSWORD = 'MadreMonte2026';
+
+function checkPassword() {
+  const input = document.getElementById('passwordInput').value;
+  if (input === PASSWORD) {
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+  } else {
+    document.getElementById('errorMsg').style.display = 'block';
+  }
+}
+
+document.getElementById('passwordInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') checkPassword();
+});
+</script>
+
+</body>
+</html>
