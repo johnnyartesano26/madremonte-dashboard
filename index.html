@@ -339,7 +339,7 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script>window.DATA = {"generado": "2026-07-05", "planta": "Cervecería Madre Monte", "fermentadores": [{"nombre": "F1 Frankie", "estilo": "Stout", "litros": 375, "capacidad": 400, "porcentaje": 94, "alarma": "verde"}, {"nombre": "F2 Igor", "estilo": "Irish Red", "litros": 418, "capacidad": 1200, "porcentaje": 35, "alarma": "verde"}, {"nombre": "F3 Principito", "estilo": "APA", "litros": 270, "capacidad": 400, "porcentaje": 68, "alarma": "verde"}, {"nombre": "F4 Gargantua", "estilo": "IPA", "litros": 300, "capacidad": 700, "porcentaje": 43, "alarma": "verde"}, {"nombre": "F5 Pantragruel", "estilo": "IPA", "litros": 680, "capacidad": 800, "porcentaje": 85, "alarma": "verde"}, {"nombre": "F6 Potter", "estilo": "Golden Ale", "litros": 650, "capacidad": 1000, "porcentaje": 65, "alarma": "verde"}, {"nombre": "F7 HighLander", "estilo": "Hidromiel", "litros": 130, "capacidad": 500, "porcentaje": 26, "alarma": "amarilla"}], "barriles": [{"codigo": "PTL01", "estilo": "Golden Ale", "litros": 60.0}, {"codigo": "PTL02", "estilo": "Irish Red Ale", "litros": 0}, {"codigo": "PTL03", "estilo": "APA", "litros": 0}, {"codigo": "PTL04", "estilo": "IPA", "litros": 80.0}, {"codigo": "PTL05", "estilo": "Stout", "litros": 30.0}], "botellas": [{"codigo": "PTB01", "estilo": "Golden Ale", "cantidad": 79}, {"codigo": "PTB02", "estilo": "Irish Red Ale", "cantidad": 38}, {"codigo": "PTB03", "estilo": "APA", "cantidad": 163}, {"codigo": "PTB04", "estilo": "IPA", "cantidad": 100}, {"codigo": "PTB05", "estilo": "Stout", "cantidad": 18}]};</script>
+  <script>window.DATA = {"generado": "2026-07-05", "planta": "Cervecería Madre Monte", "fermentadores": [{"nombre": "F1 Frankie", "estilo": "Stout", "litros": 375, "capacidad": 400, "porcentaje": 94, "alarma": "verde"}, {"nombre": "F2 Igor", "estilo": "Irish Red", "litros": 418, "capacidad": 1200, "porcentaje": 35, "alarma": "verde"}, {"nombre": "F3 Principito", "estilo": "APA", "litros": 270, "capacidad": 400, "porcentaje": 68, "alarma": "verde"}, {"nombre": "F4 Gargantua", "estilo": "IPA", "litros": 300, "capacidad": 700, "porcentaje": 43, "alarma": "verde"}, {"nombre": "F5 Pantragruel", "estilo": "IPA", "litros": 680, "capacidad": 800, "porcentaje": 85, "alarma": "verde"}, {"nombre": "F6 Potter", "estilo": "Golden Ale", "litros": 650, "capacidad": 1000, "porcentaje": 65, "alarma": "verde"}, {"nombre": "F7 HighLander", "estilo": "Hidromiel", "litros": 130, "capacidad": 500, "porcentaje": 26, "alarma": "amarilla"}], "barriles": [{"codigo": "PTL01", "estilo": "Golden Ale", "litros": 60.0}, {"codigo": "PTL02", "estilo": "Irish Red Ale", "litros": 0}, {"codigo": "PTL03", "estilo": "APA", "litros": 0}, {"codigo": "PTL04", "estilo": "IPA", "litros": 80.0}, {"codigo": "PTL05", "estilo": "Stout", "litros": 30.0}], "botellas": [{"codigo": "PTB01", "estilo": "Golden Ale", "cantidad": 79}, {"codigo": "PTB02", "estilo": "Irish Red Ale", "cantidad": 38}, {"codigo": "PTB03", "estilo": "APA", "cantidad": 163}, {"codigo": "PTB04", "estilo": "IPA", "cantidad": 100}, {"codigo": "PTB05", "estilo": "Stout", "cantidad": 18}], "historial": [{"fecha": "2026-07-01", "pct": 56, "litros": 2823, "capacidad": 5000}]};</script>
   <script>
 /* Dashboard de Planta — Madre Monte
    Datos vivos desde Google Sheets + fallback local.
@@ -611,7 +611,17 @@ function renderChart(points) {
     displayPoints = [{ label: 'Inicio', pct: 0, litros: 0, capacidad: points[0].capacidad }, points[0]];
   }
 
-  const labels = displayPoints.map(p => p.label);
+  // Normalizar formato fecha para mostrar: "01/07", "17/06", etc.
+  const fmtLabel = (lbl) => {
+    if (!lbl) return '';
+    const iso = lbl.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (iso) return iso[3] + '/' + iso[2];
+    const dm = lbl.match(/^(\d{1,2})\/(\d{1,2})/);
+    if (dm) return dm[1] + '/' + dm[2];
+    return lbl;
+  };
+
+  const labels = displayPoints.map(p => fmtLabel(p.label));
   const data = displayPoints.map(p => p.pct);
   document.getElementById('resumen-historico').textContent = points.length + ' registros';
 
@@ -646,7 +656,7 @@ function renderChart(points) {
           padding: 12,
           cornerRadius: 8,
           callbacks: {
-            title: (items) => items[0].label,
+            title: (items) => displayPoints[items[0].dataIndex] ? displayPoints[items[0].dataIndex].label : items[0].label,
             label: (item) => {
               const p = points[item.dataIndex];
               return p ? `${item.raw}% · ${p.litros}/${p.capacidad} L` : item.raw + '%';
@@ -674,8 +684,20 @@ function renderChart(points) {
   }
   render(data);
 
-  const history = await fetchSheetHistory();
-  if (history.length > 0) renderChart(history);
+  // Histórico: combinar Google Sheets + datos locales
+  const sheetHistory = await fetchSheetHistory();
+  const localHistory = (data.historial || []).map(h => ({
+    label: h.fecha || '', pct: h.pct, litros: h.litros, capacidad: h.capacidad
+  }));
+  // Merge, deduplicar por fecha, ordenar
+  const allPoints = [...sheetHistory, ...localHistory];
+  const seen = new Set();
+  const merged = [];
+  for (const p of allPoints) {
+    if (!seen.has(p.label)) { seen.add(p.label); merged.push(p); }
+  }
+  merged.sort((a, b) => a.label.localeCompare(b.label));
+  if (merged.length > 0) renderChart(merged);
 })();
 
 </script>
