@@ -449,16 +449,17 @@ function parsePTB(raw) {
 }
 
 function nthHeader(headers, pat, n) {
-  let found = 0;
+  let found = 0; const pl = pat.toLowerCase();
   for (let i = 0; i < headers.length; i++) {
-    if (headers[i].replace(/\s+/g, ' ').trim().startsWith(pat)) { if (found === n) return i; found++; }
+    if (headers[i].replace(/\s+/g, ' ').trim().toLowerCase().startsWith(pl)) { if (found === n) return i; found++; }
   }
   return -1;
 }
 
 function parseOneRow(headers, row) {
   function ci(pat) {
-    for (let i = 0; i < headers.length; i++) if (headers[i].replace(/\s+/g, ' ').trim().startsWith(pat)) return i;
+    const pl = pat.toLowerCase();
+    for (let i = 0; i < headers.length; i++) if (headers[i].replace(/\s+/g, ' ').trim().toLowerCase().startsWith(pl)) return i;
     return -1;
   }
   const fermNames = ['F1 Frankie','F2 Igor','F3 Principito','F4 Gargantua','F5 Pantagruel','F6 Potter','F7 HighLander'];
