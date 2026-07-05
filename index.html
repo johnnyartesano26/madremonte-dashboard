@@ -140,6 +140,38 @@ main { max-width: 1200px; margin: 0 auto; padding: 30px 24px; }
 
 .footer { text-align: center; color: var(--text-dim); font-size: 12px; margin-top: 20px; }
 
+/* ── Donut de capacidad ── */
+.dona-section {
+  display: flex; align-items: center; justify-content: center; gap: 40px;
+  background: var(--bg-card); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 30px; box-shadow: var(--shadow);
+  flex-wrap: wrap;
+}
+.dona-wrap { display: flex; align-items: center; gap: 40px; flex-wrap: wrap; justify-content: center; }
+.dona-svg { flex-shrink: 0; }
+.dona-svg path.dona-arc {
+  transition: opacity .2s ease, transform .2s ease;
+  cursor: pointer; transform-origin: 140px 140px;
+}
+.dona-svg path.dona-arc:hover {
+  opacity: .80; transform: scale(1.04);
+}
+.dona-leyenda {
+  display: flex; flex-direction: column; gap: 10px; min-width: 240px;
+}
+.dona-leyenda-item {
+  display: flex; align-items: center; gap: 10px; font-size: 14px;
+}
+.dona-leyenda-dot {
+  width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+}
+.dona-leyenda-nombre { color: var(--text); flex: 1; }
+.dona-leyenda-pct { font-weight: 700; color: var(--text); min-width: 45px; text-align: right; }
+.dona-vacio-dot {
+  width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+  border: 2px dashed #aab4bd; background: transparent;
+}
+
 </style>
 </head>
 <body>
@@ -183,13 +215,22 @@ main { max-width: 1200px; margin: 0 auto; padding: 30px 24px; }
       </div>
       <div id="botellas" class="grid-botella"></div>
     </section>
+
+    <!-- CAPACIDAD DE PRODUCCIÓN -->
+    <section class="bloque">
+      <div class="bloque-head">
+        <h2>🏭 Capacidad de Producción Instalada</h2>
+        <span id="resumen-capacidad" class="resumen"></span>
+      </div>
+      <div id="capacidad-produccion" class="dona-section"></div>
+    </section>
   </main>
 
   <footer class="footer">
     <p>Generado automáticamente · Cervecería Madre Monte S.A.S.</p>
   </footer>
 
-  <script>window.DATA = {"generado": "2026-07-03", "planta": "Cervecería Madre Monte", "fermentadores": [{"nombre": "F1 Frankie", "estilo": "Stout", "litros": 375, "capacidad": 400, "porcentaje": 94, "alarma": "verde"}, {"nombre": "F2 Igor", "estilo": "Irish Red", "litros": 418, "capacidad": 1200, "porcentaje": 35, "alarma": "verde"}, {"nombre": "F3 Principito", "estilo": "APA", "litros": 270, "capacidad": 400, "porcentaje": 68, "alarma": "verde"}, {"nombre": "F4 Gargantua", "estilo": "IPA", "litros": 300, "capacidad": 700, "porcentaje": 43, "alarma": "verde"}, {"nombre": "F5 Pantragruel", "estilo": "IPA", "litros": 680, "capacidad": 800, "porcentaje": 85, "alarma": "verde"}, {"nombre": "F6 Potter", "estilo": "Golden Ale", "litros": 650, "capacidad": 1000, "porcentaje": 65, "alarma": "verde"}, {"nombre": "F7 HighLander", "estilo": "Hidromiel", "litros": 130, "capacidad": 500, "porcentaje": 26, "alarma": "amarilla"}], "barriles": [{"codigo": "PTL01", "estilo": "Golden Ale", "litros": 60.0}, {"codigo": "PTL02", "estilo": "Irish Red Ale", "litros": 0}, {"codigo": "PTL03", "estilo": "APA", "litros": 0}, {"codigo": "PTL04", "estilo": "IPA", "litros": 80.0}, {"codigo": "PTL05", "estilo": "Stout", "litros": 30.0}], "botellas": [{"codigo": "PTB01", "estilo": "Golden Ale", "cantidad": 79}, {"codigo": "PTB02", "estilo": "Irish Red Ale", "cantidad": 38}, {"codigo": "PTB03", "estilo": "APA", "cantidad": 163}, {"codigo": "PTB04", "estilo": "IPA", "cantidad": 100}, {"codigo": "PTB05", "estilo": "Stout", "cantidad": 18}]};</script>
+  <script>window.DATA = {"generado": "2026-07-04", "planta": "Cervecería Madre Monte", "fermentadores": [{"nombre": "F1 Frankie", "estilo": "Stout", "litros": 375, "capacidad": 400, "porcentaje": 94, "alarma": "verde"}, {"nombre": "F2 Igor", "estilo": "Irish Red", "litros": 418, "capacidad": 1200, "porcentaje": 35, "alarma": "verde"}, {"nombre": "F3 Principito", "estilo": "APA", "litros": 270, "capacidad": 400, "porcentaje": 68, "alarma": "verde"}, {"nombre": "F4 Gargantua", "estilo": "IPA", "litros": 300, "capacidad": 700, "porcentaje": 43, "alarma": "verde"}, {"nombre": "F5 Pantragruel", "estilo": "IPA", "litros": 680, "capacidad": 800, "porcentaje": 85, "alarma": "verde"}, {"nombre": "F6 Potter", "estilo": "Golden Ale", "litros": 650, "capacidad": 1000, "porcentaje": 65, "alarma": "verde"}, {"nombre": "F7 HighLander", "estilo": "Hidromiel", "litros": 130, "capacidad": 500, "porcentaje": 26, "alarma": "amarilla"}], "barriles": [{"codigo": "PTL01", "estilo": "Golden Ale", "litros": 60.0}, {"codigo": "PTL02", "estilo": "Irish Red Ale", "litros": 0}, {"codigo": "PTL03", "estilo": "APA", "litros": 0}, {"codigo": "PTL04", "estilo": "IPA", "litros": 80.0}, {"codigo": "PTL05", "estilo": "Stout", "litros": 30.0}], "botellas": [{"codigo": "PTB01", "estilo": "Golden Ale", "cantidad": 79}, {"codigo": "PTB02", "estilo": "Irish Red Ale", "cantidad": 38}, {"codigo": "PTB03", "estilo": "APA", "cantidad": 163}, {"codigo": "PTB04", "estilo": "IPA", "cantidad": 100}, {"codigo": "PTB05", "estilo": "Stout", "cantidad": 18}]};</script>
   <script>
 /* Dashboard de Planta — Madre Monte
    Renderiza fermentadores (tanques con nivel), barriles y botellas desde window.DATA */
@@ -349,6 +390,102 @@ function botellaSVG(estilo) {
   </svg>`;
 }
 
+/* ── Donut: Capacidad de Producción Instalada ── */
+const ESTILO_NOMBRE = {
+  "Golden Ale": "Golden · Siempre Viva",
+  "IPA": "IPA · Vagabundo",
+  "Irish Red": "Irish · Mística", "Irish Red Ale": "Irish · Mística",
+  "APA": "APA · Cienfuegos",
+  "Stout": "Stout · Sangre Negra",
+  "Hidromiel": "Hidromiel",
+};
+
+/* Agrupa estilos equivalentes para la dona */
+function normalizarEstilo(estilo) {
+  if (estilo === "Irish Red Ale") return "Irish Red";
+  return estilo;
+}
+
+function donaCapacidad(data) {
+  const estilos = {};
+  let totCap = 0;
+  data.fermentadores.forEach(f => {
+    totCap += f.capacidad || 0;
+    const e = normalizarEstilo(f.estilo) || "Otro";
+    if (!estilos[e]) estilos[e] = { litros: 0, capacidad: 0 };
+    estilos[e].litros += f.litros || 0;
+    estilos[e].capacidad += f.capacidad || 0;
+  });
+  const totOcup = Object.values(estilos).reduce((s, e) => s + e.litros, 0);
+  const totPct = totCap ? Math.round(totOcup / totCap * 100) : 0;
+
+  const entries = Object.entries(estilos).sort((a, b) => b[1].litros - a[1].litros);
+
+  const cx = 140, cy = 140, R = 120, innerR = 70;
+  let paths = "";
+  let currentAngle = -90;
+
+  entries.forEach(([estilo, info]) => {
+    const angDeg = (info.litros / totCap) * 360;
+    if (angDeg < 0.5) return;
+    const pct = Math.round(info.litros / totCap * 1000) / 10;
+
+    const startRad = currentAngle * Math.PI / 180;
+    const endRad = (currentAngle + angDeg) * Math.PI / 180;
+    const la = angDeg > 180 ? 1 : 0;
+
+    const x1 = cx + R * Math.cos(startRad), y1 = cy + R * Math.sin(startRad);
+    const x2 = cx + R * Math.cos(endRad),   y2 = cy + R * Math.sin(endRad);
+    const x3 = cx + innerR * Math.cos(endRad),   y3 = cy + innerR * Math.sin(endRad);
+    const x4 = cx + innerR * Math.cos(startRad), y4 = cy + innerR * Math.sin(startRad);
+
+    const d = `M${x1.toFixed(1)},${y1.toFixed(1)} A${R},${R} 0 ${la},1 ${x2.toFixed(1)},${y2.toFixed(1)} L${x3.toFixed(1)},${y3.toFixed(1)} A${innerR},${innerR} 0 ${la},0 ${x4.toFixed(1)},${y4.toFixed(1)} Z`;
+    const col = colorEstilo(estilo);
+    paths += `<path class="dona-arc" d="${d}" fill="${col}" stroke="#fff" stroke-width="2"><title>${ESTILO_NOMBRE[estilo] || estilo}: ${pct}% (${info.litros} L)</title></path>\n`;
+    currentAngle += angDeg;
+  });
+
+  // Empty/unused arc
+  const remaining = 360 - (currentAngle + 90);
+  if (remaining > 1) {
+    const sr = currentAngle * Math.PI / 180;
+    const er = -90 * Math.PI / 180;
+    const la = remaining > 180 ? 1 : 0;
+    const x1 = cx + R * Math.cos(sr), y1 = cy + R * Math.sin(sr);
+    const x2 = cx + R * Math.cos(er), y2 = cy + R * Math.sin(er);
+    const x3 = cx + innerR * Math.cos(er), y3 = cy + innerR * Math.sin(er);
+    const x4 = cx + innerR * Math.cos(sr), y4 = cy + innerR * Math.sin(sr);
+    const d = `M${x1.toFixed(1)},${y1.toFixed(1)} A${R},${R} 0 ${la},1 ${x2.toFixed(1)},${y2.toFixed(1)} L${x3.toFixed(1)},${y3.toFixed(1)} A${innerR},${innerR} 0 ${la},0 ${x4.toFixed(1)},${y4.toFixed(1)} Z`;
+    paths += `<path class="dona-arc" d="${d}" fill="#e3e9ef" stroke="#fff" stroke-width="2"><title>Disponible: ${Math.round(remaining/360*100)}% (${totCap - totOcup} L)</title></path>\n`;
+  }
+
+  const svg = `<svg width="280" height="280" viewBox="0 0 280 280" class="dona-svg">
+    ${paths}
+    <text x="${cx}" y="${cy - 10}" text-anchor="middle" font-family="Poppins,system-ui,sans-serif" font-size="28" font-weight="700" fill="#26313d">${totPct}%</text>
+    <text x="${cx}" y="${cy + 12}" text-anchor="middle" font-family="Poppins,system-ui,sans-serif" font-size="12" fill="#6b7784">Capacidad</text>
+    <text x="${cx}" y="${cy + 28}" text-anchor="middle" font-family="Poppins,system-ui,sans-serif" font-size="12" fill="#6b7784">Ocupada</text>
+  </svg>`;
+
+  let legendItems = entries.map(([estilo, info]) => {
+    const pct = Math.round(info.litros / totCap * 1000) / 10;
+    const name = ESTILO_NOMBRE[estilo] || estilo;
+    return `<div class="dona-leyenda-item">
+      <span class="dona-leyenda-dot" style="background:${colorEstilo(estilo)}"></span>
+      <span class="dona-leyenda-nombre">${name}</span>
+      <span class="dona-leyenda-pct">${pct}%</span>
+    </div>`;
+  }).join("");
+
+  const pctDisponible = Math.round((totCap - totOcup) / totCap * 1000) / 10;
+  legendItems += `<div class="dona-leyenda-item">
+    <span class="dona-vacio-dot"></span>
+    <span class="dona-leyenda-nombre">Disponible</span>
+    <span class="dona-leyenda-pct">${pctDisponible}%</span>
+  </div>`;
+
+  return `<div class="dona-wrap">${svg}<div class="dona-leyenda">${legendItems}</div></div>`;
+}
+
 /* ── Render ── */
 function render(data) {
   document.getElementById("fecha").textContent = "Actualizado: " + data.generado;
@@ -409,6 +546,12 @@ function render(data) {
   }).join("");
   document.getElementById("resumen-botella").textContent =
     `${totBot} botellas · ${(totBot/24).toFixed(1)} cajas (24 u)`;
+
+  // Donut: Capacidad de Producción
+  document.getElementById("capacidad-produccion").innerHTML = donaCapacidad(data);
+  const totales = data.fermentadores.reduce((s, f) => { s.cap += f.capacidad || 0; s.lit += f.litros || 0; return s; }, { cap: 0, lit: 0 });
+  document.getElementById("resumen-capacidad").textContent =
+    `${totales.lit} / ${totales.cap} L ocupados (${totales.cap ? Math.round(totales.lit / totales.cap * 100) : 0}%)`;
 }
 
 /* ── Carga de datos (window.DATA para file://, o fetch si hay servidor) ── */
