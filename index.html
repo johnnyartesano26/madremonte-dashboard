@@ -5,180 +5,378 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard de Planta — Cervecería Madre Monte</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
+/* ── Madre Monte Dashboard · Tema Corporativo ── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
 :root {
-  --bg: #eef1f5;
-  --bg-card: #ffffff;
-  --bg-card2: #f3f6f9;
-  --text: #26313d;
-  --text-dim: #6b7784;
-  --line: #e3e9ef;
-  --gold: #d4a017;
-  --green: #1e8449;
-  --amber: #b9600e;
-  --red: #b03325;
-  --shadow: 0 8px 22px rgba(60,72,88,.12);
-  --radius: 16px;
+  --bg-base: #0f1a0f;
+  --bg-card: rgba(255,255,255,.04);
+  --bg-card-hover: rgba(255,255,255,.07);
+  --text: #e8e0d5;
+  --text-dim: #9a9588;
+  --line: rgba(212,175,55,.18);
+  --line-strong: rgba(212,175,55,.35);
+  --gold: #d4af37;
+  --gold-secondary: #f2d680;
+  --green: #2d5e3c;
+  --green-bright: #3da05d;
+  --amber: #e8a735;
+  --red: #d94538;
+  --shadow: 0 8px 32px rgba(0,0,0,.45);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,.55);
+  --radius: 18px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'Poppins', system-ui, sans-serif;
-  background: radial-gradient(1200px 700px at 50% -10%, #ffffff 0%, #e7edf3 60%, var(--bg) 100%);
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #0a120a;
+  background-image:
+    radial-gradient(ellipse 1000px 600px at 15% 0%, #1a2e1a 0%, transparent 55%),
+    radial-gradient(ellipse 800px 500px at 85% 20%, #122212 0%, transparent 50%),
+    radial-gradient(ellipse 600px 450px at 50% 100%, #0d1a0d 0%, transparent 50%);
   color: var(--text);
   min-height: 100vh;
   padding-bottom: 40px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ── Partículas de luciérnagas ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    radial-gradient(2px 2px at 10% 15%, rgba(242,214,128,.7) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 25% 45%, rgba(242,214,128,.5) 0%, transparent 100%),
+    radial-gradient(2.5px 2.5px at 70% 30%, rgba(212,175,55,.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 70%, rgba(242,214,128,.4) 0%, transparent 100%),
+    radial-gradient(2px 2px at 80% 60%, rgba(242,214,128,.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 15% 80%, rgba(212,175,55,.4) 0%, transparent 100%),
+    radial-gradient(2px 2px at 90% 85%, rgba(242,214,128,.45) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 10%, rgba(242,214,128,.6) 0%, transparent 100%),
+    radial-gradient(2.5px 2.5px at 60% 50%, rgba(212,175,55,.35) 0%, transparent 100%);
+  animation: luciernagas 8s ease-in-out infinite alternate;
+}
+
+@keyframes luciernagas {
+  0%   { opacity: .6; transform: translateY(0); }
+  100% { opacity: .85; transform: translateY(-30px); }
+}
+
+/* Patrón de hojas sutil en esquina */
+body::after {
+  content: '';
+  position: fixed; bottom: -20px; right: -40px; pointer-events: none; z-index: 0;
+  width: 340px; height: 340px; opacity: .04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpath fill='%23f2d680' d='M100 10 C60 40 20 80 30 130 C40 170 80 180 100 160 C120 180 160 170 170 130 C180 80 140 40 100 10 Z M100 55 L100 155 M100 55 C80 75 60 110 70 140 M100 55 C120 75 140 110 130 140 M100 100 L60 80 M100 100 L140 80 M100 100 L60 130 M100 100 L140 130'/%3E%3C/svg%3E");
+  background-size: contain; background-repeat: no-repeat;
+  animation: hoja-flotar 14s ease-in-out infinite;
+}
+
+@keyframes hoja-flotar {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(4deg) scale(1.06); }
 }
 
 /* ── Topbar ── */
 .topbar {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 22px 34px;
-  background: rgba(255,255,255,.82);
-  backdrop-filter: blur(8px);
+  padding: 20px 34px;
+  background: rgba(15,26,15,.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line);
-  position: sticky; top: 0; z-index: 10;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 20px rgba(0,0,0,.3);
 }
 .brand { display: flex; align-items: center; gap: 16px; }
-.logo { font-size: 42px; filter: drop-shadow(0 2px 6px rgba(232,185,35,.4)); }
-.logo-img { height: 56px; width: auto; filter: drop-shadow(0 2px 8px rgba(0,0,0,.5)); }
-.brand h1 { font-size: 26px; font-weight: 700; letter-spacing: .5px; }
-.subtitle { color: var(--text-dim); font-size: 13px; font-weight: 300; }
+.logo-img {
+  height: 52px; width: auto;
+  filter: drop-shadow(0 2px 10px rgba(212,175,55,.5));
+  transition: filter .3s ease;
+}
+.brand h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px; font-weight: 700; letter-spacing: 1px;
+  color: var(--text);
+  text-shadow: 0 0 30px rgba(212,175,55,.25);
+}
+.subtitle {
+  color: var(--text-dim); font-size: 12px; font-weight: 300;
+  letter-spacing: .8px; text-transform: uppercase;
+}
 .pill {
-  background: var(--bg-card2); color: var(--text-dim);
-  padding: 8px 16px; border-radius: 999px; font-size: 13px;
-  border: 1px solid var(--line);
+  background: rgba(255,255,255,.06);
+  color: var(--text-dim);
+  padding: 8px 18px; border-radius: 999px; font-size: 12px;
+  border: 1px solid var(--line); font-weight: 400;
+  backdrop-filter: blur(6px);
 }
 
 /* ── Bloques ── */
-main { max-width: 1200px; margin: 0 auto; padding: 30px 24px; }
-.bloque { margin-bottom: 46px; }
+main { max-width: 1240px; margin: 0 auto; padding: 34px 24px; position: relative; z-index: 1; }
+.bloque { margin-bottom: 50px; position: relative; }
+
+/* Cabecera de sección con ícono SVG */
 .bloque-head {
-  display: flex; align-items: baseline; gap: 16px;
-  margin-bottom: 22px; padding-bottom: 12px;
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 24px; padding-bottom: 14px;
   border-bottom: 1px solid var(--line);
+  position: relative;
 }
-.bloque-head h2 { font-size: 20px; font-weight: 500; }
-.resumen { color: var(--text-dim); font-size: 14px; }
+.bloque-head::after {
+  content: '';
+  position: absolute; bottom: -1px; left: 0; width: 60px; height: 2px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+  border-radius: 1px;
+}
+.bloque-head .ico { width: 26px; height: 26px; flex-shrink: 0; }
+.bloque-head h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 600; letter-spacing: .5px;
+  color: var(--text);
+}
+.resumen {
+  color: var(--text-dim); font-size: 13px; font-weight: 400;
+  margin-left: auto; font-family: 'Inter', sans-serif;
+}
 
 /* ── Fermentadores ── */
 .grid-ferm {
-  display: grid; gap: 22px;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  display: grid; gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(152px, 1fr));
 }
 .ferm {
   background: var(--bg-card); border: 1px solid var(--line);
-  border-radius: var(--radius); padding: 18px 14px 16px;
+  border-radius: var(--radius); padding: 20px 12px 16px;
   text-align: center; box-shadow: var(--shadow);
-  transition: transform .2s ease, box-shadow .2s ease;
+  transition: transform .3s cubic-bezier(.25,.8,.25,1.2),
+              box-shadow .3s ease,
+              background .3s ease,
+              border-color .3s ease;
+  position: relative; overflow: hidden;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
-.ferm:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(0,0,0,.5); }
-.ferm .nombre { font-weight: 700; font-size: 15px; margin-bottom: 2px; }
-.ferm .estilo { color: var(--text-dim); font-size: 12px; margin-bottom: 12px; min-height: 16px; }
+.ferm::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0; transition: opacity .3s ease;
+}
+.ferm::after {
+  content: '';
+  position: absolute; top: 6px; right: 6px;
+  width: 8px; height: 8px;
+  border-top: 1px solid var(--line-strong);
+  border-right: 1px solid var(--line-strong);
+  border-radius: 0 4px 0 0; opacity: .6;
+}
+.ferm:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  background: var(--bg-card-hover);
+  border-color: rgba(212,175,55,.25);
+}
+.ferm:hover::before { opacity: 1; }
+.ferm .nombre {
+  font-weight: 600; font-size: 14px; margin-bottom: 2px;
+  font-family: 'Playfair Display', serif; letter-spacing: .5px;
+}
+.ferm .estilo {
+  color: var(--text-dim); font-size: 11px; margin-bottom: 10px;
+  min-height: 16px; text-transform: uppercase; letter-spacing: .6px;
+}
 
 /* Tanque SVG */
 .tanque-wrap { position: relative; display: inline-block; }
 .tanque .liquido { transition: all .9s cubic-bezier(.4,0,.2,1); }
 .pct-label {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-  font-weight: 700; font-size: 20px; text-shadow: 0 1px 4px rgba(0,0,0,.6);
+  font-weight: 700; font-size: 18px;
+  text-shadow: 0 1px 6px rgba(0,0,0,.7);
+  font-family: 'Inter', sans-serif;
 }
-.ferm .litros { margin-top: 10px; font-size: 14px; }
-.ferm .litros b { font-size: 17px; }
-.ferm .cap { color: var(--text-dim); font-size: 11px; }
+.ferm .litros { margin-top: 10px; font-size: 13px; font-weight: 300; }
+.ferm .litros b { font-size: 16px; font-weight: 600; color: var(--gold-secondary); }
+.ferm .cap { color: var(--text-dim); font-size: 10px; }
 
 .badge {
-  display: inline-block; margin-top: 8px; padding: 3px 10px;
-  border-radius: 999px; font-size: 11px; font-weight: 500;
+  display: inline-block; margin-top: 8px; padding: 3px 12px;
+  border-radius: 999px; font-size: 10px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: .5px;
 }
-.badge.verde  { background: rgba(39,174,96,.14);  color: #1e8449; }
-.badge.amarilla { background: rgba(230,126,34,.15); color: #b9600e; }
-.badge.roja   { background: rgba(192,57,43,.14);  color: #b03325; }
+.badge.verde  { background: rgba(45,94,60,.20);  color: #3da05d; border: 1px solid rgba(61,160,93,.25); }
+.badge.amarilla { background: rgba(232,167,53,.16); color: #e8a735; border: 1px solid rgba(232,167,53,.25); }
+.badge.roja   { background: rgba(217,69,56,.18);  color: #d94538; border: 1px solid rgba(217,69,56,.25); }
 
 /* ── Barriles ── */
 .grid-barril {
-  display: grid; gap: 22px;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  display: grid; gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
 }
 .barril {
   background: var(--bg-card); border: 1px solid var(--line);
-  border-radius: var(--radius); padding: 20px 14px;
+  border-radius: var(--radius); padding: 22px 12px 18px;
   text-align: center; box-shadow: var(--shadow);
-  transition: transform .2s ease;
+  transition: transform .3s cubic-bezier(.25,.8,.25,1.2),
+              box-shadow .3s ease,
+              background .3s ease,
+              border-color .3s ease;
+  position: relative; overflow: hidden;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
-.barril:hover { transform: translateY(-4px); }
-.barril .estilo { font-weight: 500; margin-top: 10px; font-size: 14px; }
-.barril .litros { font-size: 22px; font-weight: 700; margin-top: 4px; }
-.barril .litros span { font-size: 13px; color: var(--text-dim); font-weight: 300; }
-.barril.vacio { opacity: .45; }
+.barril::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0; transition: opacity .3s ease;
+}
+.barril::after {
+  content: '';
+  position: absolute; bottom: 6px; left: 6px;
+  width: 8px; height: 8px;
+  border-bottom: 1px solid var(--line-strong);
+  border-left: 1px solid var(--line-strong);
+  border-radius: 0 0 0 4px; opacity: .6;
+}
+.barril:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  background: var(--bg-card-hover);
+  border-color: rgba(212,175,55,.25);
+}
+.barril:hover::before { opacity: 1; }
+.barril .estilo { font-weight: 500; margin-top: 12px; font-size: 13px; }
+.barril .litros { font-size: 24px; font-weight: 700; margin-top: 4px; color: var(--gold-secondary); }
+.barril .litros span { font-size: 12px; color: var(--text-dim); font-weight: 300; }
+.barril.vacio { opacity: .35; }
 
 /* ── Botellas ── */
 .grid-botella {
-  display: grid; gap: 22px;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  display: grid; gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
 }
 .botella-foto {
   height: 205px; display: flex; align-items: flex-end; justify-content: center;
-  background: radial-gradient(circle at 50% 55%, rgba(0,0,0,.05), transparent 70%);
-  border-radius: 12px; margin-bottom: 6px;
+  background: radial-gradient(circle at 50% 55%, rgba(242,214,128,.04), transparent 70%);
+  border-radius: 14px; margin-bottom: 6px;
 }
-.botella-foto svg { filter: drop-shadow(0 8px 14px rgba(0,0,0,.28)); }
+.botella-foto svg { filter: drop-shadow(0 8px 16px rgba(0,0,0,.45)); }
 .botella {
-  background: linear-gradient(160deg, var(--bg-card) 0%, var(--bg-card2) 100%);
+  background: var(--bg-card);
   border: 1px solid var(--line); border-radius: var(--radius);
-  padding: 20px 14px 16px; text-align: center; box-shadow: var(--shadow);
-  transition: transform .2s ease;
+  padding: 22px 14px 16px; text-align: center; box-shadow: var(--shadow);
+  transition: transform .3s cubic-bezier(.25,.8,.25,1.2),
+              box-shadow .3s ease,
+              background .3s ease,
+              border-color .3s ease;
+  position: relative; overflow: hidden;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
-.botella:hover { transform: translateY(-4px); }
-.botella .estilo { font-weight: 500; margin-top: 8px; font-size: 14px; }
-.botella .cant { font-size: 28px; font-weight: 700; margin-top: 4px; }
-.botella .cant span { font-size: 12px; color: var(--text-dim); font-weight: 300; display: block; }
-.botella .alarma-txt { font-size: 11px; margin-top: 6px; }
-.rojo-txt { color: #c0392b; } .ambar-txt { color: #b9770e; } .verde-txt { color: #1e8449; }
-
-.footer { text-align: center; color: var(--text-dim); font-size: 12px; margin-top: 20px; }
+.botella::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0; transition: opacity .3s ease;
+}
+.botella::after {
+  content: '';
+  position: absolute; top: 6px; right: 6px;
+  width: 8px; height: 8px;
+  border-top: 1px solid var(--line-strong);
+  border-right: 1px solid var(--line-strong);
+  border-radius: 0 4px 0 0; opacity: .6;
+}
+.botella:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  background: var(--bg-card-hover);
+  border-color: rgba(212,175,55,.25);
+}
+.botella:hover::before { opacity: 1; }
+.botella .estilo { font-weight: 500; margin-top: 10px; font-size: 13px; }
+.botella .cant { font-size: 30px; font-weight: 700; margin-top: 4px; color: var(--gold-secondary); }
+.botella .cant span { font-size: 11px; color: var(--text-dim); font-weight: 300; display: block; }
+.botella .alarma-txt { font-size: 10px; margin-top: 6px; font-weight: 500; }
+.rojo-txt { color: #d94538; } .ambar-txt { color: #e8a735; } .verde-txt { color: #3da05d; }
 
 /* ── Donut de capacidad ── */
 .dona-section {
-  display: flex; align-items: center; justify-content: center; gap: 40px;
+  display: flex; align-items: center; justify-content: center; gap: 44px;
   background: var(--bg-card); border: 1px solid var(--line);
-  border-radius: var(--radius); padding: 30px; box-shadow: var(--shadow);
+  border-radius: var(--radius); padding: 34px 30px; box-shadow: var(--shadow);
   flex-wrap: wrap;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  position: relative;
 }
-.dona-wrap { display: flex; align-items: center; gap: 40px; flex-wrap: wrap; justify-content: center; }
-.dona-svg { flex-shrink: 0; }
+.dona-section::after {
+  content: '';
+  position: absolute; bottom: 8px; right: 8px;
+  width: 10px; height: 10px;
+  border-bottom: 1px solid var(--line-strong);
+  border-right: 1px solid var(--line-strong);
+  border-radius: 0 0 4px 0; opacity: .5;
+}
+.dona-wrap { display: flex; align-items: center; gap: 44px; flex-wrap: wrap; justify-content: center; }
+.dona-svg { flex-shrink: 0; position: relative; }
 .dona-svg path.dona-arc {
   transition: opacity .2s ease, transform .2s ease;
   cursor: pointer; transform-origin: 140px 140px;
 }
 .dona-svg path.dona-arc:hover {
-  opacity: .80; transform: scale(1.04);
+  opacity: .80; transform: scale(1.05);
+  filter: drop-shadow(0 0 8px rgba(212,175,55,.4));
 }
 .dona-leyenda {
   display: flex; flex-direction: column; gap: 10px; min-width: 240px;
 }
 .dona-leyenda-item {
-  display: flex; align-items: center; gap: 10px; font-size: 14px;
+  display: flex; align-items: center; gap: 10px; font-size: 13px;
+  padding: 6px 0;
+  transition: opacity .2s ease;
 }
+.dona-leyenda-item:hover { opacity: .8; }
+
 .dona-leyenda-dot {
   width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+  box-shadow: 0 0 6px currentColor;
 }
-.dona-leyenda-nombre { color: var(--text); flex: 1; }
-.dona-leyenda-pct { font-weight: 700; color: var(--text); min-width: 45px; text-align: right; }
+.dona-leyenda-nombre { color: var(--text); flex: 1; font-weight: 400; }
+.dona-leyenda-pct { font-weight: 700; color: var(--gold-secondary); min-width: 45px; text-align: right; }
 .dona-vacio-dot {
   width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
-  border: 2px dashed #aab4bd; background: transparent;
+  border: 2px dashed rgba(242,214,128,.3); background: transparent;
 }
-.dona-svg { position: relative; }
+
 .dona-tooltip {
   display: none; position: absolute; pointer-events: none;
-  background: rgba(38,49,61,.92); color: #fff; padding: 8px 14px;
-  border-radius: 8px; font-size: 13px; line-height: 1.5; font-weight: 500;
-  white-space: nowrap; z-index: 20; box-shadow: 0 4px 14px rgba(0,0,0,.3);
+  background: rgba(10,18,10,.95); color: var(--gold-secondary);
+  padding: 10px 16px; border: 1px solid var(--line-strong);
+  border-radius: 10px; font-size: 13px; line-height: 1.5; font-weight: 500;
+  white-space: nowrap; z-index: 20; box-shadow: 0 6px 20px rgba(0,0,0,.5);
+  backdrop-filter: blur(4px);
 }
 .dona-svg path { pointer-events: all; }
+
+/* ── Footer ── */
+.footer {
+  text-align: center; color: var(--text-dim); font-size: 11px; margin-top: 24px;
+  letter-spacing: .5px; position: relative; z-index: 1;
+  opacity: .6;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #0a120a; }
+::-webkit-scrollbar-thumb { background: rgba(212,175,55,.25); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(212,175,55,.45); }
 
 </style>
 </head>
@@ -200,7 +398,8 @@ main { max-width: 1200px; margin: 0 auto; padding: 30px 24px; }
     <!-- FERMENTADORES -->
     <section class="bloque">
       <div class="bloque-head">
-        <h2>🧪 Fermentadores</h2>
+        <svg class="ico" viewBox="0 0 28 28" fill="none"><rect x="4" y="3" width="20" height="22" rx="4" stroke="#d4af37" stroke-width="1.4" fill="none"/><line x1="8" y1="8" x2="20" y2="8" stroke="#d4af37" stroke-width=".8" opacity=".5"/><ellipse cx="14" cy="16" rx="7" ry="8" stroke="#d4af37" stroke-width=".9" fill="none"/><line x1="14" y1="8" x2="14" y2="24" stroke="#d4af37" stroke-width=".7" opacity=".4"/></svg>
+        <h2>Fermentadores</h2>
         <span id="resumen-ferm" class="resumen"></span>
       </div>
       <div id="fermentadores" class="grid-ferm"></div>
@@ -209,7 +408,8 @@ main { max-width: 1200px; margin: 0 auto; padding: 30px 24px; }
     <!-- BARRILES -->
     <section class="bloque">
       <div class="bloque-head">
-        <h2>🛢️ Barriles por estilo</h2>
+        <svg class="ico" viewBox="0 0 28 28" fill="none"><ellipse cx="14" cy="8" rx="9" ry="3" stroke="#d4af37" stroke-width="1.2"/><rect x="5" y="8" width="18" height="16" rx="3" stroke="#d4af37" stroke-width="1.2"/><rect x="5" y="8" width="18" height="3" fill="none" stroke="#d4af37" stroke-width=".6" opacity=".5"/><ellipse cx="14" cy="24" rx="9" ry="3" stroke="#d4af37" stroke-width="1.2"/></svg>
+        <h2>Barriles por estilo</h2>
         <span id="resumen-barril" class="resumen"></span>
       </div>
       <div id="barriles" class="grid-barril"></div>
@@ -218,7 +418,8 @@ main { max-width: 1200px; margin: 0 auto; padding: 30px 24px; }
     <!-- BOTELLAS -->
     <section class="bloque">
       <div class="bloque-head">
-        <h2>🍾 Botellas por estilo</h2>
+        <svg class="ico" viewBox="0 0 28 28" fill="none"><rect x="10" y="2" width="8" height="4" rx="1" stroke="#d4af37" stroke-width="1.1"/><path d="M12,6 L12,10 Q12,14 10,18 Q8,22 8,24 L20,24 Q20,22 18,18 Q16,14 16,10 L16,6 Z" stroke="#d4af37" stroke-width="1.1" fill="none"/><line x1="10" y1="10" x2="18" y2="10" stroke="#d4af37" stroke-width=".5" opacity=".4"/></svg>
+        <h2>Botellas por estilo</h2>
         <span id="resumen-botella" class="resumen"></span>
       </div>
       <div id="botellas" class="grid-botella"></div>
@@ -227,7 +428,8 @@ main { max-width: 1200px; margin: 0 auto; padding: 30px 24px; }
     <!-- CAPACIDAD DE PRODUCCIÓN -->
     <section class="bloque">
       <div class="bloque-head">
-        <h2>🏭 Capacidad de Producción Instalada</h2>
+        <svg class="ico" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="11" stroke="#d4af37" stroke-width="1.2" fill="none"/><circle cx="14" cy="14" r="6" stroke="#d4af37" stroke-width=".8" fill="none" opacity=".5"/><path d="M14,3 A11,11 0 0,1 24,13" stroke="#d4af37" stroke-width="2.5" stroke-linecap="round"/></svg>
+        <h2>Capacidad de Producción Instalada</h2>
         <span id="resumen-capacidad" class="resumen"></span>
       </div>
       <div id="capacidad-produccion" class="dona-section"></div>
@@ -280,14 +482,14 @@ const FILL_FERM = {
   "Irish Red": "#B03A2E", "Irish Red Ale": "#B03A2E",
   "Stout": "#1e1e1e", "Scottish Ale": "#5B3A29", "Temporada": "#C0873B",
 };
-const EMPTY_FERM = "#c2c9d0";
+const EMPTY_FERM = "#1e2e1e";
 
 /* Elige texto blanco o oscuro según el color de fondo (contraste) */
 function textoContraste(hex) {
   const c = hex.replace("#", "");
   const r = parseInt(c.substr(0, 2), 16), g = parseInt(c.substr(2, 2), 16), b = parseInt(c.substr(4, 2), 16);
   const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return lum > 0.6 ? "#1a2530" : "#ffffff";
+  return lum > 0.6 ? "#1e1e1a" : "#e8e0d5";
 }
 
 /* ── SVG: Fermentador cilindrocónico con nivel de líquido ── */
@@ -311,15 +513,15 @@ function tanqueSVG(f, idx) {
         <ellipse cx="60" cy="${fillY}" rx="30" ry="3.5" fill="${fill}"/>
       </g>
       <!-- contorno cilindrocónico -->
-      <path d="${interior}" fill="none" stroke="#8a95a1" stroke-width="2"/>
+      <path d="${interior}" fill="none" stroke="#6b7280" stroke-width="2"/>
       <!-- tapa superior -->
-      <ellipse cx="60" cy="${innerTop}" rx="30" ry="7" fill="#eef2f5" stroke="#8a95a1" stroke-width="2"/>
-      <circle cx="60" cy="${innerTop - 6}" r="3" fill="#8a95a1"/>
+      <ellipse cx="60" cy="${innerTop}" rx="30" ry="7" fill="#1a2a1a" stroke="#6b7280" stroke-width="2"/>
+      <circle cx="60" cy="${innerTop - 6}" r="3" fill="#6b7280"/>
       <!-- válvula de salida (punta del cono) -->
-      <rect x="57" y="130" width="6" height="9" rx="1" fill="#8a95a1"/>
+      <rect x="57" y="130" width="6" height="9" rx="1" fill="#6b7280"/>
       <!-- patas -->
-      <line x1="42" y1="96" x2="34" y2="152" stroke="#8a95a1" stroke-width="3"/>
-      <line x1="78" y1="96" x2="86" y2="152" stroke="#8a95a1" stroke-width="3"/>
+      <line x1="42" y1="96" x2="34" y2="152" stroke="#6b7280" stroke-width="3"/>
+      <line x1="78" y1="96" x2="86" y2="152" stroke="#6b7280" stroke-width="3"/>
     </svg>
     <span class="pct-label" style="color:${txt};text-shadow:none;">${pct}%</span>
   </div>`;
@@ -346,21 +548,21 @@ function barrilSVG(estilo) {
       </linearGradient>
     </defs>
     <!-- collar superior (coloreado por estilo) -->
-    <ellipse cx="50" cy="14" rx="26" ry="6" fill="url(#cap${uid})" stroke="#5b6670" stroke-width="1.5"/>
+    <ellipse cx="50" cy="14" rx="26" ry="6" fill="url(#cap${uid})" stroke="#3a444a" stroke-width="1.5"/>
     <rect x="24" y="14" width="52" height="8" fill="url(#cap${uid})"/>
     <!-- válvula spear -->
-    <rect x="46" y="4" width="8" height="8" rx="2" fill="#5b6670"/>
+    <rect x="46" y="4" width="8" height="8" rx="2" fill="#3a444a"/>
     <!-- cuerpo del keg -->
     <path d="M24,22 L24,26 Q16,30 16,40 L16,92 Q16,102 24,106 L24,110
              L76,110 L76,106 Q84,102 84,92 L84,40 Q84,30 76,26 L76,22 Z"
-          fill="url(#steel${uid})" stroke="#5b6670" stroke-width="1.5"/>
+          fill="url(#steel${uid})" stroke="#3a444a" stroke-width="1.5"/>
     <!-- anillos de refuerzo -->
-    <rect x="14" y="40" width="72" height="6" rx="3" fill="#aab4bd" opacity="0.8"/>
-    <rect x="14" y="86" width="72" height="6" rx="3" fill="#aab4bd" opacity="0.8"/>
+    <rect x="14" y="40" width="72" height="6" rx="3" fill="#5a6a74" opacity="0.6"/>
+    <rect x="14" y="86" width="72" height="6" rx="3" fill="#5a6a74" opacity="0.6"/>
     <!-- brillo -->
-    <rect x="30" y="30" width="5" height="76" rx="2" fill="#ffffff" opacity="0.35"/>
+    <rect x="30" y="30" width="5" height="76" rx="2" fill="#ffffff" opacity="0.25"/>
     <!-- base -->
-    <ellipse cx="50" cy="110" rx="26" ry="6" fill="#8a97a3" stroke="#5b6670" stroke-width="1.5"/>
+    <ellipse cx="50" cy="110" rx="26" ry="6" fill="#5a6a74" stroke="#3a444a" stroke-width="1.5"/>
   </svg>`;
 }
 
@@ -464,7 +666,7 @@ function donaCapacidad(data) {
     const d = `M${x1.toFixed(1)},${y1.toFixed(1)} A${R},${R} 0 ${la},1 ${x2.toFixed(1)},${y2.toFixed(1)} L${x3.toFixed(1)},${y3.toFixed(1)} A${innerR},${innerR} 0 ${la},0 ${x4.toFixed(1)},${y4.toFixed(1)} Z`;
     const col = colorEstilo(estilo);
     const tooltip = `${ESTILO_NOMBRE[estilo] || estilo}\n${pct}% (${info.litros} L)`;
-    paths += `<path class="dona-arc" d="${d}" fill="${col}" stroke="#fff" stroke-width="2" data-tooltip="${tooltip.replace(/"/g, '&quot;')}" onclick="donaClick(event, this)"><title>${ESTILO_NOMBRE[estilo] || estilo}: ${pct}% (${info.litros} L)</title></path>\n`;
+    paths += `<path class="dona-arc" d="${d}" fill="${col}" stroke="#0a120a" stroke-width="2" data-tooltip="${tooltip.replace(/"/g, '&quot;')}" onclick="donaClick(event, this)"><title>${ESTILO_NOMBRE[estilo] || estilo}: ${pct}% (${info.litros} L)</title></path>\n`;
     currentAngle += angDeg;
   });
 
@@ -480,14 +682,14 @@ function donaCapacidad(data) {
     const x4 = cx + innerR * Math.cos(sr), y4 = cy + innerR * Math.sin(sr);
     const d = `M${x1.toFixed(1)},${y1.toFixed(1)} A${R},${R} 0 ${la},1 ${x2.toFixed(1)},${y2.toFixed(1)} L${x3.toFixed(1)},${y3.toFixed(1)} A${innerR},${innerR} 0 ${la},0 ${x4.toFixed(1)},${y4.toFixed(1)} Z`;
     const tooltipEmpty = `Disponible\n${Math.round(remaining/360*1000)/10}% (${totCap - totOcup} L)`;
-    paths += `<path class="dona-arc" d="${d}" fill="#e3e9ef" stroke="#fff" stroke-width="2" data-tooltip="${tooltipEmpty.replace(/"/g, '&quot;')}" onclick="donaClick(event, this)"><title>Disponible: ${Math.round(remaining/360*100)}% (${totCap - totOcup} L)</title></path>\n`;
+    paths += `<path class="dona-arc" d="${d}" fill="#1e2e1e" stroke="#0a120a" stroke-width="2" data-tooltip="${tooltipEmpty.replace(/"/g, '&quot;')}" onclick="donaClick(event, this)"><title>Disponible: ${Math.round(remaining/360*100)}% (${totCap - totOcup} L)</title></path>\n`;
   }
 
   const svg = `<svg width="280" height="280" viewBox="0 0 280 280" class="dona-svg">
     ${paths}
-    <text x="${cx}" y="${cy - 10}" text-anchor="middle" font-family="Poppins,system-ui,sans-serif" font-size="28" font-weight="700" fill="#26313d">${totPct}%</text>
-    <text x="${cx}" y="${cy + 12}" text-anchor="middle" font-family="Poppins,system-ui,sans-serif" font-size="12" fill="#6b7784">Capacidad</text>
-    <text x="${cx}" y="${cy + 28}" text-anchor="middle" font-family="Poppins,system-ui,sans-serif" font-size="12" fill="#6b7784">Ocupada</text>
+    <text x="${cx}" y="${cy - 10}" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="28" font-weight="700" fill="#f2d680">${totPct}%</text>
+    <text x="${cx}" y="${cy + 12}" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11" fill="#9a9588">Capacidad</text>
+    <text x="${cx}" y="${cy + 27}" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11" fill="#9a9588">Ocupada</text>
   </svg>`;
 
   let legendItems = entries.map(([estilo, info]) => {
