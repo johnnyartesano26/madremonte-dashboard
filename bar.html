@@ -160,6 +160,33 @@ table tbody tr:hover { background: rgba(200,138,61,.04); }
 }
 .footer strong { font-size: 13px; color: var(--text); display: block; margin-bottom: 2px; }
 
+/* ── Histórico Mensual ── */
+.historico-section {
+  background: var(--bg-card); border-radius: var(--radius);
+  padding: 22px 20px; box-shadow: var(--shadow); margin-top: 24px;
+}
+.historico-header {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; margin-bottom: 16px;
+}
+.historico-header h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px; font-weight: 600; color: var(--text);
+  padding-bottom: 8px; border-bottom: 2px solid var(--gold);
+}
+.historico-toggles { display: flex; gap: 8px; flex-wrap: wrap; }
+.toggle-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 16px; border-radius: 999px; border: 2px solid #e0d6c8;
+  background: #fff; font-family: 'Inter', sans-serif; font-size: 13px;
+  font-weight: 500; color: var(--text-body); cursor: pointer;
+  transition: all .2s ease;
+}
+.toggle-btn.active { border-color: var(--gold); background: rgba(200,138,61,.08); color: var(--text); }
+.toggle-btn:hover { border-color: var(--gold); }
+.toggle-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.chart-wrap-historico { max-height: 350px; }
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .topbar { padding: 14px 16px; }
@@ -226,6 +253,22 @@ table tbody tr:hover { background: rgba(200,138,61,.04); }
         <tbody></tbody>
       </table>
     </div>
+  </section>
+
+  <!-- Histórico mensual -->
+  <section class="historico-section">
+    <div class="historico-header">
+      <h3>📈 Histórico de Ventas por Mes</h3>
+      <div class="historico-toggles">
+        <button class="toggle-btn active" data-serie="alegra" onclick="toggleSerie('alegra')">
+          <span class="toggle-dot" style="background:#c88a3d"></span> Alegra
+        </button>
+        <button class="toggle-btn active" data-serie="formato" onclick="toggleSerie('formato')">
+          <span class="toggle-dot" style="background:#6b5a4a"></span> Formato
+        </button>
+      </div>
+    </div>
+    <div class="chart-wrap chart-wrap-historico"><canvas id="chart-historico"></canvas></div>
   </section>
 </main>
 
@@ -2768,8 +2811,9 @@ table tbody tr:hover { background: rgba(200,138,61,.04); }
 
 const DATA = window.BAR_DATA;
 let hojaActual = DATA.hojas[0];
-let chartVentas = null, chartPagos = null, chartDesglose = null;
+let chartVentas = null, chartPagos = null, chartDesglose = null, chartHistorico = null;
 let columnaOrden = null, ordenAsc = false;
+let showAlegra = true, showFormato = true;
 
 /* ── Formateo ── */
 function fmtDinero(n) {
@@ -2971,6 +3015,76 @@ function renderAll() {
   renderKPIs(hojaActual);
   renderCharts(hojaActual);
   renderTabla(hojaActual);
+  renderHistorico();
+}
+
+/* ── Histórico Mensual ── */
+function computeMensual() {
+  return DATA.hojas.map(h => {
+    const t = { alegra: 0, formato: 0 };
+    h.datos.forEach(d => { t.alegra += d.cierreAlegra || 0; t.formato += d.cierreFormato || 0; });
+    const mes = h.nombre.replace('Arqueo Cierre de bar ', '').replace('Dicembre', 'Dic').replace('Noviembre', 'Nov').replace('Enero', 'Ene').replace('Febrero', 'Feb').replace('Marzo', 'Mar').replace('Abril', 'Abr').replace('Mayo', 'May').replace('Junio', 'Jun').replace('Julio', 'Jul');
+    return { mes, alegra: t.alegra, formato: t.formato };
+  });
+}
+
+function renderHistorico() {
+  const mensual = computeMensual();
+  if (chartHistorico) chartHistorico.destroy();
+  const ctx = document.getElementById('chart-historico');
+  if (!ctx) return;
+
+  const datasets = [];
+  if (showAlegra) {
+    datasets.push({
+      label: 'Alegra', data: mensual.map(m => m.alegra),
+      borderColor: '#c88a3d', backgroundColor: 'rgba(200,138,61,.10)',
+      borderWidth: 3, pointRadius: 6, pointHoverRadius: 9,
+      pointBackgroundColor: '#c88a3d', pointBorderColor: '#fff', pointBorderWidth: 2,
+      tension: .3, fill: true,
+    });
+  }
+  if (showFormato) {
+    datasets.push({
+      label: 'Formato', data: mensual.map(m => m.formato),
+      borderColor: '#6b5a4a', backgroundColor: 'rgba(107,90,74,.06)',
+      borderWidth: 2.5, pointRadius: 5, pointHoverRadius: 8,
+      pointBackgroundColor: '#6b5a4a', pointBorderColor: '#fff', pointBorderWidth: 2,
+      tension: .3, fill: true, borderDash: [5, 3],
+    });
+  }
+
+  chartHistorico = new Chart(ctx, {
+    type: 'line',
+    data: { labels: mensual.map(m => m.mes), datasets },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ': ' + fmtDinero(ctx.raw) } },
+        legend: { display: false },
+      },
+      scales: {
+        y: {
+          ticks: { callback: v => '$' + (v / 1000000).toFixed(1) + 'M' },
+          grid: { color: '#e8e0d6' },
+        },
+        x: { grid: { display: false } },
+      },
+    },
+  });
+}
+
+function toggleSerie(serie) {
+  if (serie === 'alegra') { showAlegra = !showAlegra; }
+  else if (serie === 'formato') { showFormato = !showFormato; }
+  // Update button states
+  document.querySelectorAll('.toggle-btn').forEach(btn => {
+    const s = btn.dataset.serie;
+    const active = (s === 'alegra' && showAlegra) || (s === 'formato' && showFormato);
+    btn.classList.toggle('active', active);
+  });
+  renderHistorico();
 }
 
 /* ── Init ── */
