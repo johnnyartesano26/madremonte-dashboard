@@ -333,11 +333,12 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
   <footer class="footer">
     <strong>CERVECERÍA MADRE MONTE S.A.S.</strong>
     <a href="mailto:cervezamadremonte@gmail.com">cervezamadremonte@gmail.com</a><br>
-    Cl 2 Sur # 51B - 23 · Medellín, Colombia<br>
+    Cl 32F # 76-18 · Medellín, Colombia<br>
     (+57) 301 326 4124<br>
     <small>PROHIBIDA SU VENTA A MENORES DE 18 AÑOS</small>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script>window.DATA = {"generado": "2026-07-05", "planta": "Cervecería Madre Monte", "fermentadores": [{"nombre": "F1 Frankie", "estilo": "Stout", "litros": 375, "capacidad": 400, "porcentaje": 94, "alarma": "verde"}, {"nombre": "F2 Igor", "estilo": "Irish Red", "litros": 418, "capacidad": 1200, "porcentaje": 35, "alarma": "verde"}, {"nombre": "F3 Principito", "estilo": "APA", "litros": 270, "capacidad": 400, "porcentaje": 68, "alarma": "verde"}, {"nombre": "F4 Gargantua", "estilo": "IPA", "litros": 300, "capacidad": 700, "porcentaje": 43, "alarma": "verde"}, {"nombre": "F5 Pantragruel", "estilo": "IPA", "litros": 680, "capacidad": 800, "porcentaje": 85, "alarma": "verde"}, {"nombre": "F6 Potter", "estilo": "Golden Ale", "litros": 650, "capacidad": 1000, "porcentaje": 65, "alarma": "verde"}, {"nombre": "F7 HighLander", "estilo": "Hidromiel", "litros": 130, "capacidad": 500, "porcentaje": 26, "alarma": "amarilla"}], "barriles": [{"codigo": "PTL01", "estilo": "Golden Ale", "litros": 60.0}, {"codigo": "PTL02", "estilo": "Irish Red Ale", "litros": 0}, {"codigo": "PTL03", "estilo": "APA", "litros": 0}, {"codigo": "PTL04", "estilo": "IPA", "litros": 80.0}, {"codigo": "PTL05", "estilo": "Stout", "litros": 30.0}], "botellas": [{"codigo": "PTB01", "estilo": "Golden Ale", "cantidad": 79}, {"codigo": "PTB02", "estilo": "Irish Red Ale", "cantidad": 38}, {"codigo": "PTB03", "estilo": "APA", "cantidad": 163}, {"codigo": "PTB04", "estilo": "IPA", "cantidad": 100}, {"codigo": "PTB05", "estilo": "Stout", "cantidad": 18}]};</script>
   <script>
 /* Dashboard de Planta — Madre Monte
@@ -599,13 +600,19 @@ function render(data) {
 let chartInstance = null;
 
 function renderChart(points) {
-  if (typeof Chart === 'undefined') return;
+  if (typeof Chart === 'undefined') { console.warn('Chart.js no disponible'); return; }
   const ctx = document.getElementById('chart-historico');
   if (!ctx) return;
   if (chartInstance) chartInstance.destroy();
 
-  const labels = points.map(p => p.label);
-  const data = points.map(p => p.pct);
+  // Si solo hay un punto, añadir uno inicial para que se vea la línea
+  let displayPoints = points;
+  if (points.length === 1) {
+    displayPoints = [{ label: 'Inicio', pct: 0, litros: 0, capacidad: points[0].capacidad }, points[0]];
+  }
+
+  const labels = displayPoints.map(p => p.label);
+  const data = displayPoints.map(p => p.pct);
   document.getElementById('resumen-historico').textContent = points.length + ' registros';
 
   chartInstance = new Chart(ctx, {
@@ -672,6 +679,5 @@ function renderChart(points) {
 })();
 
 </script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </body>
 </html>
