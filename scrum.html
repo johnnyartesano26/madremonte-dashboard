@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scrum · Madre Monte · Q3 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #faf7f0; --card: #fff; --text: #3d2a1d; --body: #6b5a4a; --dim: #8c7b6b;
+  --gold: #c88a3d; --gold-l: #e8a84c; --green: #4caf50; --amber: #ffc107; --red: #e57373;
+  --line: #e0d6c8; --shadow: 0 3px 14px rgba(60,40,20,.06); --radius: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 40px; }
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+  padding: 16px 28px; background: rgba(255,255,255,.94); border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 10px rgba(60,40,20,.04);
+}
+.brand h1 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; }
+.brand h1 span { color: var(--gold); }
+.brand p { color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+.pill { background: #f5efe6; padding: 7px 16px; border-radius: 999px; font-size: 12px; color: var(--dim); border: 1px solid var(--line); }
+.pill.wk { background: var(--gold); color: #fff; border-color: var(--gold); font-weight: 600; }
+main { max-width: 1200px; margin: 0 auto; padding: 28px 20px; }
+.row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; }
+.card {
+  flex: 1; min-width: 320px; background: var(--card); border-radius: var(--radius);
+  padding: 22px 20px; box-shadow: var(--shadow);
+}
+.card.wide { flex: 2; min-width: 500px; }
+.card h2 { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--gold); display: inline-block; }
+.card h3 { font-size: 14px; color: var(--body); margin-bottom: 10px; }
+
+/* Date Line */
+.timeline { position: relative; padding: 10px 0 30px; }
+.timeline-track { height: 6px; background: var(--line); border-radius: 3px; position: relative; margin: 30px 0; }
+.timeline-fill { height: 100%; background: var(--gold); border-radius: 3px; transition: width .8s ease; }
+.timeline-weeks { display: flex; justify-content: space-between; position: relative; margin-top: -38px; }
+.tl-week { text-align: center; flex: 1; position: relative; }
+.tl-dot {
+  width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--line);
+  margin: -5px auto 4px; position: relative; z-index: 2;
+}
+.tl-dot.done { background: var(--green); border-color: var(--green); }
+.tl-dot.current { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 0 4px rgba(200,138,61,.20); }
+.tl-dot.future { background: #fff; border-color: var(--line); }
+.tl-label { font-size: 10px; color: var(--dim); }
+.tl-label strong { color: var(--text); font-size: 12px; }
+
+/* Objective cards */
+.obj-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.obj-badge {
+  padding: 6px 16px; border-radius: 999px; font-size: 22px; font-weight: 700;
+  color: #fff; min-width: 70px; text-align: center;
+}
+.obj-badge.ok { background: var(--green); }
+.obj-badge.progress { background: var(--gold); }
+.obj-info h3 { margin: 0; color: var(--text); }
+.obj-info p { font-size: 12px; color: var(--dim); margin-top: 2px; }
+
+/* Indicators */
+.ind-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.ind-row:last-child { border-bottom: none; }
+.ind-icon { font-size: 18px; width: 28px; text-align: center; }
+.ind-label { flex: 1; font-size: 13px; color: var(--body); }
+.ind-value { font-weight: 700; font-size: 13px; min-width: 60px; text-align: right; }
+.ind-bar-wrap { width: 80px; height: 8px; background: #e8e0d6; border-radius: 4px; overflow: hidden; }
+.ind-bar-fill { height: 100%; border-radius: 4px; }
+.ind-bar-fill.green { background: var(--green); }
+.ind-bar-fill.gold { background: var(--gold); }
+.ind-bar-fill.amber { background: var(--amber); }
+.ind-status { font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 500; }
+.ind-status.check { background: rgba(76,175,80,.12); color: #2e7d32; }
+.ind-status.warn { background: rgba(255,193,7,.12); color: #a08000; }
+.ind-status.wait { background: rgba(200,138,61,.10); color: var(--gold); }
+
+/* Sprint board */
+.sprint-grid { display: grid; gap: 10px; }
+.sprint-task {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+  border-radius: 10px; background: #faf7f0; border-left: 4px solid var(--line);
+}
+.sprint-task.done { border-left-color: var(--green); opacity: .7; }
+.sprint-task.ongoing { border-left-color: var(--gold); }
+.sprint-task.pending { border-left-color: var(--line); }
+.sprint-task .task-status { font-size: 16px; }
+.sprint-task .task-name { flex: 1; font-size: 13px; }
+.sprint-task .task-owner { font-size: 11px; color: var(--dim); }
+
+.chart-wrap { position: relative; width: 100%; }
+.chart-wrap canvas { width: 100% !important; max-height: 280px; }
+
+.footer { text-align: center; padding: 20px; color: var(--dim); font-size: 11px; border-top: 1px solid var(--line); margin-top: 20px; }
+
+@media (max-width: 768px) { .card { min-width: 100%; } .card.wide { min-width: 100%; } }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><h1>📊 Scrum <span>Madre Monte</span></h1><p>Dashboard de Objetivos · Q3 2026</p></div>
+  <div class="topbar-meta" style="display:flex;gap:10px;align-items:center;">
+    <span class="pill wk">Semana 2 · 12</span>
+    <span class="pill">Sprint 2 "Roja y Feria" · 6-12 jul</span>
+    <span class="pill">📅 Q3: 1 jul — 21 sep 2026</span>
+  </div>
+</header>
+
+<main>
+
+<!-- DATE LINE -->
+<div class="card wide" style="margin-bottom:24px;">
+  <h2>⏳ Progreso Trimestral — Semana 2 de 12</h2>
+  <div class="timeline" id="timeline"></div>
+  <div class="chart-wrap"><canvas id="chart-progress"></canvas></div>
+</div>
+
+<div class="row">
+  <!-- OBJETIVO 1: Estilos Base -->
+  <div class="card">
+    <div class="obj-header">
+      <div class="obj-badge ok">100%</div>
+      <div class="obj-info"><h3>Objetivo 1: Mantener 5 estilos base</h3><p>Logrado Q1/Q2 · Sostenido Q3</p></div>
+    </div>
+    <div class="ind-row"><span class="ind-icon">🍺</span><span class="ind-label">Golden · Siempre Viva</span><span class="ind-status check">OK</span></div>
+    <div class="ind-row"><span class="ind-icon">🍺</span><span class="ind-label">APA · Cienfuegos</span><span class="ind-status check">OK</span></div>
+    <div class="ind-row"><span class="ind-icon">🍺</span><span class="ind-label">IPA · Vagabundo</span><span class="ind-status check">OK</span></div>
+    <div class="ind-row"><span class="ind-icon">🍺</span><span class="ind-label">Irish Red · Mística</span><span class="ind-status check">OK</span></div>
+    <div class="ind-row"><span class="ind-icon">🍺</span><span class="ind-label">Stout · Sangre Negra</span><span class="ind-status check">OK</span></div>
+    <div style="margin-top:14px; padding-top:10px; border-top:1px solid var(--line);">
+      <div class="ind-row"><span class="ind-icon">🏭</span><span class="ind-label">Ocupación fermentadores</span><span class="ind-value">56%</span></div>
+      <div class="ind-row"><span class="ind-icon">📦</span><span class="ind-label">Stock botellas (>50 por estilo)</span><span class="ind-status check">OK</span></div>
+      <div class="ind-row"><span class="ind-icon">🔄</span><span class="ind-label">Rotación producción</span><span class="ind-status check">Activa</span></div>
+    </div>
+    <div class="chart-wrap" style="margin-top:14px;"><canvas id="chart-obj1"></canvas></div>
+  </div>
+
+  <!-- OBJETIVO 2: Temporada + Copas -->
+  <div class="card">
+    <div class="obj-header">
+      <div class="obj-badge progress" id="obj2-badge">0%</div>
+      <div class="obj-info"><h3>Objetivo 2: Cervezas de temporada y competencias</h3><p>En progreso · Meta: 100% al final del Q3</p></div>
+    </div>
+    <div id="obj2-indicators"></div>
+    <div class="chart-wrap" style="margin-top:14px;"><canvas id="chart-obj2"></canvas></div>
+  </div>
+</div>
+
+<div class="row">
+  <!-- SPRINT BOARD -->
+  <div class="card wide">
+    <h2>🏃 Sprint 2 "Roja y Feria" · Tablero</h2>
+    <div class="sprint-grid" id="sprint-board"></div>
+  </div>
+</div>
+
+<div class="row">
+  <!-- PRÓXIMOS HITOS -->
+  <div class="card">
+    <h2>📅 Hitos del Trimestre</h2>
+    <div id="hitos-list"></div>
+  </div>
+  <!-- EVENTOS -->
+  <div class="card">
+    <h2>🎪 Eventos Q3</h2>
+    <div id="eventos-list"></div>
+  </div>
+</div>
+
+</main>
+
+<footer class="footer">Scrum Dashboard · Madre Monte · Q3 2026 · Generado 6-jul-2026</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+/* ═══ SCRUM DASHBOARD · Q3 2026 ═══ */
+const SEMANA_ACTUAL = 2;
+const TOTAL_SEMANAS = 12;
+
+/* ── Date Line ── */
+(function buildTimeline() {
+  const tl = document.getElementById('timeline');
+  const pct = Math.round(SEMANA_ACTUAL / TOTAL_SEMANAS * 100);
+  let dots = '';
+  for (let w = 1; w <= TOTAL_SEMANAS; w++) {
+    const cls = w < SEMANA_ACTUAL ? 'done' : (w === SEMANA_ACTUAL ? 'current' : 'future');
+    dots += `<div class="tl-week"><div class="tl-dot ${cls}"></div><div class="tl-label"><strong>S${w}</strong></div></div>`;
+  }
+  tl.innerHTML = `<div class="timeline-track"><div class="timeline-fill" style="width:${pct}%"></div></div><div class="timeline-weeks">${dots}</div>`;
+})();
+
+/* ── Chart: Progress line ── */
+new Chart(document.getElementById('chart-progress'), {
+  type: 'line',
+  data: {
+    labels: ['S1','S2','S3','S4','S5','S6','S7','S8','S9','S10','S11','S12'],
+    datasets: [{
+      label: 'Progreso real', data: [0, 5, null, null, null, null, null, null, null, null, null, null],
+      borderColor: '#c88a3d', backgroundColor: 'rgba(200,138,61,.08)', borderWidth: 3,
+      pointRadius: 6, pointBackgroundColor: '#c88a3d', tension: .3, fill: true,
+    }, {
+      label: 'Meta ideal', data: [8, 16, 25, 33, 42, 50, 58, 67, 75, 83, 92, 100],
+      borderColor: '#d6c9b8', borderDash: [5, 3], borderWidth: 2, pointRadius: 0, tension: .3, fill: false,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: true,
+    plugins: {
+      tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + c.raw + '%' } },
+      legend: { labels: { usePointStyle: true, boxWidth: 8 } }
+    },
+    scales: {
+      y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#e8e0d6' } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+/* ── Objetivo 1: Dona estilos base ── */
+new Chart(document.getElementById('chart-obj1'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Golden','APA','IPA','Irish Red','Stout'],
+    datasets: [{
+      data: [20, 20, 20, 20, 20],
+      backgroundColor: ['#E8B923','#E39A2A','#D68910','#B03A2E','#5B3A29'],
+      borderColor: '#fff', borderWidth: 2,
+    }]
+  },
+  options: {
+    responsive: true, cutout: '65%',
+    plugins: {
+      tooltip: { callbacks: { label: (c) => c.label + ': Activo ✅' } },
+      legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 11 } } }
+    }
+  }
+});
+
+/* ── Objetivo 2: Sub-indicadores ── */
+const obj2Items = [
+  { icon: '🍻', label: 'Cervezas de temporada producidas', key: 'temporada', target: 3, current: 0, unit: 'estilos', detail: 'Hoppy IPA, Red Lager, Doble IPA' },
+  { icon: '🏆', label: 'Competencias / Copas', key: 'copas', target: 2, current: 1, unit: 'copas', detail: 'Copa IPA Montaña (inscrita) + BAP' },
+  { icon: '🎪', label: 'Eventos ejecutados', key: 'eventos', target: 3, current: 1, unit: 'eventos', detail: 'Silleteros ✓ · Bazar 12-jul · IPA Day' },
+  { icon: '📋', label: 'IPA Day — preparación', key: 'ipaday', target: 100, current: 30, unit: '%', detail: 'Cocciones, capital, marketing, logística' },
+  { icon: '📦', label: 'Proyecciones embotellado', key: 'embotellado', target: 100, current: 50, unit: '%', detail: 'Plan julio en marcha' },
+  { icon: '📈', label: 'Plan de mejoramiento', key: 'mejora', target: 100, current: 20, unit: '%', detail: 'KPIs definidos, acciones en curso' },
+];
+
+const obj2Total = obj2Items.reduce((s, i) => s + (i.current / i.target) * (100 / obj2Items.length), 0);
+document.getElementById('obj2-badge').textContent = Math.round(obj2Total) + '%';
+
+document.getElementById('obj2-indicators').innerHTML = obj2Items.map(i => {
+  const pct = Math.min(100, Math.round(i.current / i.target * 100));
+  const barCls = pct >= 80 ? 'green' : (pct >= 40 ? 'gold' : 'amber');
+  const statusCls = pct >= 80 ? 'check' : (pct >= 40 ? 'wait' : 'warn');
+  const statusTxt = pct >= 80 ? '✓' : (pct >= 40 ? 'En curso' : 'Pendiente');
+  return `<div class="ind-row">
+    <span class="ind-icon">${i.icon}</span>
+    <span class="ind-label">${i.label}<br><small style="color:var(--dim)">${i.detail}</small></span>
+    <div class="ind-bar-wrap"><div class="ind-bar-fill ${barCls}" style="width:${pct}%"></div></div>
+    <span class="ind-value">${i.current}/${i.target} ${i.unit}</span>
+    <span class="ind-status ${statusCls}">${statusTxt}</span>
+  </div>`;
+}).join('');
+
+/* ── Objetivo 2: Bar Chart ── */
+new Chart(document.getElementById('chart-obj2'), {
+  type: 'bar',
+  data: {
+    labels: obj2Items.map(i => i.label.split(' ').slice(0, 2).join(' ')),
+    datasets: [{
+      label: 'Progreso', data: obj2Items.map(i => Math.round(i.current / i.target * 100)),
+      backgroundColor: obj2Items.map(i => {
+        const p = Math.round(i.current / i.target * 100);
+        return p >= 80 ? 'rgba(76,175,80,.7)' : (p >= 40 ? 'rgba(200,138,61,.7)' : 'rgba(255,193,7,.5)');
+      }),
+      borderColor: '#fff', borderWidth: 1, borderRadius: 6,
+    }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: true,
+    plugins: {
+      tooltip: { callbacks: { label: (c) => c.raw + '% completado' } },
+      legend: { display: false }
+    },
+    scales: {
+      x: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#e8e0d6' } },
+      y: { grid: { display: false }, ticks: { font: { size: 10 } } }
+    }
+  }
+});
+
+/* ── Sprint Board ── */
+const sprintTasks = [
+  { name: 'Cocinar Red IPA → F5 (800L)', owner: 'Maestro Cervecero', status: 'ongoing' },
+  { name: 'Dry-hop American IPA (F4)', owner: 'Maestro Cervecero', status: 'pending' },
+  { name: 'Diseñar etiqueta Temporada IPA — Red', owner: 'Robotina', status: 'pending' },
+  { name: 'Evento Desfile de Silleteros (5-jul)', owner: 'Equipo', status: 'done' },
+  { name: 'Cajas regalo Feria (4 IPA + vaso)', owner: 'Operaciones', status: 'ongoing' },
+  { name: 'Campaña Feria × Madre Monte', owner: 'Robotina', status: 'pending' },
+  { name: 'Inscribir American IPA en BAP', owner: 'Robotina', status: 'done' },
+];
+
+document.getElementById('sprint-board').innerHTML = sprintTasks.map(t => {
+  const icons = { done: '✅', ongoing: '🟡', pending: '⬜' };
+  return `<div class="sprint-task ${t.status}">
+    <span class="task-status">${icons[t.status]}</span>
+    <span class="task-name">${t.name}</span>
+    <span class="task-owner">${t.owner}</span>
+  </div>`;
+}).join('');
+
+/* ── Hitos ── */
+const hitos = [
+  { fecha: '5 jul', texto: 'Desfile de Silleteros', status: 'done' },
+  { fecha: '9 jul', texto: 'Cocción Hoppy IPA (400L)', status: 'pending' },
+  { fecha: '12 jul', texto: 'Bazar de la Confianza', status: 'pending' },
+  { fecha: '16 jul', texto: 'Cocción Red Lager (800L)', status: 'pending' },
+  { fecha: '23 jul', texto: 'Cocción Doble IPA', status: 'pending' },
+  { fecha: '1-7 ago', texto: 'IPA DAY 🍻', status: 'pending' },
+  { fecha: '21 sep', texto: 'Fin Q3 — revisión objetivos', status: 'pending' },
+];
+document.getElementById('hitos-list').innerHTML = hitos.map(h => {
+  const icon = h.status === 'done' ? '✅' : '⬜';
+  return `<div class="ind-row"><span class="ind-icon">${icon}</span><span class="ind-label"><strong>${h.fecha}</strong> — ${h.texto}</span></div>`;
+}).join('');
+
+/* ── Eventos ── */
+const eventos = [
+  { nombre: 'Desfile Silleteros', fecha: '5 jul', estado: '✅' },
+  { nombre: 'Bazar de la Confianza', fecha: '12 jul', estado: '🟡' },
+  { nombre: 'Torneo de las Flores', fecha: 'jul-ago', estado: '⬜' },
+  { nombre: 'IPA Day', fecha: '1-7 ago', estado: '🟡' },
+  { nombre: 'Copa IPA de la Montaña', fecha: 'Resultados', estado: '✅' },
+];
+document.getElementById('eventos-list').innerHTML = eventos.map(e =>
+  `<div class="ind-row"><span class="ind-icon">${e.estado}</span><span class="ind-label"><strong>${e.nombre}</strong> — ${e.fecha}</span></div>`
+).join('');
+</script>
+</body>
+</html>
