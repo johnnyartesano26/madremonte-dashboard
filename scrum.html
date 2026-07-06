@@ -95,9 +95,44 @@ main { max-width: 1200px; margin: 0 auto; padding: 28px 20px; }
 .footer { text-align: center; padding: 20px; color: var(--dim); font-size: 11px; border-top: 1px solid var(--line); margin-top: 20px; }
 
 @media (max-width: 768px) { .card { min-width: 100%; } .card.wide { min-width: 100%; } }
+
+/* ── Login ── */
+.login-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.75); display:flex;
+  align-items:center; justify-content:center; z-index:10000;
+}
+.login-box {
+  background:#fff; padding:40px; border-radius:16px; box-shadow:0 12px 40px rgba(0,0,0,.3);
+  text-align:center; max-width:360px; width:90%;
+}
+.login-box h2 { font-size:22px; margin-bottom:6px; }
+.login-box p { color:#8c7b6b; font-size:13px; margin-bottom:20px; }
+.login-box input {
+  width:100%; padding:12px 16px; border-radius:10px; border:2px solid #e0d6c8;
+  font-size:16px; text-align:center; margin-bottom:14px;
+}
+.login-box input:focus { outline:none; border-color:#c88a3d; }
+.login-box button {
+  width:100%; padding:12px; border-radius:10px; background:#c88a3d; color:#fff;
+  border:none; font-size:15px; font-weight:600; cursor:pointer;
+}
+.login-box button:hover { opacity:.9; }
+.login-error { color:#e57373; font-size:12px; margin-top:8px; display:none; }
 </style>
 </head>
 <body>
+
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <h2>🔐 Scrum Dashboard</h2>
+    <p>Acceso restringido · Madre Monte</p>
+    <input type="password" id="passInput" placeholder="Clave de acceso" autofocus>
+    <button onclick="checkPass()">Ingresar</button>
+    <p class="login-error" id="loginError">Clave incorrecta</p>
+  </div>
+</div>
+
+<div id="mainContent" style="display:none;">
 
 <header class="topbar">
   <div class="brand"><h1>📊 Scrum <span>Madre Monte</span></h1><p>Dashboard de Objetivos · Q3 2026</p></div>
@@ -172,8 +207,23 @@ main { max-width: 1200px; margin: 0 auto; padding: 28px 20px; }
 </main>
 
 <footer class="footer">Scrum Dashboard · Madre Monte · Q3 2026 · Generado 6-jul-2026</footer>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const PASS = 'MadreMonte2026';
+function checkPass() {
+  if (document.getElementById('passInput').value === PASS) {
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+document.getElementById('passInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') checkPass();
+});
+</script>
 <script>
 /* ═══ SCRUM DASHBOARD · Q3 2026 ═══ */
 const SEMANA_ACTUAL = 2;
