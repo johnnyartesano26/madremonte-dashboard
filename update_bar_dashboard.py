@@ -99,14 +99,25 @@ def parse_sheet(ws, sheet_tab_name):
         month, year = 1, 2025
 
     # Filtrar filas de datos (saltar fila 1=title, fila 2=headers, filas con TOTAL o vacías)
+    totales_mes = None
     datos = []
     for row in raw_data[2:]:
         fecha_val = row[0] if len(row) > 0 else None
 
-        # Saltar filas de TOTAL o vacías
-        if fecha_val is None:
-            continue
+        # Capturar fila TOTAL
         if isinstance(fecha_val, str) and "total" in fecha_val.lower():
+            totales_mes = {
+                "cierreAlegra": clean_money(row[1]) if len(row) > 1 else 0,
+                "cierreFormato": clean_money(row[2]) if len(row) > 2 else 0,
+                "efectivo": clean_money(row[3]) if len(row) > 3 else 0,
+                "transferencias": clean_money(row[4]) if len(row) > 4 else 0,
+                "datafono": clean_money(row[5]) if len(row) > 5 else 0,
+                "propinas": clean_money(row[6]) if len(row) > 6 else 0,
+            }
+            continue
+
+        # Saltar filas vacías
+        if fecha_val is None:
             continue
 
         # Corregir fecha
@@ -142,6 +153,10 @@ def parse_sheet(ws, sheet_tab_name):
         "nombre": nombre,
         "columnas": COLUMNAS_J,
         "datos": datos,
+        "totalesMes": totales_mes or {
+            "cierreAlegra": 0, "cierreFormato": 0, "efectivo": 0,
+            "transferencias": 0, "datafono": 0, "propinas": 0,
+        },
     }
 
 

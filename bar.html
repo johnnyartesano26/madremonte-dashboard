@@ -47,11 +47,15 @@ body {
   position: sticky; top: 0; z-index: 100;
   box-shadow: 0 1px 10px rgba(60,40,20,.04);
 }
+.brand {
+  display: flex; align-items: center; gap: 14px;
+}
 .brand h1 {
   font-family: 'Playfair Display', serif;
   font-size: 24px; font-weight: 700; color: var(--text);
 }
 .brand h1 span { color: var(--gold); }
+.brand-logo { width: 46px; height: 46px; flex-shrink: 0; }
 .subtitle {
   color: var(--text-dim); font-size: 11px; font-weight: 400;
   text-transform: uppercase; letter-spacing: .5px; margin-top: 2px;
@@ -90,7 +94,10 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; }
   border-left: 4px solid var(--gold);
   transition: transform .2s ease, box-shadow .2s ease;
 }
-.kpi-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+.kpi-card.kpi-bar {
+  border-left: 4px solid var(--green);
+  background: linear-gradient(135deg, rgba(76,175,80,.05) 0%, var(--bg-card) 100%);
+}
 .kpi-card .kpi-icon { font-size: 22px; margin-bottom: 4px; }
 .kpi-card .kpi-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .5px; }
 .kpi-card .kpi-valor { font-size: 22px; font-weight: 700; color: var(--text); margin-top: 4px; }
@@ -206,8 +213,22 @@ table tbody tr:hover { background: rgba(200,138,61,.04); }
 
 <header class="topbar">
   <div class="brand">
-    <h1>🍺 Bar Madre Monte</h1>
-    <p class="subtitle">Dashboard de Arqueo de Cierre</p>
+    <svg class="brand-logo" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#c88a3d"/><stop offset="100%" stop-color="#8b5e2a"/></linearGradient></defs>
+      <circle cx="30" cy="30" r="28" fill="url(#logoGrad)" opacity="0.12"/>
+      <circle cx="30" cy="30" r="26" fill="none" stroke="url(#logoGrad)" stroke-width="1.5" opacity="0.5"/>
+      <path d="M10 44 L18 24 L24 30 L30 18 L36 28 L42 22 L50 44" fill="url(#logoGrad)" opacity="0.85"/>
+      <path d="M16 38 L22 28 L28 34 L34 22 L40 32 L44 26 L48 38" fill="#3d2a1d" opacity="0.5"/>
+      <line x1="18" y1="48" x2="18" y2="41" stroke="#c88a3d" stroke-width="1.2"/>
+      <line x1="27" y1="48" x2="27" y2="39" stroke="#c88a3d" stroke-width="1.2"/>
+      <line x1="36" y1="48" x2="36" y2="42" stroke="#c88a3d" stroke-width="1.2"/>
+      <line x1="44" y1="48" x2="44" y2="39" stroke="#c88a3d" stroke-width="1.2"/>
+      <circle cx="30" cy="30" r="3" fill="#c88a3d"/>
+    </svg>
+    <div>
+      <h1>Bar Madre Monte</h1>
+      <p class="subtitle">Dashboard de Arqueo de Cierre</p>
+    </div>
   </div>
   <div class="topbar-meta">
     <span id="fecha-actualizacion" class="pill"></span>
@@ -605,7 +626,15 @@ window.BAR_DATA = {
           "propinas": 80000,
           "observaciones": ""
         }
-      ]
+      ],
+      "totalesMes": {
+        "cierreAlegra": 20802596,
+        "cierreFormato": 17258535,
+        "efectivo": 4844000,
+        "transferencias": 8375500,
+        "datafono": 8011695,
+        "propinas": 1555423
+      }
     },
     {
       "nombre": "Arqueo Cierre de bar Dicembre 2025",
@@ -901,7 +930,15 @@ window.BAR_DATA = {
           "propinas": 21000,
           "observaciones": ""
         }
-      ]
+      ],
+      "totalesMes": {
+        "cierreAlegra": 16757726,
+        "cierreFormato": 12998910,
+        "efectivo": 4555300,
+        "transferencias": 4781000,
+        "datafono": 7409126,
+        "propinas": 1230502
+      }
     },
     {
       "nombre": "Arqueo Cierre de bar Enero 2026",
@@ -1217,7 +1254,15 @@ window.BAR_DATA = {
           "propinas": 90000,
           "observaciones": ""
         }
-      ]
+      ],
+      "totalesMes": {
+        "cierreAlegra": 20065500,
+        "cierreFormato": 14526110,
+        "efectivo": 6233000,
+        "transferencias": 5965000,
+        "datafono": 8654500,
+        "propinas": 1435571
+      }
     },
     {
       "nombre": "Arqueo Cierre de bar Febrero 2026",
@@ -1503,7 +1548,15 @@ window.BAR_DATA = {
           "propinas": 229249,
           "observaciones": ""
         }
-      ]
+      ],
+      "totalesMes": {
+        "cierreAlegra": 24149840,
+        "cierreFormato": 17932180,
+        "efectivo": 6619500,
+        "transferencias": 7978500,
+        "datafono": 9551840,
+        "propinas": 1686509
+      }
     },
     {
       "nombre": "Arqueo Cierre de bar Marzo 2026",
@@ -1809,7 +1862,15 @@ window.BAR_DATA = {
           "propinas": 129526,
           "observaciones": ""
         }
-      ]
+      ],
+      "totalesMes": {
+        "cierreAlegra": 20553000,
+        "cierreFormato": 15287650,
+        "efectivo": 5512500,
+        "transferencias": 5878500,
+        "datafono": 9162000,
+        "propinas": 1354121
+      }
     },
     {
       "nombre": "Arqueo Cierre de bar Abril 2026",
@@ -2115,7 +2176,15 @@ window.BAR_DATA = {
           "propinas": 165000,
           "observaciones": "13 Promos de Jarra (3 IPA, 1 APA, 5 Irish, 4 Stout)"
         }
-      ]
+      ],
+      "totalesMes": {
+        "cierreAlegra": 22828666,
+        "cierreFormato": 19021690,
+        "efectivo": 6292500,
+        "transferencias": 6530667,
+        "datafono": 10005499,
+        "propinas": 1567035
+      }
     },
     {
       "nombre": "Arqueo Cierre de bar Mayo 2026",
@@ -2431,7 +2500,15 @@ window.BAR_DATA = {
           "propinas": 0,
           "observaciones": ""
         }
-      ]
+      ],
+      "totalesMes": {
+        "cierreAlegra": 20077900,
+        "cierreFormato": 17357965,
+        "efectivo": 5150800,
+        "transferencias": 7537600,
+        "datafono": 7389500,
+        "propinas": 1438682
+      }
     },
     {
       "nombre": "Arqueo Cierre de bar Junio 2026",
@@ -2737,7 +2814,15 @@ window.BAR_DATA = {
           "propinas": 77400,
           "observaciones": "Pago dia Daniela Gil 85.000 - Pago Dia Daniela Bermudez 130.000"
         }
-      ]
+      ],
+      "totalesMes": {
+        "cierreAlegra": 18895500,
+        "cierreFormato": 17052660,
+        "efectivo": 3788000,
+        "transferencias": 6651500,
+        "datafono": 8456000,
+        "propinas": 1349636
+      }
     },
     {
       "nombre": "Arqueo Cierre de bar Julio 2026",
@@ -2845,12 +2930,12 @@ window.BAR_DATA = {
         },
         {
           "fecha": "2026-07-08 00:00:00",
-          "cierreAlegra": 0,
-          "cierreFormato": 0,
-          "efectivo": 0,
-          "transferencias": 0,
-          "datafono": 0,
-          "propinas": 0,
+          "cierreAlegra": 1000,
+          "cierreFormato": 1000,
+          "efectivo": 1000,
+          "transferencias": 1000,
+          "datafono": 1000,
+          "propinas": 1000,
           "observaciones": ""
         },
         {
@@ -3043,18 +3128,26 @@ window.BAR_DATA = {
           "propinas": 0,
           "observaciones": ""
         }
-      ]
+      ],
+      "totalesMes": {
+        "cierreAlegra": 6027500,
+        "cierreFormato": 4914950,
+        "efectivo": 1135000,
+        "transferencias": 2097500,
+        "datafono": 2797000,
+        "propinas": 465500
+      }
     }
   ],
   "totales": {
-    "cierreAlegra": 170157228,
-    "cierreFormato": 136349650,
-    "efectivo": 44129600,
-    "transferencias": 55794767,
-    "datafono": 71436160,
-    "propinas": 12081979
+    "cierreAlegra": 170158228,
+    "cierreFormato": 136350650,
+    "efectivo": 44130600,
+    "transferencias": 55795767,
+    "datafono": 71437160,
+    "propinas": 12082979
   },
-  "totalDias": 213
+  "totalDias": 214
 };
 /*+++BAR_DATA_END+++*/
 </script>
@@ -3078,29 +3171,23 @@ function fmtFecha(f) {
 
 /* ── KPIs ── */
 function renderKPIs(hoja) {
-  const t = { cierreAlegra: 0, cierreFormato: 0, efectivo: 0, transferencias: 0, datafono: 0, propinas: 0 };
+  const tm = hoja.totalesMes || { cierreAlegra: 0, cierreFormato: 0, efectivo: 0, transferencias: 0, datafono: 0, propinas: 0 };
   let diasConDatos = 0;
   hoja.datos.forEach(d => {
-    t.cierreAlegra += d.cierreAlegra || 0;
-    t.cierreFormato += d.cierreFormato || 0;
-    t.efectivo += d.efectivo || 0;
-    t.transferencias += d.transferencias || 0;
-    t.datafono += d.datafono || 0;
-    t.propinas += d.propinas || 0;
     if (d.cierreAlegra || d.cierreFormato) diasConDatos++;
   });
 
   const kpis = [
-    { icon: '🧾', label: 'Cierre Alegra', valor: fmtDinero(t.cierreAlegra), sub: 'Total acumulado' },
-    { icon: '📄', label: 'Cierre Formato', valor: fmtDinero(t.cierreFormato), sub: 'Total acumulado' },
-    { icon: '💵', label: 'Efectivo', valor: fmtDinero(t.efectivo), sub: Math.round(t.efectivo / Math.max(1, t.cierreAlegra) * 100) + '% del total' },
-    { icon: '🏦', label: 'Transferencias', valor: fmtDinero(t.transferencias), sub: Math.round(t.transferencias / Math.max(1, t.cierreAlegra) * 100) + '% del total' },
-    { icon: '💳', label: 'Datafono', valor: fmtDinero(t.datafono), sub: Math.round(t.datafono / Math.max(1, t.cierreAlegra) * 100) + '% del total' },
-    { icon: '❤️', label: 'Propinas', valor: fmtDinero(t.propinas), sub: diasConDatos + ' días con datos' },
+    { icon: '🍺', label: 'Ventas Bar (Alegra)', valor: fmtDinero(tm.cierreAlegra), sub: hoja.nombre.replace('Arqueo Cierre de bar ','') },
+    { icon: '📄', label: 'Cierre Formato', valor: fmtDinero(tm.cierreFormato), sub: tm.cierreFormato > 0 ? Math.round(tm.cierreFormato / Math.max(1, tm.cierreAlegra) * 100) + '% vs Alegra' : '' },
+    { icon: '💵', label: 'Efectivo', valor: fmtDinero(tm.efectivo), sub: Math.round(tm.efectivo / Math.max(1, tm.cierreAlegra) * 100) + '% del total' },
+    { icon: '🏦', label: 'Transferencias', valor: fmtDinero(tm.transferencias), sub: Math.round(tm.transferencias / Math.max(1, tm.cierreAlegra) * 100) + '% del total' },
+    { icon: '💳', label: 'Datafono', valor: fmtDinero(tm.datafono), sub: Math.round(tm.datafono / Math.max(1, tm.cierreAlegra) * 100) + '% del total' },
+    { icon: '❤️', label: 'Propinas', valor: fmtDinero(tm.propinas), sub: diasConDatos + ' días con datos' },
   ];
 
-  document.getElementById('kpi-grid').innerHTML = kpis.map(k =>
-    `<div class="kpi-card"><div class="kpi-icon">${k.icon}</div><div class="kpi-label">${k.label}</div><div class="kpi-valor">${k.valor}</div><div class="kpi-sub">${k.sub}</div></div>`
+  document.getElementById('kpi-grid').innerHTML = kpis.map((k, i) =>
+    `<div class="kpi-card${i === 0 ? ' kpi-bar' : ''}"><div class="kpi-icon">${k.icon}</div><div class="kpi-label">${k.label}</div><div class="kpi-valor">${k.valor}</div><div class="kpi-sub">${k.sub}</div></div>`
   ).join('');
 }
 
