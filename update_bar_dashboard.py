@@ -42,13 +42,17 @@ def parse_sheet_name(year_str, month_str):
 
 
 def fix_date(dt, expected_month, expected_year):
-    """Corrige fechas corruptas de la hoja de Noviembre 2025."""
+    """Corrige fechas corruptas de la hoja de Noviembre 2025.
+    En la hoja corrupta el número de día se codificó en el año (year = 2000 + día).
+    Las fechas legítimas SIEMPRE tienen year == expected_year, por lo que nunca se tocan."""
     if not isinstance(dt, datetime):
         return dt
-    # Patrón corrupto: año entre 2001-2031, mes=expected, día=1
-    if dt.year > 2000 and dt.year < 2032 and dt.month == expected_month and dt.day == 1:
+    if dt.year == expected_year:
+        return dt
+    if dt.month == expected_month and dt.day == 1:
         real_day = dt.year - 2000
-        return datetime(expected_year, expected_month, real_day)
+        if 1 <= real_day <= 31:
+            return datetime(expected_year, expected_month, real_day)
     return dt
 
 
