@@ -25,13 +25,23 @@ jobs:
         run: python3 update_bar_dashboard.py
 
       - name: Publicar cambios (si hay)
+        id: publicar
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add bar.html
           if git diff --cached --quiet; then
             echo "Sin cambios en bar.html."
+            echo "cambios=0" >> "$GITHUB_OUTPUT"
           else
             git commit -m "Auto-actualización Bar: $(date -u +'%Y-%m-%d %H:%M') UTC"
             git push
+            echo "cambios=1" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Aviso por Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          HUBO_CAMBIOS: ${{ steps.publicar.outputs.cambios }}
+        run: python3 notify_telegram.py
