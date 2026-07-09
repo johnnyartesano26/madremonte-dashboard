@@ -193,6 +193,7 @@ table tbody tr:hover { background: rgba(200,138,61,.04); }
 .toggle-btn:hover { border-color: var(--gold); }
 .toggle-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .chart-wrap-historico { max-height: 350px; }
+.chart-wrap-timeline { max-height: 320px; }
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
@@ -257,6 +258,14 @@ table tbody tr:hover { background: rgba(200,138,61,.04); }
     <div class="chart-card chart-card-wide">
       <h3>📊 Desglose por Método de Pago</h3>
       <div class="chart-wrap"><canvas id="chart-desglose"></canvas></div>
+    </div>
+  </section>
+
+  <!-- Línea de tiempo continua -->
+  <section class="charts-row">
+    <div class="chart-card chart-card-wide">
+      <h3>📅 Línea de Tiempo Continua — Ventas Diarias</h3>
+      <div class="chart-wrap chart-wrap-timeline"><canvas id="chart-timeline"></canvas></div>
     </div>
   </section>
 
@@ -3156,7 +3165,7 @@ window.BAR_DATA = {
 
 const DATA = window.BAR_DATA;
 let hojaActual = DATA.hojas[0];
-let chartVentas = null, chartPagos = null, chartDesglose = null, chartHistorico = null;
+let chartVentas = null, chartPagos = null, chartDesglose = null, chartHistorico = null, chartTimeline = null;
 let columnaOrden = null, ordenAsc = false;
 let showAlegra = true, showFormato = true;
 
@@ -3354,16 +3363,16 @@ function renderAll() {
   renderKPIs(hojaActual);
   renderCharts(hojaActual);
   renderTabla(hojaActual);
+  renderTimeline();
   renderHistorico();
 }
 
 /* ── Histórico Mensual ── */
 function computeMensual() {
   return DATA.hojas.map(h => {
-    const t = { alegra: 0, formato: 0 };
-    h.datos.forEach(d => { t.alegra += d.cierreAlegra || 0; t.formato += d.cierreFormato || 0; });
+    const tm = h.totalesMes || { cierreAlegra: 0, cierreFormato: 0 };
     const mes = h.nombre.replace('Arqueo Cierre de bar ', '').replace('Dicembre', 'Dic').replace('Noviembre', 'Nov').replace('Enero', 'Ene').replace('Febrero', 'Feb').replace('Marzo', 'Mar').replace('Abril', 'Abr').replace('Mayo', 'May').replace('Junio', 'Jun').replace('Julio', 'Jul');
-    return { mes, alegra: t.alegra, formato: t.formato };
+    return { mes, alegra: tm.cierreAlegra, formato: tm.cierreFormato };
   });
 }
 
@@ -3424,6 +3433,86 @@ function toggleSerie(serie) {
     btn.classList.toggle('active', active);
   });
   renderHistorico();
+  renderTimeline();
+}
+
+/* ── Línea de Tiempo Continua ── */
+function renderTimeline() {
+  const mesesAbr = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+  const allPoints = [];
+  DATA.hojas.forEach(h => {
+    h.datos.forEach(d => {
+      if (!d.cierreAlegra && !d.cierreFormato) return;
+      const m = d.fecha.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (!m) return;
+      allPoints.push({
+        date: new Date(+m[1], +m[2] - 1, +m[3]),
+        alegra: d.cierreAlegra,
+        formato: d.cierreFormato,
+      });
+    });
+  });
+  allPoints.sort((a, b) => a.date - b.date);
+
+  const labels = allPoints.map((p, i) => {
+    const d = p.date.getDate();
+    const m = mesesAbr[p.date.getMonth()];
+    return (d === 1 || i === 0) ? d + ' ' + m : String(d);
+  });
+
+  if (chartTimeline) chartTimeline.destroy();
+  const ctx = document.getElementById('chart-timeline');
+  if (!ctx) return;
+
+  chartTimeline = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Alegra', data: allPoints.map(p => p.alegra),
+          borderColor: '#c88a3d', backgroundColor: 'rgba(200,138,61,.06)',
+          borderWidth: 2, pointRadius: 1.5, pointHoverRadius: 5,
+          pointBackgroundColor: '#c88a3d', tension: 0.2, fill: true,
+        },
+        {
+          label: 'Formato', data: allPoints.map(p => p.formato),
+          borderColor: '#6b5a4a', backgroundColor: 'rgba(107,90,74,.04)',
+          borderWidth: 1.5, pointRadius: 1, pointHoverRadius: 4,
+          pointBackgroundColor: '#6b5a4a', tension: 0.2, fill: true,
+          borderDash: [4, 3],
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            title: (items) => {
+              const p = allPoints[items[0].dataIndex];
+              return p.date.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' });
+            },
+            label: (ctx) => ctx.dataset.label + ': ' + fmtDinero(ctx.raw)
+          }
+        },
+        legend: { position: 'top', labels: { usePointStyle: true, padding: 20, font: { size: 12 } } },
+      },
+      scales: {
+        y: { ticks: { callback: v => '$' + (v / 1000).toFixed(0) + 'k' }, grid: { color: '#e8e0d6' } },
+        x: {
+          grid: { display: false }, ticks: { maxRotation: 0,
+            callback: function(val, idx) {
+              const label = this.getLabelForValue(val);
+              return label && label.includes(' ') ? label : '';
+            }
+          }
+        }
+      }
+    }
+  });
 }
 
 /* ── Init ── */
