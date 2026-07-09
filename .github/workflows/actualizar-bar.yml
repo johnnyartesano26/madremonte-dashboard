@@ -1,8 +1,9 @@
 name: Actualizar Bar (arqueo)
 
+# RESPALDO MANUAL: la actualización diaria la hace el cron de la PC.
+# Este workflow NO tiene programación; se ejecuta solo a mano (Run workflow)
+# como respaldo en la nube cuando la PC esté apagada.
 on:
-  schedule:
-    - cron: '0 19 * * 1'    # Lunes 14:00 hora Colombia (UTC-5)
   workflow_dispatch:         # botón "Run workflow" para actualizar cuando quieras
 
 permissions:
