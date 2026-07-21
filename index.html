@@ -64,6 +64,35 @@ body {
 }
 .btn-form-outline:hover { background: var(--gold-pale); }
 
+/* ── Navegación por pestañas ── */
+.tab-nav {
+  display: flex; gap: 4px; justify-content: center;
+  padding: 8px 20px;
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; z-index: 99;
+}
+.tab-btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px; font-weight: 500;
+  color: var(--text-dim);
+  background: transparent;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all .25s ease;
+}
+.tab-btn:hover { background: var(--amber-bg); color: var(--gold); }
+.tab-btn.active {
+  background: var(--gold); color: #fff;
+  box-shadow: 0 2px 10px rgba(200,138,61,.30);
+  font-weight: 600;
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
 /* ── Topbar ── */
 .topbar {
   display: flex; align-items: center; justify-content: space-between;
@@ -271,7 +300,17 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
     </div>
   </header>
 
+  <!-- ── NAVEGACIÓN ── -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="resumen">Resumen General</button>
+    <button class="tab-btn" data-tab="facturacion">Facturación</button>
+    <button class="tab-btn" data-tab="inventario">Inventario</button>
+    <button class="tab-btn" data-tab="ventas">Ventas</button>
+  </nav>
+
   <main>
+    <!-- ═══ RESÚMEN GENERAL ═══ -->
+    <div id="tab-resumen" class="tab-content active">
     <!-- FERMENTADORES -->
     <section class="bloque">
       <div class="bloque-head">
@@ -328,6 +367,91 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
       <p>¿Datos desactualizados?</p>
       <a class="btn-form-outline" href="https://forms.gle/MP67JwVGqvfVH3GL7" target="_blank" rel="noopener">📝 Actualizar inventario ahora</a>
     </section>
+    </div><!-- /tab-resumen -->
+
+    <!-- ═══ FACTURACIÓN ═══ -->
+    <div id="tab-facturacion" class="tab-content">
+      <section class="bloque cta-section">
+        <h2 style="font-family:'Playfair Display',serif; color:var(--text); margin-bottom:12px;">📋 Facturación — Cierres Diarios del Bar</h2>
+        <p style="color:var(--text-dim); margin-bottom:16px;">Consulta los cierres diarios de Alegra, efectivo, datáfono y transferencias.</p>
+        <a class="btn-form-outline" href="bar.html">📊 Ver Dashboard de Bar</a>
+      </section>
+    </div>
+
+    <!-- ═══ INVENTARIO ═══ -->
+    <div id="tab-inventario" class="tab-content">
+      <section class="bloque">
+        <div class="bloque-head">
+          <svg class="ico" viewBox="0 0 28 28" fill="none"><rect x="2" y="6" width="24" height="14" rx="2" stroke="#c88a3d" stroke-width="1.2" fill="none"/><rect x="2" y="6" width="16" height="14" rx="2" fill="#c88a3d" opacity=".25"/></svg>
+          <h2>Inventario de Planta</h2>
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:16px;">
+          <a class="btn-form-outline" href="https://forms.gle/MP67JwVGqvfVH3GL7" target="_blank" rel="noopener" style="justify-content:center;">📝 Actualizar inventario</a>
+          <a class="btn-form-outline" href="https://docs.google.com/spreadsheets/d/1hBicxCSwnZpreEPmru_ZScZQjuHPXcRQBiWatC8AC1Q" target="_blank" rel="noopener" style="justify-content:center;">📋 Ver remisiones</a>
+        </div>
+      </section>
+
+      <!-- GRÁFICO HISTÓRICO (repetido para acceso rápido) -->
+      <section class="bloque bloque-bg">
+        <div class="bloque-head">
+          <svg class="ico" viewBox="0 0 28 28" fill="none"><polyline points="2,22 7,16 11,18 16,10 21,12 26,4" stroke="#c88a3d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <h2>Histórico de Ocupación</h2>
+          <span id="resumen-historico-2" class="resumen"></span>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-historico-2"></canvas></div>
+        <p class="historico-leyenda">Porcentaje de ocupación total de fermentadores a lo largo del tiempo</p>
+      </section>
+    </div>
+
+    <!-- ═══ VENTAS ═══ -->
+    <section id="ventas-section" class="bloque" style="display:none;">
+      <div class="bloque-head">
+        <svg class="ico" viewBox="0 0 28 28" fill="none"><rect x="3" y="6" width="22" height="16" rx="3" stroke="#c88a3d" stroke-width="1.2" fill="none"/><line x1="3" y1="12" x2="25" y2="12" stroke="#c88a3d" stroke-width=".5" opacity=".5"/><circle cx="20" cy="18" r="2" stroke="#c88a3d" stroke-width=".9"/></svg>
+        <h2>Ventas 2026</h2>
+        <span id="ventas-status" class="resumen"></span>
+      </div>
+
+      <!-- KPIs -->
+      <div class="grid-ferm" style="grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px;">
+        <div class="kpi-card" style="background:var(--bg-card); border-radius:var(--radius-sm); padding:16px; text-align:center; box-shadow:var(--shadow-sm);">
+          <div style="font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px;">Total Facturado</div>
+          <div id="kpi-total" style="font-size:24px; font-weight:700; color:var(--gold); font-family:'Playfair Display',serif;">—</div>
+        </div>
+        <div class="kpi-card" style="background:var(--bg-card); border-radius:var(--radius-sm); padding:16px; text-align:center; box-shadow:var(--shadow-sm);">
+          <div style="font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px;">Núm. Facturas</div>
+          <div id="kpi-facturas" style="font-size:24px; font-weight:700; color:var(--text); font-family:'Playfair Display',serif;">—</div>
+        </div>
+        <div class="kpi-card" style="background:var(--bg-card); border-radius:var(--radius-sm); padding:16px; text-align:center; box-shadow:var(--shadow-sm);">
+          <div style="font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px;">Domicilios</div>
+          <div id="kpi-domicilios" style="font-size:24px; font-weight:700; color:var(--green); font-family:'Playfair Display',serif;">—</div>
+        </div>
+        <div class="kpi-card" style="background:var(--bg-card); border-radius:var(--radius-sm); padding:16px; text-align:center; box-shadow:var(--shadow-sm);">
+          <div style="font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px;">Pendientes (Debe)</div>
+          <div id="kpi-debe" style="font-size:24px; font-weight:700; color:var(--red); font-family:'Playfair Display',serif;">—</div>
+        </div>
+      </div>
+
+      <!-- Gráficos -->
+      <div style="display:grid; grid-template-columns: 1.4fr 1fr; gap:20px;">
+        <div class="chart-card" style="background:var(--bg-card); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow-sm);">
+          <h3 style="font-family:Inter; font-size:14px; color:var(--text); margin-bottom:10px;">📊 Evolución mensual (Facturas + Domicilios)</h3>
+          <div style="height:280px;"><canvas id="chart-ventas-mensuales"></canvas></div>
+        </div>
+        <div class="chart-card" style="background:var(--bg-card); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow-sm);">
+          <h3 style="font-family:Inter; font-size:14px; color:var(--text); margin-bottom:10px;">🏆 Top 10 Clientes</h3>
+          <div style="height:280px;"><canvas id="chart-top-clientes"></canvas></div>
+        </div>
+      </div>
+
+      <p id="ventas-update" style="text-align:right; font-size:11px; color:var(--text-dim); margin-top:10px;"></p>
+    </section>
+
+    <!-- Botón Actualizar Ventas -->
+    <section id="ventas-empty" class="bloque cta-section">
+      <p>Ventas 2026 — Consolidado automático desde Google Sheet</p>
+      <button id="btn-actualizar-ventas" class="btn-form-outline" style="cursor:pointer; border:none; font-size:15px;">📊 Cargar datos de ventas</button>
+    </section>
+    </div><!-- /tab-ventas -->
   </main>
 
   <footer class="footer">
@@ -339,7 +463,7 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script>window.DATA = {"generado": "2026-07-05", "planta": "Cervecería Madre Monte", "fermentadores": [{"nombre": "F1 Frankie", "estilo": "Stout", "litros": 375, "capacidad": 400, "porcentaje": 94, "alarma": "verde"}, {"nombre": "F2 Igor", "estilo": "Irish Red", "litros": 418, "capacidad": 1200, "porcentaje": 35, "alarma": "verde"}, {"nombre": "F3 Principito", "estilo": "APA", "litros": 270, "capacidad": 400, "porcentaje": 68, "alarma": "verde"}, {"nombre": "F4 Gargantua", "estilo": "IPA", "litros": 300, "capacidad": 700, "porcentaje": 43, "alarma": "verde"}, {"nombre": "F5 Pantragruel", "estilo": "IPA", "litros": 680, "capacidad": 800, "porcentaje": 85, "alarma": "verde"}, {"nombre": "F6 Potter", "estilo": "Golden Ale", "litros": 650, "capacidad": 1000, "porcentaje": 65, "alarma": "verde"}, {"nombre": "F7 HighLander", "estilo": "Hidromiel", "litros": 130, "capacidad": 500, "porcentaje": 26, "alarma": "amarilla"}], "barriles": [{"codigo": "PTL01", "estilo": "Golden Ale", "litros": 60.0}, {"codigo": "PTL02", "estilo": "Irish Red Ale", "litros": 0}, {"codigo": "PTL03", "estilo": "APA", "litros": 0}, {"codigo": "PTL04", "estilo": "IPA", "litros": 80.0}, {"codigo": "PTL05", "estilo": "Stout", "litros": 30.0}], "botellas": [{"codigo": "PTB01", "estilo": "Golden Ale", "cantidad": 79}, {"codigo": "PTB02", "estilo": "Irish Red Ale", "cantidad": 38}, {"codigo": "PTB03", "estilo": "APA", "cantidad": 163}, {"codigo": "PTB04", "estilo": "IPA", "cantidad": 100}, {"codigo": "PTB05", "estilo": "Stout", "cantidad": 18}], "historial": [{"fecha": "2026-07-01", "pct": 56, "litros": 2823, "capacidad": 5000}]};</script>
+  <script>window.DATA = {"generado": "2026-07-16", "planta": "Cervecería Madre Monte", "fermentadores": [{"nombre": "F1 Frankie", "estilo": "Stout", "litros": 375, "capacidad": 400, "porcentaje": 94, "alarma": "verde"}, {"nombre": "F2 Igor", "estilo": "Irish Red", "litros": 418, "capacidad": 1200, "porcentaje": 35, "alarma": "verde"}, {"nombre": "F3 Principito", "estilo": "APA", "litros": 270, "capacidad": 400, "porcentaje": 68, "alarma": "verde"}, {"nombre": "F4 Gargantua", "estilo": "IPA", "litros": 300, "capacidad": 700, "porcentaje": 43, "alarma": "verde"}, {"nombre": "F5 Pantragruel", "estilo": "IPA", "litros": 680, "capacidad": 800, "porcentaje": 85, "alarma": "verde"}, {"nombre": "F6 Potter", "estilo": "Golden Ale", "litros": 650, "capacidad": 1000, "porcentaje": 65, "alarma": "verde"}, {"nombre": "F7 HighLander", "estilo": "Hidromiel", "litros": 130, "capacidad": 500, "porcentaje": 26, "alarma": "amarilla"}], "barriles": [{"codigo": "PTL01", "estilo": "Golden Ale", "litros": 60.0}, {"codigo": "PTL02", "estilo": "Irish Red Ale", "litros": 0}, {"codigo": "PTL03", "estilo": "APA", "litros": 0}, {"codigo": "PTL04", "estilo": "IPA", "litros": 80.0}, {"codigo": "PTL05", "estilo": "Stout", "litros": 30.0}], "botellas": [{"codigo": "PTB01", "estilo": "Golden Ale", "cantidad": 73}, {"codigo": "PTB02", "estilo": "Irish Red Ale", "cantidad": 32}, {"codigo": "PTB03", "estilo": "APA", "cantidad": 157}, {"codigo": "PTB04", "estilo": "IPA", "cantidad": 100}, {"codigo": "PTB05", "estilo": "Stout", "cantidad": 12}], "historial": [{"fecha": "2026-07-01", "pct": 56, "litros": 2823, "capacidad": 5000}]};</script>
   <script>
 /* Dashboard de Planta — Madre Monte
    Datos vivos desde Google Sheets + fallback local.
@@ -702,5 +826,323 @@ function renderChart(points) {
 })();
 
 </script>
+  <script>
+/* Ventas — Consolidado Madre Monte 2026
+   Datos vivos desde Google Sheet público.
+   Se activa al hacer clic en "Actualizar ventas". */
+
+const SALES_SHEET_URL =
+  "https://docs.google.com/spreadsheets/d/1WFq09-LDg4le6FqC9BnBZfKZXSmb8Kn195wnFZaEMys/gviz/tq?tqx=out:csv&sheet=Respuestas%20de%20formulario%201";
+
+let ventasChart = null;
+let clientesChart = null;
+
+function cleanNumber(raw) {
+  if (!raw) return 0;
+  const s = String(raw).replace(/[$. ]/g, "").replace(",", ".").trim();
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
+function parseDate(raw) {
+  if (!raw) return null;
+  // DD/MM/YYYY
+  const parts = String(raw).trim().split("/");
+  if (parts.length === 3) {
+    const d = parseInt(parts[0]), m = parseInt(parts[1]) - 1, y = parseInt(parts[2]);
+    const dt = new Date(y, m, d);
+    if (y >= 2025 && y <= 2027) return dt;
+  }
+  // Try MM/DD/YYYY or YYYY-MM-DD
+  const dt = new Date(raw);
+  if (!isNaN(dt.getTime()) && dt.getFullYear() >= 2025 && dt.getFullYear() <= 2027) {
+    return dt;
+  }
+  return null;
+}
+
+function monthLabel(date) {
+  const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun",
+                  "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+  return months[date.getMonth()] + " " + date.getFullYear();
+}
+
+async function fetchSalesData() {
+  const statusEl = document.getElementById("ventas-status");
+  if (statusEl) statusEl.textContent = "Cargando...";
+
+  try {
+    const resp = await fetch(SALES_SHEET_URL);
+    const csvText = await resp.text();
+    return parseSalesCSV(csvText);
+  } catch (e) {
+    if (statusEl) statusEl.textContent = "Error al cargar datos.";
+    console.error(e);
+    return null;
+  }
+}
+
+function parseSalesCSV(csvText) {
+  const lines = csvText.trim().split("\n");
+  if (lines.length < 2) return null;
+
+  // The first line is headers but gviz wraps in quotes
+  const headers = parseCSVLine(lines[0]);
+  const data = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseCSVLine(lines[i]);
+    if (cols.length < 10) continue;
+
+    const nombre = (cols[2] || "").trim();
+    const factura = (cols[3] || "").trim();
+    const valor = cleanNumber(cols[4]);
+    const domicilio = cleanNumber(cols[5]);
+    const observaciones = (cols[6] || "").trim();
+    const fechaStr = (cols[1] || "").trim();
+    const formaPago = (cols[7] || "").trim();
+    const cuenta = (cols[8] || "").trim();
+    const pagoRealizado = (cols[9] || "").trim();
+
+    const fecha = parseDate(fechaStr);
+    if (!fecha) continue;
+
+    // Skip test/automation entries
+    const nl = nombre.toLowerCase();
+    if (nl.includes("automatización") || nl.includes("opción 1") || nl.includes("automatizacion")) continue;
+    if (valor === 0 && domicilio === 0) continue;
+    if (observaciones.toLowerCase().includes("nota crédito")) continue;
+
+    data.push({ nombre, factura, valor, domicilio, fecha, formaPago, cuenta, pagoRealizado, observaciones });
+  }
+
+  return data;
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (ch === "," && !inQuotes) {
+      result.push(current);
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current);
+  return result;
+}
+
+function renderSalesKPIs(data) {
+  const totalFacturas = data.reduce((s, d) => s + d.valor, 0);
+  const totalDomicilios = data.reduce((s, d) => s + d.domicilio, 0);
+  const totalGeneral = totalFacturas + totalDomicilios;
+  const numFacturas = data.length;
+
+  const debe = data.filter(d =>
+    d.pagoRealizado.toLowerCase() === "debe" ||
+    d.cuenta.toLowerCase() === "debe" ||
+    d.observaciones.toLowerCase() === "debe"
+  );
+  const totalDebe = debe.reduce((s, d) => s + d.valor + d.domicilio, 0);
+
+  document.getElementById("kpi-total").textContent = "$" + totalGeneral.toLocaleString("es-CO");
+  document.getElementById("kpi-facturas").textContent = numFacturas;
+  document.getElementById("kpi-domicilios").textContent = "$" + totalDomicilios.toLocaleString("es-CO");
+  document.getElementById("kpi-debe").textContent = "$" + totalDebe.toLocaleString("es-CO") + " (" + debe.length + ")";
+}
+
+function renderMonthlyChart(data) {
+  const monthly = {};
+  data.forEach(d => {
+    const key = monthLabel(d.fecha);
+    if (!monthly[key]) monthly[key] = { valor: 0, domicilio: 0 };
+    monthly[key].valor += d.valor;
+    monthly[key].domicilio += d.domicilio;
+  });
+
+  const sortedKeys = Object.keys(monthly).sort((a, b) => {
+    const [ma, ya] = a.split(" ");
+    const [mb, yb] = b.split(" ");
+    const meses = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+    return (parseInt(ya) - parseInt(yb)) || (meses.indexOf(ma) - meses.indexOf(mb));
+  });
+
+  const labels = sortedKeys;
+  const valoresData = sortedKeys.map(k => monthly[k].valor);
+  const domiciliosData = sortedKeys.map(k => monthly[k].domicilio);
+
+  const ctx = document.getElementById("chart-ventas-mensuales").getContext("2d");
+  if (ventasChart) ventasChart.destroy();
+
+  ventasChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Valor facturas",
+          data: valoresData,
+          backgroundColor: "#c88a3d",
+          borderRadius: 6,
+        },
+        {
+          label: "Domicilios",
+          data: domiciliosData,
+          backgroundColor: "#a3b898",
+          borderRadius: 6,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: "top", labels: { color: "#6b5a4a", font: { family: "Inter" } } },
+        tooltip: {
+          callbacks: {
+            label: (c) => c.dataset.label + ": $" + c.raw.toLocaleString("es-CO"),
+          },
+        },
+      },
+      scales: {
+        x: {
+          ticks: { color: "#8c7b6b", font: { family: "Inter", size: 11 } },
+          grid: { display: false },
+          title: { display: true, text: "Mes", color: "#6b5a4a", font: { family: "Inter", weight: "600" } },
+        },
+        y: {
+          ticks: {
+            color: "#8c7b6b",
+            font: { family: "Inter", size: 11 },
+            callback: (v) => "$" + (v / 1000000).toFixed(1) + "M",
+          },
+          grid: { color: "#e0d6c8" },
+          title: { display: true, text: "Pesos COP", color: "#6b5a4a", font: { family: "Inter", weight: "600" } },
+        },
+      },
+    },
+  });
+}
+
+function renderTopClientesChart(data) {
+  const clientes = {};
+  data.forEach(d => {
+    const total = d.valor + d.domicilio;
+    if (!clientes[d.nombre]) clientes[d.nombre] = 0;
+    clientes[d.nombre] += total;
+  });
+
+  const sorted = Object.entries(clientes)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10);
+
+  const labels = sorted.map(s => s[0]);
+  const valores = sorted.map(s => s[1]);
+
+  const ctx = document.getElementById("chart-top-clientes").getContext("2d");
+  if (clientesChart) clientesChart.destroy();
+
+  clientesChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Total facturado",
+        data: valores,
+        backgroundColor: valores.map((_, i) => {
+          const colors = ["#c88a3d", "#b03a2e", "#e39a2a", "#d68910", "#5b3a29",
+                          "#7a9e7a", "#8b4513", "#f1c40f", "#a07c52", "#c9685e"];
+          return colors[i] || "#c88a3d";
+        }),
+        borderRadius: 6,
+      }],
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (c) => "$" + c.raw.toLocaleString("es-CO"),
+          },
+        },
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: "#8c7b6b",
+            font: { family: "Inter", size: 11 },
+            callback: (v) => "$" + (v / 1000000).toFixed(1) + "M",
+          },
+          grid: { color: "#e0d6c8" },
+          title: { display: true, text: "Pesos COP", color: "#6b5a4a", font: { family: "Inter", weight: "600" } },
+        },
+        y: {
+          ticks: { color: "#6b5a4a", font: { family: "Inter", size: 10 } },
+          grid: { display: false },
+          title: { display: true, text: "Cliente", color: "#6b5a4a", font: { family: "Inter", weight: "600" } },
+        },
+      },
+    },
+  });
+}
+
+function renderLastUpdate() {
+  const now = new Date();
+  document.getElementById("ventas-update").textContent =
+    "Actualizado: " + now.toLocaleString("es-CO", { dateStyle: "short", timeStyle: "short" });
+}
+
+async function actualizarVentas() {
+  const data = await fetchSalesData();
+  if (!data || data.length === 0) {
+    document.getElementById("ventas-status").textContent = "Sin datos disponibles.";
+    return;
+  }
+
+  document.getElementById("ventas-status").textContent = data.length + " facturas cargadas";
+  renderSalesKPIs(data);
+  renderMonthlyChart(data);
+  renderTopClientesChart(data);
+  renderLastUpdate();
+
+  document.getElementById("ventas-section").style.display = "block";
+  document.getElementById("ventas-empty").style.display = "none";
+}
+
+// Auto-load on page init if ventas section exists
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("btn-actualizar-ventas");
+  if (btn) {
+    btn.addEventListener("click", actualizarVentas);
+  }
+});
+
+</script>
+  <script>
+    // Navegación por pestañas
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+  </script>
 </body>
 </html>

@@ -1,0 +1,49 @@
+name: Actualizar Bar (arqueo)
+
+# Automático desde GitHub: martes a domingo, 4:00 pm hora Colombia.
+# (El lunes lo actualiza el cron de la PC, así no hay cruces.)
+on:
+  schedule:
+    - cron: '0 21 * * 0,2,3,4,5,6'   # 16:00 COT (UTC-5) mar–dom (0=dom,1=lun excluido)
+  workflow_dispatch:                  # botón "Run workflow" para actualizar a mano
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependencias
+        run: pip install requests openpyxl
+
+      - name: Regenerar bar.html desde Google Sheets
+        run: python3 update_bar_dashboard.py
+
+      - name: Publicar cambios (si hay)
+        id: publicar
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add bar.html
+          if git diff --cached --quiet; then
+            echo "Sin cambios en bar.html."
+            echo "cambios=0" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "Auto-actualización Bar: $(date -u +'%Y-%m-%d %H:%M') UTC"
+            git push
+            echo "cambios=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Aviso por Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          HUBO_CAMBIOS: ${{ steps.publicar.outputs.cambios }}
+        run: python3 notify_telegram.py
