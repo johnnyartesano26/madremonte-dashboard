@@ -501,10 +501,10 @@ function renderInventario(catalogo) {
 function renderObjetivo2() {
   const items = [
     { icon: '🍻', label: 'Cervezas temporada producidas', target: 3, current: 1, unit: 'estilos', detail: 'Red IPA cocinada · Hoppy IPA · Doble IPA pendiente' },
-    { icon: '🏆', label: 'Competencias / Copas', target: 2, current: 1, unit: 'copas', detail: 'Copa IPA Montaña ✓ · Copa Raíces (pendiente)' },
+    { icon: '🏆', label: 'Competencias / Copas', target: 2, current: 1, unit: 'copas', detail: 'Copa IPA Montaña ✅ · Copa Raíces (cierre 8 ago)' },
     { icon: '🎪', label: 'Eventos Q3', target: 4, current: 2, unit: 'eventos', detail: 'Silleteros ✓ · Bazar ✓ · IPA Day · Torneo Flores' },
     { icon: '📋', label: 'IPA Day — preparación', target: 100, current: 40, unit: '%', detail: 'Batch IPA programado, falta marketing y logística' },
-    { icon: '🌱', label: 'Copa Raíces — inscripción', target: 100, current: 0, unit: '%', detail: '¿Vamos a participar? Definir esta semana' },
+    { icon: '🌱', label: 'Copa Raíces — inscripción (cierre 8 ago)', target: 100, current: 0, unit: '%', detail: 'Definir si participamos, qué cerveza, inscripción' },
     { icon: '🌸', label: 'Torneo Flores — logística', target: 100, current: 20, unit: '%', detail: 'Neveras, líquido, vasos, personal pendientes' },
   ];
 
@@ -558,7 +558,7 @@ function renderSprintBoard() {
     { name: 'Revisar alerta de inventario activa', owner: 'Maestro Cervecero', status: 'ongoing' },
     { name: 'Definir logística Torneo de las Flores', owner: 'Johnny + Equipo', status: 'pending' },
     { name: 'Preparar material IPA Day (marketing, promos)', owner: 'Robotina', status: 'pending' },
-    { name: 'Decidir inscripción Copa Raíces', owner: 'Johnny', status: 'pending' },
+    { name: 'Decidir inscripción Copa Raíces (cierre 8 ago)', owner: 'Johnny', status: 'pending' },
     { name: 'Actualizar dashboard maestro (consolidar ventas)', owner: 'MULTIVAC', status: 'done' },
   ];
 
@@ -580,7 +580,8 @@ function renderEventos() {
     { nombre: 'Cocción Doble IPA', fecha: '23 jul', estado: '🟡' },
     { nombre: 'Torneo de las Flores', fecha: 'jul-ago', estado: '🔴' },
     { nombre: 'IPA Day 🍻', fecha: '1-7 ago', estado: '🟡' },
-    { nombre: 'Copa Raíces', fecha: '28 jul?', estado: '⬜' },
+    { nombre: 'Copa IPA de la Montaña', fecha: 'Cerrada ✅', estado: '✅' },
+    { nombre: 'Copa Raíces', fecha: 'Cierre 8 ago', estado: '🟡' },
     { nombre: 'Fin Q3 — revisión objetivos', fecha: '21 sep', estado: '⬜' },
   ];
 
