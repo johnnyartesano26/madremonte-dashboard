@@ -807,6 +807,31 @@ function renderChart(points) {
       catch (e) { document.body.innerHTML = "<p style='padding:40px'>No se pudo cargar datos.</p>"; return; }
     }
   }
+
+  // Cargar inventario neto con deducciones de Alegra
+  try {
+    const netoResp = await fetch("https://johnnyartesano26.github.io/dashboard-maestro/data/inventario_neto.json?t=" + Date.now());
+    if (netoResp.ok) {
+      const neto = await netoResp.json();
+      // Aplicar barriles y botellas netas (con deducciones)
+      if (neto.barriles && neto.barriles.length > 0) {
+        const barrilMap = {};
+        neto.barriles.forEach(b => { barrilMap[b.estilo] = b.litros; });
+        data.barriles.forEach(b => {
+          if (barrilMap[b.estilo] !== undefined) b.litros = barrilMap[b.estilo];
+        });
+      }
+      if (neto.botellas && neto.botellas.length > 0) {
+        const botMap = {};
+        neto.botellas.forEach(b => { botMap[b.estilo] = b.cantidad; });
+        data.botellas.forEach(b => {
+          if (botMap[b.estilo] !== undefined) b.cantidad = botMap[b.estilo];
+        });
+      }
+      if (neto.generado) data.generado = "Inv. neto: " + neto.fecha_lectura || neto.generado;
+    }
+  } catch(e) { /* si no hay neto, usar datos sin deducir */ }
+
   render(data);
 
   // Histórico: combinar Google Sheets + datos locales
