@@ -412,7 +412,7 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
       </div>
 
       <!-- KPIs -->
-      <div class="grid-ferm" style="grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px;">
+      <div class="grid-ferm" style="grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 20px;">
         <div class="kpi-card" style="background:var(--bg-card); border-radius:var(--radius-sm); padding:16px; text-align:center; box-shadow:var(--shadow-sm);">
           <div style="font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px;">Total Facturado</div>
           <div id="kpi-total" style="font-size:24px; font-weight:700; color:var(--gold); font-family:'Playfair Display',serif;">—</div>
@@ -426,8 +426,9 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
           <div id="kpi-domicilios" style="font-size:24px; font-weight:700; color:var(--green); font-family:'Playfair Display',serif;">—</div>
         </div>
         <div class="kpi-card" style="background:var(--bg-card); border-radius:var(--radius-sm); padding:16px; text-align:center; box-shadow:var(--shadow-sm);">
-          <div style="font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px;">Pendientes (Debe)</div>
-          <div id="kpi-debe" style="font-size:24px; font-weight:700; color:var(--red); font-family:'Playfair Display',serif;">—</div>
+          <div style="font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px;">Ventas Alegra (7d) ★</div>
+          <div id="kpi-alegra" style="font-size:24px; font-weight:700; color:var(--gold); font-family:'Playfair Display',serif;">—</div>
+          <div style="font-size:10px; color:var(--text-dim); margin-top:4px;">Descontado del inventario</div>
         </div>
       </div>
 
@@ -1136,17 +1137,32 @@ async function actualizarVentas() {
   const data = await fetchSalesData();
   if (!data || data.length === 0) {
     document.getElementById("ventas-status").textContent = "Sin datos disponibles.";
-    return;
+  } else {
+    document.getElementById("ventas-status").textContent = data.length + " facturas cargadas";
+    renderSalesKPIs(data);
+    renderMonthlyChart(data);
+    renderTopClientesChart(data);
+    renderLastUpdate();
   }
 
-  document.getElementById("ventas-status").textContent = data.length + " facturas cargadas";
-  renderSalesKPIs(data);
-  renderMonthlyChart(data);
-  renderTopClientesChart(data);
-  renderLastUpdate();
+  // Cargar ventas Alegra desde inventario neto
+  loadAlegraSalesKPI();
 
   document.getElementById("ventas-section").style.display = "block";
   document.getElementById("ventas-empty").style.display = "none";
+}
+
+async function loadAlegraSalesKPI() {
+  try {
+    const resp = await fetch("https://johnnyartesano26.github.io/dashboard-maestro/data/inventario_neto.json?t=" + Date.now());
+    if (!resp.ok) return;
+    const neto = await resp.json();
+    const ventasCop = neto.totales?.ventas_cop || 0;
+    const formatted = "$" + ventasCop.toLocaleString("es-CO", {maximumFractionDigits: 0});
+    document.getElementById("kpi-alegra").textContent = formatted;
+  } catch(e) {
+    document.getElementById("kpi-alegra").textContent = "—";
+  }
 }
 
 // Auto-load on page init if ventas section exists
