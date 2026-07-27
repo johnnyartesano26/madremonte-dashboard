@@ -504,8 +504,8 @@ function renderObjetivo2() {
     { icon: '🏆', label: 'Competencias / Copas', target: 2, current: 1, unit: 'copas', detail: 'Copa IPA Montaña ✅ · Copa Raíces (cierre 8 ago)' },
     { icon: '🎪', label: 'Eventos Q3', target: 4, current: 2, unit: 'eventos', detail: 'Silleteros ✓ · Bazar ✓ · IPA Day · Torneo Flores' },
     { icon: '📋', label: 'IPA Day — preparación', target: 100, current: 40, unit: '%', detail: 'Batch IPA programado, falta marketing y logística' },
-    { icon: '🌱', label: 'Copa Raíces — inscripción (cierre 8 ago)', target: 100, current: 0, unit: '%', detail: 'Definir si participamos, qué cerveza, inscripción' },
-    { icon: '🌸', label: 'Torneo Flores — logística', target: 100, current: 20, unit: '%', detail: 'Neveras, líquido, vasos, personal pendientes' },
+    { icon: '🌱', label: 'Copa Raíces — inscripción (cierre 8 ago)', target: 100, current: 10, unit: '%', detail: 'Definir si participamos, estilo a inscribir, preparar muestra' },
+    { icon: '🌸', label: 'Torneo Flores — logística', target: 100, current: 50, unit: '%', detail: '✅ Confirmado: Golden Ale + 4 estilos más (5 total) · Neveras, vasos, personal pendientes' },
   ];
 
   const total = items.reduce((s, i) => s + (i.current / i.target) * (100 / items.length), 0);
@@ -557,9 +557,9 @@ function renderSprintBoard() {
     { name: 'Alcanzar meta semanal $21M (bar + vendedores)', owner: 'Todos', status: 'ongoing' },
     { name: 'Producir batch IPA para IPA Day (post-Red)', owner: 'Maestro Cervecero', status: 'pending' },
     { name: 'Revisar alerta de inventario activa', owner: 'Maestro Cervecero', status: 'ongoing' },
-    { name: 'Definir logística Torneo de las Flores', owner: 'Johnny + Equipo', status: 'pending' },
+    { name: 'Definir logística Torneo de las Flores (1 ago)', owner: 'Johnny + Equipo', status: 'ongoing' },
     { name: 'Preparar material IPA Day (marketing, promos)', owner: 'Robotina', status: 'pending' },
-    { name: 'Decidir inscripción Copa Raíces (cierre 8 ago)', owner: 'Johnny', status: 'pending' },
+    { name: 'Decidir inscripción Copa Raíces (cierre 8 ago)', owner: 'Johnny', status: 'ongoing' },
     { name: 'Actualizar dashboard maestro (consolidar ventas)', owner: 'MULTIVAC', status: 'done' },
   ];
 
@@ -580,7 +580,7 @@ function renderEventos() {
     { nombre: 'Bazar de la Confianza', fecha: '12 jul', estado: '✅' },
     { nombre: 'Cocción Red IPA', fecha: '21 jul', estado: '🟡' },
     { nombre: 'Cocción Doble IPA', fecha: '23 jul', estado: '🟡' },
-    { nombre: 'Torneo de las Flores', fecha: 'jul-ago', estado: '🔴' },
+    { nombre: 'Torneo de las Flores', fecha: '1 ago', estado: '🟡' },
     { nombre: 'IPA Day 🍻', fecha: '1-7 ago', estado: '🟡' },
     { nombre: 'Copa IPA de la Montaña', fecha: 'Cerrada ✅', estado: '✅' },
     { nombre: 'Copa Raíces', fecha: 'Cierre 8 ago', estado: '🟡' },
