@@ -24,18 +24,9 @@ if [ $RET -ne 0 ]; then
     exit $RET
 fi
 
-# ── 2. Cargar token de Telegram ──
-python3 -c "
-import sys; sys.path.insert(0,'/mnt/c/DeepAgente')
-import os
-from env_loader import load_credentials; load_credentials()
-print(os.getenv('TELEGRAM_BOT_TOKEN',''))
-print(os.getenv('TELEGRAM_CHAT_ID',''))
-" > /tmp/mm_telegram_creds.txt
-
-TOKEN=$(head -1 /tmp/mm_telegram_creds.txt)
-CHAT_ID=$(tail -1 /tmp/mm_telegram_creds.txt)
-rm -f /tmp/mm_telegram_creds.txt
+# ── 2. Cargar token de Telegram desde el entorno ──
+TOKEN="${TELEGRAM_BOT_TOKEN}"
+CHAT_ID="${TELEGRAM_CHAT_ID}"
 
 # ── 3. Verificar si hay cambios ──
 if git diff --quiet bar.html; then
