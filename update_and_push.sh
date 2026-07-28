@@ -3,7 +3,14 @@
 # Ejecuta update_bar_dashboard.py, si hay cambios commitea/pushea y envía informe por Telegram.
 set -e
 
-export MADREMONTE_KEY="Anderle01!"
+# Cargar credenciales desde .env (fuera del repo, nunca en GitHub)
+ENV_FILE="$HOME/.config/madremonte/.env"
+if [ -f "$ENV_FILE" ]; then
+    set -a; source "$ENV_FILE"; set +a
+else
+    echo "[$(date)] ⚠️  $ENV_FILE no encontrado. Algunas funciones fallarán." >&2
+fi
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
@@ -20,10 +27,10 @@ fi
 # ── 2. Cargar token de Telegram ──
 python3 -c "
 import sys; sys.path.insert(0,'/mnt/c/DeepAgente')
-import os; os.environ['MADREMONTE_KEY']='Anderle01!'
+import os
 from env_loader import load_credentials; load_credentials()
 print(os.getenv('TELEGRAM_BOT_TOKEN',''))
-print(os.getenv('TELEGRAM_CHAT_ID','8068061566'))
+print(os.getenv('TELEGRAM_CHAT_ID',''))
 " > /tmp/mm_telegram_creds.txt
 
 TOKEN=$(head -1 /tmp/mm_telegram_creds.txt)

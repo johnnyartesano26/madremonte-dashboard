@@ -1076,7 +1076,8 @@ function renderTopClientesChart(data) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10);
 
-  const labels = sorted.map(s => s[0]);
+  const ofuscar = (n) => n.length > 5 ? n.slice(0, 5) + '…' : n;
+  const labels = sorted.map(s => ofuscar(s[0]));
   const valores = sorted.map(s => s[1]);
 
   const ctx = document.getElementById("chart-top-clientes").getContext("2d");

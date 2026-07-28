@@ -211,6 +211,28 @@ table tbody tr:hover { background: rgba(200,138,61,.04); }
 </style>
 </head>
 <body>
+<div id="login-gate" style="display:flex;align-items:center;justify-content:center;position:fixed;top:0;left:0;width:100%;height:100%;background:#faf7f0;z-index:9999;font-family:Inter,sans-serif">
+  <div style="text-align:center;background:#fff;padding:40px 30px;border-radius:14px;box-shadow:0 3px 14px rgba(60,40,20,.07);max-width:340px;width:90%">
+    <h2 style="font-family:Playfair Display,serif;color:#3d2a1d;margin-bottom:6px">Bar Madre Monte</h2>
+    <p style="color:#8c7b6b;font-size:13px;margin-bottom:20px">Dashboard de acceso restringido</p>
+    <input type="password" id="gate-pass" placeholder="Contraseña" style="width:100%;padding:10px 14px;border:1px solid #e0d6c8;border-radius:10px;font-size:14px;text-align:center;margin-bottom:10px;outline:none" onkeydown="if(event.key==='Enter')verificarPass()">
+    <button onclick="verificarPass()" style="width:100%;padding:10px;background:#c88a3d;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer">Acceder</button>
+    <p id="gate-msg" style="color:#c9685e;font-size:12px;margin-top:10px;min-height:16px"></p>
+  </div>
+</div>
+<script>
+async function verificarPass() {
+  const input = document.getElementById('gate-pass').value;
+  const hashHex = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+  const hashStr = Array.from(new Uint8Array(hashHex)).map(b => b.toString(16).padStart(2,'0')).join('');
+  if (hashStr === '176f00676e67338a0a72d34c2b71058aafc76c6c790681ca0da2a35688864105') {
+    document.getElementById('login-gate').remove();
+  } else {
+    document.getElementById('gate-msg').textContent = 'Contraseña incorrecta';
+    document.getElementById('gate-pass').value = '';
+  }
+}
+</script>
 
 <header class="topbar">
   <div class="brand">
