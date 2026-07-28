@@ -817,16 +817,18 @@ function renderChart(points) {
       // Aplicar barriles y botellas netas (con deducciones)
       if (neto.barriles && neto.barriles.length > 0) {
         const barrilMap = {};
-        neto.barriles.forEach(b => { barrilMap[b.estilo] = b.litros; });
+        neto.barriles.forEach(b => { barrilMap[b.estilo.toUpperCase()] = b.litros; });
         data.barriles.forEach(b => {
-          if (barrilMap[b.estilo] !== undefined) b.litros = barrilMap[b.estilo];
+          const k = b.estilo.toUpperCase();
+          if (barrilMap[k] !== undefined) b.litros = barrilMap[k];
         });
       }
       if (neto.botellas && neto.botellas.length > 0) {
         const botMap = {};
-        neto.botellas.forEach(b => { botMap[b.estilo] = b.cantidad; });
+        neto.botellas.forEach(b => { botMap[b.estilo.toUpperCase()] = b.cantidad; });
         data.botellas.forEach(b => {
-          if (botMap[b.estilo] !== undefined) b.cantidad = botMap[b.estilo];
+          const k = b.estilo.toUpperCase();
+          if (botMap[k] !== undefined) b.cantidad = botMap[k];
         });
       }
       if (neto.generado) data.generado = "Inv. neto: " + neto.fecha_lectura || neto.generado;
