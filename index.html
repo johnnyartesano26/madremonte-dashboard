@@ -306,6 +306,7 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
     <button class="tab-btn" data-tab="facturacion">Facturación</button>
     <button class="tab-btn" data-tab="inventario">Inventario</button>
     <button class="tab-btn" data-tab="ventas">Ventas</button>
+    <button class="tab-btn" data-tab="produccion">Producción</button>
   </nav>
 
   <main>
@@ -453,6 +454,65 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
       <button id="btn-actualizar-ventas" class="btn-form-outline" style="cursor:pointer; border:none; font-size:15px;">📊 Cargar datos de ventas</button>
     </section>
     </div><!-- /tab-ventas -->
+
+    <!-- ═══ PRODUCCIÓN ═══ -->
+    <div id="tab-produccion" class="tab-content">
+      <!-- ALERTAS -->
+      <section class="bloque">
+        <div class="bloque-head">
+          <svg class="ico" viewBox="0 0 28 28" fill="none"><path d="M14 3 L26 24 L2 24 Z" stroke="#c88a3d" stroke-width="1.3" fill="none"/><line x1="14" y1="11" x2="14" y2="17" stroke="#c88a3d" stroke-width="1.5"/><circle cx="14" cy="20" r="1.5" fill="#c88a3d"/></svg>
+          <h2>Alertas de Inventario</h2>
+          <span id="resumen-alertas" class="resumen"></span>
+        </div>
+        <div id="alertas-container" style="display:flex; flex-direction:column; gap:10px;"></div>
+      </section>
+
+      <!-- CRONOGRAMA DE PRODUCCIÓN -->
+      <section class="bloque">
+        <div class="bloque-head">
+          <svg class="ico" viewBox="0 0 28 28" fill="none"><rect x="3" y="4" width="22" height="20" rx="3" stroke="#c88a3d" stroke-width="1.2" fill="none"/><line x1="8" y1="2" x2="8" y2="6" stroke="#c88a3d" stroke-width="1.2"/><line x1="20" y1="2" x2="20" y2="6" stroke="#c88a3d" stroke-width="1.2"/><line x1="3" y1="11" x2="25" y2="11" stroke="#c88a3d" stroke-width=".5"/><rect x="6" y="14" width="6" height="4" rx="1" fill="#c88a3d" opacity=".3"/></svg>
+          <h2>Cronograma de Producción</h2>
+          <span id="resumen-cronograma" class="resumen"></span>
+        </div>
+        <div id="cronograma-container" class="bloque-bg" style="min-height:80px;"></div>
+      </section>
+
+      <!-- 3 CAPAS -->
+      <section class="bloque">
+        <div class="bloque-head">
+          <svg class="ico" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="24" height="8" rx="2" stroke="#c88a3d" stroke-width="1.1" fill="none"/><rect x="2" y="12" width="24" height="6" rx="2" stroke="#c88a3d" stroke-width="1.1" fill="none"/><rect x="2" y="20" width="24" height="6" rx="2" stroke="#c88a3d" stroke-width="1.1" fill="none"/></svg>
+          <h2>Capas de Inventario</h2>
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px;">
+          <!-- Capa 1: Fermentador -->
+          <div class="capa-card" style="background:var(--bg-card); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow-sm);">
+            <div style="font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px;">🌡️ Capa 1 · Fermentador</div>
+            <div id="capa-fermentador" style="font-size:13px; line-height:1.8; color:var(--text-body);"></div>
+          </div>
+          <!-- Capa 2: Barril -->
+          <div class="capa-card" style="background:var(--bg-card); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow-sm);">
+            <div style="font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px;">🛢️ Capa 2 · Barril (venta por litro)</div>
+            <div id="capa-barril" style="font-size:13px; line-height:1.8; color:var(--text-body);"></div>
+          </div>
+          <!-- Capa 3: Botella -->
+          <div class="capa-card" style="background:var(--bg-card); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow-sm);">
+            <div style="font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px;">🍾 Capa 3 · Botella (venta por unidad)</div>
+            <div id="capa-botella" style="font-size:13px; line-height:1.8; color:var(--text-body);"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BOTELLAS VACÍAS -->
+      <section class="bloque">
+        <div class="bloque-head">
+          <svg class="ico" viewBox="0 0 28 28" fill="none"><rect x="10" y="2" width="8" height="4" rx="1" stroke="#c88a3d" stroke-width="1.1" fill="none"/><path d="M12,6 L12,26 L16,26 L16,6" stroke="#c88a3d" stroke-width="1.1" fill="none" stroke-dasharray="3,2"/></svg>
+          <h2>Insumos · Botellas Vacías Limpias</h2>
+          <span id="resumen-botellas-vacias" class="resumen"></span>
+        </div>
+        <div id="botellas-vacias-container" class="bloque-bg" style="min-height:60px;"></div>
+      </section>
+    </div><!-- /tab-produccion -->
+
   </main>
 
   <footer class="footer">
@@ -1174,8 +1234,145 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btn) {
     btn.addEventListener("click", actualizarVentas);
   }
+  // Cargar ledger de producción
+  cargarProduccion();
 });
 
+/* ── Producción: Ledger + Alertas + Cronograma ── */
+async function cargarProduccion() {
+  try {
+    const resp = await fetch("data/ledger_inventario.json?t=" + Date.now());
+    if (!resp.ok) return;
+    const ledger = await resp.json();
+    renderAlertas(ledger);
+    renderCronograma(ledger);
+    renderCapas(ledger);
+    renderBotellasVacias(ledger);
+  } catch(e) { /* ledger no disponible */ }
+}
+
+function _urgColor(u) {
+  if (u === 'critica') return 'var(--red)';
+  if (u === 'alta') return 'var(--gold)';
+  return '#e8a84c';
+}
+function _urgBg(u) {
+  if (u === 'critica') return 'var(--red-bg)';
+  if (u === 'alta') return 'var(--amber-bg)';
+  return 'rgba(200,138,61,.07)';
+}
+
+function renderAlertas(ledger) {
+  const alertas = ledger.alertas || [];
+  const container = document.getElementById("alertas-container");
+  const resumen = document.getElementById("resumen-alertas");
+  if (!container) return;
+
+  if (alertas.length === 0) {
+    container.innerHTML = '<div class="capa-card" style="background:var(--green-bg); padding:12px 16px; border-radius:var(--radius-sm); font-size:13px; color:#5a8a5a;">✅ Sin alertas de inventario</div>';
+    resumen.textContent = '0 alertas';
+    return;
+  }
+
+  const criticas = alertas.filter(a => a.urgencia === 'critica').length;
+  const altas = alertas.filter(a => a.urgencia === 'alta').length;
+  resumen.textContent = `${alertas.length} alertas (${criticas} críticas, ${altas} altas)`;
+
+  container.innerHTML = alertas.map(a => {
+    const c = _urgColor(a.urgencia);
+    const bg = _urgBg(a.urgencia);
+    const ico = a.urgencia === 'critica' ? '🔴' : a.urgencia === 'alta' ? '🟠' : '🟡';
+    const tipoLabel = a.tipo.replace(/_/g, ' ').toLowerCase();
+    return `<div style="background:${bg}; border-left:4px solid ${c}; padding:12px 16px; border-radius:var(--radius-sm); font-size:13px;">
+      <strong style="color:${c};">${ico} ${tipoLabel}</strong>
+      <span style="color:var(--text-body); display:block; margin-top:4px;">${a.mensaje || ''}</span>
+      ${a.estilo ? `<span style="color:var(--text-dim); font-size:11px;">Estilo: ${a.estilo}</span>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderCronograma(ledger) {
+  const crono = ledger.cronograma || [];
+  const container = document.getElementById("cronograma-container");
+  const resumen = document.getElementById("resumen-cronograma");
+  if (!container) return;
+
+  if (crono.length === 0) {
+    container.innerHTML = '<p style="padding:16px; color:var(--text-dim); font-style:italic;">Sin eventos programados. Producción debe agregar fechas de embotellado/embarrilado.</p>';
+    resumen.textContent = '0 eventos';
+    return;
+  }
+
+  resumen.textContent = `${crono.length} evento(s) programado(s)`;
+  container.innerHTML = crono.map(c => {
+    const estadoColor = c.estado === 'COMPLETADO' ? 'var(--green)' : c.estado === 'EN_PROCESO' ? 'var(--gold)' : 'var(--text-dim)';
+    return `<div style="display:flex; align-items:center; gap:16px; padding:10px 16px; border-bottom:1px solid var(--line); font-size:13px;">
+      <div style="min-width:90px; font-weight:600;">${c.fecha_estimada || '??'}</div>
+      <div style="color:${estadoColor}; min-width:80px; font-size:11px; text-transform:uppercase;">● ${c.estado || 'PLANIFICADO'}</div>
+      <div style="flex:1; color:var(--text-body);">${c.estilo || ''}: ${c.litros || 0}L desde <strong>${c.origen || '??'}</strong></div>
+      <div style="color:var(--text-dim); font-size:11px;">→ ${c.capa_destino || ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderCapas(ledger) {
+  const saldos = ledger.saldos || {};
+  const estilos = ['GOLDEN ALE','IRISH RED ALE','APA','IPA','STOUT'];
+  const estilosShort = { 'GOLDEN ALE':'Golden','IRISH RED ALE':'Irish Red','APA':'APA','IPA':'IPA','STOUT':'Stout' };
+
+  // Capa 1: Fermentador
+  const fermEl = document.getElementById("capa-fermentador");
+  if (fermEl && saldos.fermentador) {
+    fermEl.innerHTML = estilos.map(e => {
+      const f = saldos.fermentador[e] || {};
+      const lit = f.litros || 0;
+      const fds = (f.fermentadores || []).map(x => `${x.nombre} (${x.porcentaje}%)`).join(', ');
+      const color = lit > 0 ? 'var(--gold)' : 'var(--text-dim)';
+      return `<div><strong>${estilosShort[e] || e}:</strong> <span style="color:${color}; font-weight:600;">${lit} L</span> ${fds ? `<span style="font-size:10px; color:var(--text-dim);">| ${fds}</span>` : ''}</div>`;
+    }).join('');
+  }
+
+  // Capa 2: Barril
+  const barrEl = document.getElementById("capa-barril");
+  if (barrEl && saldos.barril) {
+    barrEl.innerHTML = estilos.map(e => {
+      const b = saldos.barril[e] || {};
+      const lit = b.litros || 0;
+      const comp = b.comprometido || 0;
+      const disp = b.disponible || 0;
+      const color = disp <= 0 ? 'var(--red)' : disp < 30 ? 'var(--gold)' : 'var(--green)';
+      return `<div><strong>${estilosShort[e] || e}:</strong> <span style="color:${color}; font-weight:600;">${lit.toFixed(1)} L</span> ${comp > 0 ? `<span style="color:var(--red); font-size:10px;">(comp: ${comp.toFixed(1)}L)</span>` : ''} <span style="font-size:10px; color:var(--text-dim);">disp: ${disp.toFixed(1)}L</span></div>`;
+    }).join('');
+  }
+
+  // Capa 3: Botella
+  const botEl = document.getElementById("capa-botella");
+  if (botEl && saldos.botella) {
+    botEl.innerHTML = estilos.map(e => {
+      const b = saldos.botella[e] || {};
+      const und = b.unidades || 0;
+      const comp = b.comprometido || 0;
+      const disp = b.disponible || 0;
+      const color = disp <= 0 ? 'var(--red)' : disp < 120 ? 'var(--gold)' : 'var(--green)';
+      return `<div><strong>${estilosShort[e] || e}:</strong> <span style="color:${color}; font-weight:600;">${und} und</span> ${comp > 0 ? `<span style="color:var(--red); font-size:10px;">(comp: ${comp})</span>` : ''} <span style="font-size:10px; color:var(--text-dim);">disp: ${disp}</span></div>`;
+    }).join('');
+  }
+}
+
+function renderBotellasVacias(ledger) {
+  const container = document.getElementById("botellas-vacias-container");
+  const resumen = document.getElementById("resumen-botellas-vacias");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="padding:24px; text-align:center;">
+      <div style="font-size:40px; margin-bottom:8px;">🔜</div>
+      <div style="font-size:15px; color:var(--text-body); font-weight:500;">Próximamente</div>
+      <div style="font-size:12px; color:var(--text-dim); margin-top:4px;">El tracking de botellas vacías limpias estará disponible pronto.<br>Pedido estándar: 80 cajas × 24 und = 1,920 botellas</div>
+    </div>`;
+
+  resumen.textContent = 'Próximamente';
+}
 </script>
   <script>
     // Navegación por pestañas
