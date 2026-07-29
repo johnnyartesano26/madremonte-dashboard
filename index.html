@@ -448,11 +448,6 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
       <p id="ventas-update" style="text-align:right; font-size:11px; color:var(--text-dim); margin-top:10px;"></p>
     </section>
 
-    <!-- Botón Actualizar Ventas -->
-    <section id="ventas-empty" class="bloque cta-section">
-      <p>Ventas 2026 — Consolidado automático desde Google Sheet</p>
-      <button id="btn-actualizar-ventas" class="btn-form-outline" style="cursor:pointer; border:none; font-size:15px;">📊 Cargar datos de ventas</button>
-    </section>
     </div><!-- /tab-ventas -->
 
     <!-- ═══ PRODUCCIÓN ═══ -->
@@ -1212,7 +1207,6 @@ async function actualizarVentas() {
   loadAlegraSalesKPI();
 
   document.getElementById("ventas-section").style.display = "block";
-  document.getElementById("ventas-empty").style.display = "none";
 }
 
 async function loadAlegraSalesKPI() {
@@ -1228,12 +1222,8 @@ async function loadAlegraSalesKPI() {
   }
 }
 
-// Auto-load on page init if ventas section exists
+// Auto-load on page init
 document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("btn-actualizar-ventas");
-  if (btn) {
-    btn.addEventListener("click", actualizarVentas);
-  }
   // Cargar ledger de producción
   cargarProduccion();
 });
