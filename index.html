@@ -343,6 +343,15 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
 /* ── NUEVO: Flujo entre etapas ── */
 .flujo-chart-inner { position: relative; width: 100%; height: 280px; }
 .flujo-chart-inner canvas { width: 100% !important; }
+/* ── NUEVO: Semanal week nav ── */
+.semanal-nav-btn {
+  background: var(--bg-card); color: var(--gold);
+  border: 1px solid var(--gold); padding: 5px 10px;
+  border-radius: 6px; cursor: pointer; font-size: 12px;
+  font-weight: 600; transition: all .2s ease;
+}
+.semanal-nav-btn:hover:not(:disabled) { background: var(--gold); color: #fff; }
+.semanal-nav-btn:disabled { opacity: .35; cursor: default; }
   </style>
 </head>
 <body>
@@ -436,8 +445,12 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
     <section class="bloque">
       <div class="bloque-head">
         <svg class="ico" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="24" height="24" rx="3" stroke="#c88a3d" stroke-width="1.2" fill="none"/><line x1="8" y1="2" x2="8" y2="6" stroke="#c88a3d" stroke-width="1.2"/><line x1="20" y1="2" x2="20" y2="6" stroke="#c88a3d" stroke-width="1.2"/><rect x="6" y="10" width="7" height="5" rx="1" fill="#c88a3d" opacity=".3"/><rect x="15" y="10" width="7" height="5" rx="1" fill="#c88a3d" opacity=".2"/></svg>
-        <h2>Semana Actual</h2>
+        <h2>Semana <span id="semanal-titulo">Actual</span></h2>
         <span id="semanal-rango" class="resumen"></span>
+        <div style="display:flex; gap:6px; margin-left:auto;">
+          <button id="semanal-prev" class="semanal-nav-btn" title="Semana anterior">◀</button>
+          <button id="semanal-next" class="semanal-nav-btn" title="Semana siguiente" disabled>▶</button>
+        </div>
       </div>
       <div class="grid-kpi">
         <div class="kpi-card">
@@ -885,13 +898,18 @@ function renderChart(points) {
 
 /* ═══════ SECCIÓN B: Movimiento Semanal ═══════ */
 
-/* ── Semana actual ── */
-function getCurrentWeekRange() {
+/* ── Semana actual / con offset ── */
+function getWeekRange(offset) {
+  offset = offset || 0;
   const now = new Date();
-  const day = now.getDay() || 7; // Lunes=1, Domingo=7
-  const monday = new Date(now); monday.setDate(now.getDate() - day + 1); monday.setHours(0,0,0,0);
+  const day = now.getDay() || 7;
+  const monday = new Date(now); monday.setDate(now.getDate() - day + 1 + offset * 7); monday.setHours(0,0,0,0);
   const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6); sunday.setHours(23,59,59,999);
   return { monday, sunday };
+}
+
+function getCurrentWeekRange() {
+  return getWeekRange(0);
 }
 
 function fmtDateShort(d) { return d.getDate() + '/' + (d.getMonth() + 1); }
@@ -1227,35 +1245,54 @@ function renderBotellasVacias(ledger) {
   merged.sort((a, b) => a.label.localeCompare(b.label));
   if (merged.length > 0) renderChart(merged);
 
-  // 5. Cargar datos para pestaña SEMANAL
-  const { monday, sunday } = getCurrentWeekRange();
-  document.getElementById("semanal-rango").textContent = fmtDateShort(monday) + ' – ' + fmtDateShort(sunday);
+  // 5. Cargar y cachear datos para pestaña SEMANAL
+  let semanalAllSales = [];
+  let semanalLedger = null;
+  let semanalOffset = 0;
 
-  // Cargar ledger
-  let ledger = null;
+  // Cargar ledger (una sola vez)
   try {
     const lr = await fetch("data/ledger_inventario.json?t=" + Date.now());
-    if (lr.ok) ledger = await lr.json();
+    if (lr.ok) semanalLedger = await lr.json();
   } catch(e) {}
 
-  // Cargar ventas (puede fallar si el sheet no es público)
-  let allSales = [];
-  try { allSales = await fetchSalesData(); } catch(e) {}
+  // Cargar ventas (una sola vez)
+  try { semanalAllSales = await fetchSalesData(); } catch(e) {}
 
-  // Filtrar ventas de la semana actual
-  const vtasSemana = allSales.filter(d => isSameWeek(d.fecha, monday, sunday));
+  function cargarSemanal(offset) {
+    semanalOffset = offset;
+    const { monday, sunday } = getWeekRange(offset);
+    document.getElementById("semanal-rango").textContent = fmtDateShort(monday) + ' – ' + fmtDateShort(sunday);
 
-  // Renderizar KPIs
-  renderKPIs(vtasSemana);
+    if (offset === 0) { document.getElementById("semanal-titulo").textContent = 'Actual'; }
+    else if (offset === -1) { document.getElementById("semanal-titulo").textContent = 'Anterior'; }
+    else { document.getElementById("semanal-titulo").textContent = 'Hace ' + (-offset) + ' sem.'; }
 
-  // Renderizar gráfica de pedidos diarios
-  renderDailyOrdersChart(vtasSemana, monday);
+    // Botones: next disabled si es semana actual
+    document.getElementById("semanal-next").disabled = (offset === 0);
+    document.getElementById("semanal-prev").disabled = false;
 
-  // Renderizar gráfica de embotellado semanal
-  if (ledger) { renderWeeklyBottlingChart(ledger, monday, sunday); }
+    // Filtrar ventas de la semana seleccionada
+    const vtasSemana = semanalAllSales.filter(d => isSameWeek(d.fecha, monday, sunday));
 
-  // Renderizar stock post-pedidos
-  if (ledger) { renderStockPostPedidos(ledger); renderAlertas(ledger); renderCapas(ledger); renderBotellasVacias(ledger); }
+    // Renderizar KPIs
+    renderKPIs(vtasSemana);
+    // Gráfica pedidos diarios
+    renderDailyOrdersChart(vtasSemana, monday);
+    // Embotellado semanal
+    if (semanalLedger) { renderWeeklyBottlingChart(semanalLedger, monday, sunday); }
+    // Stock post-pedidos, alertas, capas, botellas vacías
+    if (semanalLedger) { renderStockPostPedidos(semanalLedger); renderAlertas(semanalLedger); renderCapas(semanalLedger); renderBotellasVacias(semanalLedger); }
+  }
+
+  // Cargar semana actual por defecto
+  cargarSemanal(0);
+
+  // Navegación entre semanas
+  document.getElementById("semanal-prev").addEventListener("click", () => { cargarSemanal(semanalOffset - 1); });
+  document.getElementById("semanal-next").addEventListener("click", () => {
+    if (semanalOffset < 0) cargarSemanal(semanalOffset + 1);
+  });
 
 })();
 </script>
