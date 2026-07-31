@@ -934,16 +934,13 @@ async function fetchSalesData() {
     const txt = await resp.text();
     const lines = txt.trim().split('\n');
     if (lines.length < 2) return [];
-
     const data = [];
     for (let i = 1; i < lines.length; i++) {
       const cols = csvParseLine(lines[i]);
       if (cols.length < 5) continue;
-
       const fechaStr = (cols[0] || '').trim();
       const fecha = parseDateRemisiones(fechaStr);
       if (!fecha) continue;
-
       const cliente = (cols[2] || '').trim();
       const formaPago = (cols[3] || '').trim();
       const domicilio = (cols[19] || '').trim();
@@ -951,25 +948,36 @@ async function fetchSalesData() {
       const valorDomStr = (cols[23] || '').trim();
       const valorDomOtroStr = (cols[24] || '').trim();
       const facturado = (cols[26] || '').trim();
-
-      // Skip test/automation entries
       const nl = cliente.toLowerCase();
       if (nl.includes('automatización') || nl.includes('opción 1') || nl.includes('automatizacion')) continue;
-
-      // Parse monetary values
       function parsePeso(raw) {
         if (!raw) return 0;
         let s = String(raw).replace(/[$. ]/g, '').replace(',', '.').trim();
-        let n = parseFloat(s);
-        return isNaN(n) ? 0 : n;
+        let n = parseFloat(s); return isNaN(n) ? 0 : n;
       }
-
       const valorDom = parsePeso(valorDomStr) || parsePeso(valorDomOtroStr) || 0;
       const tieneDomicilio = domicilio.toLowerCase().includes('se incluye') || domicilio.toLowerCase().includes('sí');
 
+      // Extraer cantidades por estilo (solo botellas, no litros)
+      const estilosCols = [
+        { tipo: 5, cant: 6, estilo: 'Golden Ale' },
+        { tipo: 8, cant: 9, estilo: 'IPA' },
+        { tipo: 11, cant: 12, estilo: 'APA' },
+        { tipo: 14, cant: 15, estilo: 'Irish Red Ale' },
+        { tipo: 17, cant: 18, estilo: 'Stout' },
+      ];
+      const botellasPorEstilo = {};
+      estilosCols.forEach(({tipo, cant, estilo}) => {
+        const tipoStr = (cols[tipo] || '').toLowerCase();
+        if (tipoStr.includes('botella')) {
+          const qty = parseInt(cols[cant]) || 0;
+          if (qty > 0) botellasPorEstilo[estilo] = (botellasPorEstilo[estilo] || 0) + qty;
+        }
+      });
+
       data.push({
         fecha, cliente, formaPago, domicilio: tieneDomicilio,
-        valorDom, facturar, facturado
+        valorDom, facturar, facturado, botellasPorEstilo
       });
     }
     return data;
@@ -1094,33 +1102,45 @@ function renderWeeklyBottlingChart(ledger, monday, sunday) {
 }
 
 /* ── Tabla Stock post-pedidos ── */
-function renderStockPostPedidos(ledger) {
-  const saldos = ledger.saldos || {};
+function renderStockPostPedidos(ledger, committedBottles) {
+  committedBottles = committedBottles || {};
   const estilos = ['GOLDEN ALE','IRISH RED ALE','APA','IPA','STOUT'];
   const estilosShort = ['Golden','Irish Red','APA','IPA','Stout'];
   const tbody = document.getElementById("tabla-stock");
   const vacioEl = document.getElementById("stock-vacio");
   if (!tbody) return;
 
-  if (!saldos.botella) {
-    if (vacioEl) vacioEl.style.display = 'block';
-    return;
+  // Obtener inventario actual de botellas (de los datos brutos de planta)
+  const dataRaw = window.__dataRaw;
+  const inventoryBottles = {};
+  if (dataRaw && dataRaw.botellas) {
+    dataRaw.botellas.forEach(b => {
+      inventoryBottles[b.estilo.toUpperCase()] = b.cantidad || 0;
+    });
+  }
+
+  // También considerar el ledger si tiene datos
+  if (ledger && ledger.saldos && ledger.saldos.botella) {
+    estilos.forEach(e => {
+      const b = ledger.saldos.botella[e] || {};
+      if ((b.unidades || 0) > 0) inventoryBottles[e] = b.unidades;
+    });
   }
 
   if (vacioEl) vacioEl.style.display = 'none';
 
   tbody.innerHTML =
-    '<thead><tr><th>Estilo</th><th>Unidades</th><th>Comprometido</th><th>Disponible</th><th>Estado</th></tr></thead><tbody>' +
+    '<thead><tr><th>Estilo</th><th>Inventario</th><th>Pedidos semana</th><th>Disponible</th><th>Estado</th></tr></thead><tbody>' +
     estilos.map((e, i) => {
-      const b = saldos.botella[e] || {};
-      const und = b.unidades || 0;
-      const comp = b.comprometido || 0;
-      const disp = b.disponible || 0;
+      const inv = inventoryBottles[e] || 0;
+      const comp = committedBottles[e] || 0;
+      const disp = inv - comp;
       let cls, status;
-      if (disp <= 0) { cls = 'stock-critico'; status = 'CRÍTICO'; }
+      if (disp <= 0 && inv > 0) { cls = 'stock-critico'; status = 'AGOTADO'; }
+      else if (disp <= 0) { cls = 'stock-critico'; status = 'CRÍTICO'; }
       else if (disp < 120) { cls = 'stock-bajo'; status = 'STOCK BAJO'; }
       else { cls = 'stock-ok'; status = 'OK'; }
-      return '<tr><td class="stock-estilo">' + estilosShort[i] + '</td><td>' + und + ' und</td><td>' + comp + '</td><td>' + disp + '</td><td class="' + cls + '">' + status + '</td></tr>';
+      return '<tr><td class="stock-estilo">' + estilosShort[i] + '</td><td>' + inv + ' und</td><td>' + comp + '</td><td>' + disp + '</td><td class="' + cls + '">' + status + '</td></tr>';
     }).join('') +
     '</tbody>';
 }
@@ -1231,6 +1251,7 @@ function renderBotellasVacias(ledger) {
   } catch(e) { /* sin neto, usar brutos */ }
 
   // 3. Renderizar pestaña PRODUCCIÓN (datos brutos sin tocar)
+  window.__dataRaw = dataRaw;
   renderProduccion(dataRaw);
 
   // 4. Histórico de ocupación
@@ -1266,21 +1287,30 @@ function renderBotellasVacias(ledger) {
     else if (offset === -1) { document.getElementById("semanal-titulo").textContent = 'Anterior'; }
     else { document.getElementById("semanal-titulo").textContent = 'Hace ' + (-offset) + ' sem.'; }
 
-    // Botones: next disabled si es semana actual
     document.getElementById("semanal-next").disabled = (offset === 0);
     document.getElementById("semanal-prev").disabled = false;
 
-    // Filtrar ventas de la semana seleccionada
     const vtasSemana = semanalAllSales.filter(d => isSameWeek(d.fecha, monday, sunday));
 
-    // Renderizar KPIs
+    // Calcular botellas comprometidas esta semana por estilo
+    const committedBottles = {};
+    vtasSemana.forEach(d => {
+      if (d.botellasPorEstilo) {
+        Object.keys(d.botellasPorEstilo).forEach(estilo => {
+          committedBottles[estilo] = (committedBottles[estilo] || 0) + d.botellasPorEstilo[estilo];
+        });
+      }
+    });
+
     renderKPIs(vtasSemana);
-    // Gráfica pedidos diarios
     renderDailyOrdersChart(vtasSemana, monday);
-    // Embotellado semanal
     if (semanalLedger) { renderWeeklyBottlingChart(semanalLedger, monday, sunday); }
-    // Stock post-pedidos, alertas, capas, botellas vacías
-    if (semanalLedger) { renderStockPostPedidos(semanalLedger); renderAlertas(semanalLedger); renderCapas(semanalLedger); renderBotellasVacias(semanalLedger); }
+    if (semanalLedger) {
+      renderStockPostPedidos(semanalLedger, committedBottles);
+      renderAlertas(semanalLedger);
+      renderCapas(semanalLedger);
+      renderBotellasVacias(semanalLedger);
+    }
   }
 
   // Cargar semana actual por defecto
