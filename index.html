@@ -454,17 +454,17 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
       </div>
       <div class="grid-kpi">
         <div class="kpi-card">
-          <div class="kpi-label">Facturado esta semana</div>
-          <div class="kpi-valor" id="kpi-facturado">$0</div>
+          <div class="kpi-label">Pedidos esta semana</div>
+          <div class="kpi-valor" id="kpi-facturado">0</div>
           <div class="kpi-sub" id="kpi-facturado-sub"></div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-label">Pedidos recibidos</div>
+          <div class="kpi-label">Clientes atendidos</div>
           <div class="kpi-valor" id="kpi-pedidos">0</div>
           <div class="kpi-sub">en la semana</div>
         </div>
         <div class="kpi-card border-red">
-          <div class="kpi-label">Por cobrar</div>
+          <div class="kpi-label">Por cobrar (crédito)</div>
           <div class="kpi-valor" id="kpi-debe">$0</div>
           <div class="kpi-sub" id="kpi-debe-sub"></div>
         </div>
@@ -662,7 +662,7 @@ function botellaSVG(estilo) {
 /* ═══════ Google Sheets ═══════ */
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1UHqPRV1stpnM5VHer9-8Z0H_UW0omiSoape7cIwzCGA/export?format=csv';
 const INVENTARIO_NETO_URL = 'https://johnnyartesano26.github.io/dashboard-maestro/data/inventario_neto.json';
-const SALES_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1WFq09-LDg4le6FqC9BnBZfKZXSmb8Kn195wnFZaEMys/gviz/tq?tqx=out:csv&sheet=Respuestas%20de%20formulario%201';
+const SALES_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1hBicxCSwnZpreEPmru_ZScZQjuHPXcRQBiWatC8AC1Q/export?format=csv';
 const FERM_CAPACIDADES = { 'F1 Frankie': 400, 'F2 Igor': 1200, 'F3 Principito': 400, 'F4 Gargantua': 700, 'F5 Pantagruel': 800, 'F6 Potter': 1000, 'F7 HighLander': 500 };
 const TOTAL_CAP = Object.values(FERM_CAPACIDADES).reduce((a, b) => a + b, 0);
 
@@ -916,88 +916,87 @@ function fmtDateShort(d) { return d.getDate() + '/' + (d.getMonth() + 1); }
 
 function isSameWeek(d, monday, sunday) { return d >= monday && d <= sunday; }
 
-/* ── Ventas (from Google Sheet) ── */
-function cleanNumber(raw) {
-  if (!raw) return 0;
-  const s = String(raw).replace(/[$. ]/g, "").replace(",", ".").trim();
-  const n = parseFloat(s); return isNaN(n) ? 0 : n;
-}
-
-function parseDate(raw) {
+/* ── Remisiones (from Google Sheet) ── */
+function parseDateRemisiones(raw) {
   if (!raw) return null;
-  const parts = String(raw).trim().split("/");
-  if (parts.length === 3) {
-    const d = parseInt(parts[0]), m = parseInt(parts[1]) - 1, y = parseInt(parts[2]);
-    const dt = new Date(y, m, d);
-    if (y >= 2025 && y <= 2027) return dt;
-  }
-  const dt = new Date(raw);
-  if (!isNaN(dt.getTime()) && dt.getFullYear() >= 2025 && dt.getFullYear() <= 2027) return dt;
+  // Format: "DD/M/YYYY HH:MM:SS" or "M/D/YYYY HH:MM:SS"
+  const m = raw.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (!m) return null;
+  const d = parseInt(m[1]), mo = parseInt(m[2]) - 1, y = parseInt(m[3]);
+  const dt = new Date(y, mo, d);
+  if (y >= 2025 && y <= 2027) return dt;
   return null;
-}
-
-function parseCSVLineVentas(line) {
-  const result = []; let current = "", inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') { if (inQuotes && line[i + 1] === '"') { current += '"'; i++; } else { inQuotes = !inQuotes; } }
-    else if (ch === "," && !inQuotes) { result.push(current); current = ""; }
-    else current += ch;
-  }
-  result.push(current); return result;
 }
 
 async function fetchSalesData() {
   try {
     const resp = await fetch(SALES_SHEET_URL);
-    const csvText = await resp.text();
-    const lines = csvText.trim().split("\n");
+    const txt = await resp.text();
+    const lines = txt.trim().split('\n');
     if (lines.length < 2) return [];
-    const headers = parseCSVLineVentas(lines[0]);
+
     const data = [];
     for (let i = 1; i < lines.length; i++) {
-      const cols = parseCSVLineVentas(lines[i]);
-      if (cols.length < 10) continue;
-      const nombre = (cols[2] || "").trim();
-      const factura = (cols[3] || "").trim();
-      const valor = cleanNumber(cols[4]);
-      const domicilio = cleanNumber(cols[5]);
-      const observaciones = (cols[6] || "").trim();
-      const fechaStr = (cols[1] || "").trim();
-      const formaPago = (cols[7] || "").trim();
-      const cuenta = (cols[8] || "").trim();
-      const pagoRealizado = (cols[9] || "").trim();
-      const fecha = parseDate(fechaStr);
+      const cols = csvParseLine(lines[i]);
+      if (cols.length < 5) continue;
+
+      const fechaStr = (cols[0] || '').trim();
+      const fecha = parseDateRemisiones(fechaStr);
       if (!fecha) continue;
-      const nl = nombre.toLowerCase();
-      if (nl.includes("automatización") || nl.includes("opción 1") || nl.includes("automatizacion")) continue;
-      if (valor === 0 && domicilio === 0) continue;
-      if (observaciones.toLowerCase().includes("nota crédito")) continue;
-      data.push({ nombre, factura, valor, domicilio, fecha, formaPago, cuenta, pagoRealizado, observaciones });
+
+      const cliente = (cols[2] || '').trim();
+      const formaPago = (cols[3] || '').trim();
+      const domicilio = (cols[19] || '').trim();
+      const facturar = (cols[22] || '').trim();
+      const valorDomStr = (cols[23] || '').trim();
+      const valorDomOtroStr = (cols[24] || '').trim();
+      const facturado = (cols[26] || '').trim();
+
+      // Skip test/automation entries
+      const nl = cliente.toLowerCase();
+      if (nl.includes('automatización') || nl.includes('opción 1') || nl.includes('automatizacion')) continue;
+
+      // Parse monetary values
+      function parsePeso(raw) {
+        if (!raw) return 0;
+        let s = String(raw).replace(/[$. ]/g, '').replace(',', '.').trim();
+        let n = parseFloat(s);
+        return isNaN(n) ? 0 : n;
+      }
+
+      const valorDom = parsePeso(valorDomStr) || parsePeso(valorDomOtroStr) || 0;
+      const tieneDomicilio = domicilio.toLowerCase().includes('se incluye') || domicilio.toLowerCase().includes('sí');
+
+      data.push({
+        fecha, cliente, formaPago, domicilio: tieneDomicilio,
+        valorDom, facturar, facturado
+      });
     }
     return data;
-  } catch (e) { console.error("Error ventas:", e); return []; }
+  } catch (e) { console.error('Error remisiones:', e); return []; }
 }
 
 /* ── Render KPIs semanales ── */
 function renderKPIs(vtasSemana) {
-  const totalFact = vtasSemana.reduce((s, d) => s + d.valor, 0);
-  const totalDom = vtasSemana.reduce((s, d) => s + d.domicilio, 0);
-  const totalGen = totalFact + totalDom;
-  const numFact = vtasSemana.length;
+  const numPedidos = vtasSemana.length;
 
-  const debe = vtasSemana.filter(d =>
-    d.pagoRealizado.toLowerCase() === "debe" ||
-    d.cuenta.toLowerCase() === "debe" ||
-    d.observaciones.toLowerCase() === "debe"
+  const conDomicilio = vtasSemana.filter(d => d.domicilio);
+  const totalDom = conDomicilio.reduce((s, d) => s + d.valorDom, 0);
+
+  // Clientes únicos
+  const clientesUnicos = new Set(vtasSemana.map(d => d.cliente).filter(c => c));
+
+  // "Por cobrar" = crédito no facturado
+  const porCobrar = vtasSemana.filter(d =>
+    d.formaPago.toLowerCase() === 'credito' &&
+    !d.facturado.toLowerCase().includes('facturado')
   );
-  const totalDebe = debe.reduce((s, d) => s + d.valor + d.domicilio, 0);
 
-  document.getElementById("kpi-facturado").textContent = "$" + totalGen.toLocaleString("es-CO");
-  document.getElementById("kpi-facturado-sub").textContent = totalFact > 0 ? totalFact.toLocaleString("es-CO") + " facturas + $" + totalDom.toLocaleString("es-CO") + " domicilios" : "";
-  document.getElementById("kpi-pedidos").textContent = numFact;
-  document.getElementById("kpi-debe").textContent = "$" + totalDebe.toLocaleString("es-CO");
-  document.getElementById("kpi-debe-sub").textContent = debe.length + " pendientes";
+  document.getElementById('kpi-facturado').textContent = numPedidos;
+  document.getElementById('kpi-facturado-sub').textContent = conDomicilio.length + ' domicilios ($' + totalDom.toLocaleString('es-CO') + ')';
+  document.getElementById('kpi-pedidos').textContent = clientesUnicos.size;
+  document.getElementById('kpi-debe').textContent = porCobrar.length;
+  document.getElementById('kpi-debe-sub').textContent = porCobrar.length > 0 ? 'pendientes' : 'al día';
 }
 
 /* ── Gráfica pedidos diarios ── */
@@ -1009,14 +1008,14 @@ function renderDailyOrdersChart(vtasSemana, monday) {
   if (pedidosDiariosChart) pedidosDiariosChart.destroy();
 
   const diasLabels = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
-  const factPorDia = [0,0,0,0,0,0,0];
+  const pedidosPorDia = [0,0,0,0,0,0,0];
   const domPorDia = [0,0,0,0,0,0,0];
 
   vtasSemana.forEach(d => {
     const diaSem = d.fecha.getDay();
-    const idx = diaSem === 0 ? 6 : diaSem - 1; // 0=Domingo -> idx 6
-    factPorDia[idx] += d.valor;
-    domPorDia[idx] += d.domicilio;
+    const idx = diaSem === 0 ? 6 : diaSem - 1;
+    pedidosPorDia[idx]++;
+    if (d.domicilio) domPorDia[idx]++;
   });
 
   pedidosDiariosChart = new Chart(ctx, {
@@ -1024,8 +1023,8 @@ function renderDailyOrdersChart(vtasSemana, monday) {
     data: {
       labels: diasLabels,
       datasets: [
-        { label: 'Facturas', data: factPorDia, backgroundColor: '#c88a3d', borderRadius: 6 },
-        { label: 'Domicilios', data: domPorDia, backgroundColor: '#a3b898', borderRadius: 6 },
+        { label: 'Pedidos', data: pedidosPorDia, backgroundColor: '#c88a3d', borderRadius: 6 },
+        { label: 'Con domicilio', data: domPorDia, backgroundColor: '#a3b898', borderRadius: 6 },
       ],
     },
     options: {
@@ -1034,12 +1033,11 @@ function renderDailyOrdersChart(vtasSemana, monday) {
         legend: { position: 'top', labels: { color: '#6b5a4a', font: { family: 'Inter', size: 11 }, usePointStyle: true } },
         tooltip: {
           backgroundColor: 'rgba(61,42,29,.94)', titleColor: '#faf7f0', bodyColor: '#faf7f0', padding: 12, cornerRadius: 8,
-          callbacks: { label: (c) => c.dataset.label + ': $' + c.raw.toLocaleString('es-CO') }
         }
       },
       scales: {
         x: { grid: { display: false }, ticks: { color: '#8c7b6b', font: { family: 'Inter', size: 11 } } },
-        y: { grid: { color: '#e0d6c8' }, ticks: { color: '#8c7b6b', font: { family: 'Inter', size: 11 }, callback: (v) => '$' + (v / 1000000).toFixed(1) + 'M' } },
+        y: { grid: { color: '#e0d6c8' }, ticks: { color: '#8c7b6b', font: { family: 'Inter', size: 11 }, stepSize: 1, precision: 0 }, title: { display: true, text: 'Pedidos', color: '#6b5a4a', font: { family: 'Inter', weight: '600' } } },
       }
     }
   });
