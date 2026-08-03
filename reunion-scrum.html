@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reunion Scrum · Madre Monte</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #faf7f0; --card: #fff; --text: #3d2a1d; --body: #6b5a4a; --dim: #8c7b6b;
+  --gold: #c88a3d; --gold-l: #e8a84c; --green: #4caf50; --amber: #ffc107; --red: #e57373;
+  --line: #e0d6c8; --shadow: 0 3px 14px rgba(60,40,20,.06); --radius: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 40px; }
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+  padding: 16px 28px; background: rgba(255,255,255,.94); border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 10px rgba(60,40,20,.04);
+}
+.brand h1 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; }
+.brand h1 span { color: var(--gold); }
+.brand p { color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+.pill { background: #f5efe6; padding: 7px 16px; border-radius: 999px; font-size: 12px; color: var(--dim); border: 1px solid var(--line); }
+.pill.wk { background: var(--gold); color: #fff; border-color: var(--gold); font-weight: 600; }
+.pill.nolink { background: transparent; border: none; color: var(--dim); }
+.pill a { color: var(--gold); text-decoration: none; font-weight: 500; }
+main { max-width: 1300px; margin: 0 auto; padding: 28px 20px; }
+.row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; }
+.card {
+  flex: 1; min-width: 320px; background: var(--card); border-radius: var(--radius);
+  padding: 22px 20px; box-shadow: var(--shadow);
+}
+.card.wide { flex: 2; min-width: 500px; }
+.card.full { flex: 1 0 100%; min-width: 100%; }
+.card h2 { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--gold); display: inline-block; }
+.card h3 { font-size: 14px; color: var(--body); margin-bottom: 10px; }
+
+.kpi-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 24px; }
+.kpi-card {
+  flex: 1; min-width: 180px; background: var(--card); border-radius: var(--radius);
+  padding: 18px 16px; box-shadow: var(--shadow); text-align: center;
+}
+.kpi-card .kpi-val { font-size: 28px; font-weight: 700; color: var(--text); margin: 4px 0; }
+.kpi-card .kpi-label { font-size: 12px; color: var(--dim); margin-top: 2px; }
+.kpi-card .kpi-sub { font-size: 11px; color: var(--body); margin-top: 4px; }
+.kpi-trend { font-size: 12px; padding: 2px 8px; border-radius: 999px; display: inline-block; margin-top: 6px; }
+.kpi-trend.up { background: rgba(76,175,80,.12); color: #2e7d32; }
+.kpi-trend.down { background: rgba(229,115,115,.12); color: #c62828; }
+.kpi-trend.warn { background: rgba(255,193,7,.12); color: #a08000; }
+
+.ind-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.ind-row:last-child { border-bottom: none; }
+.ind-icon { font-size: 18px; width: 28px; text-align: center; }
+.ind-label { flex: 1; font-size: 13px; color: var(--body); }
+.ind-value { font-weight: 700; font-size: 13px; min-width: 60px; text-align: right; }
+.ind-bar-wrap { width: 80px; height: 8px; background: #e8e0d6; border-radius: 4px; overflow: hidden; }
+.ind-bar-fill { height: 100%; border-radius: 4px; }
+.ind-bar-fill.green { background: var(--green); }
+.ind-bar-fill.gold { background: var(--gold); }
+.ind-bar-fill.amber { background: var(--amber); }
+.ind-bar-fill.red { background: var(--red); }
+.ind-status { font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 500; }
+.ind-status.ok { background: rgba(76,175,80,.12); color: #2e7d32; }
+.ind-status.warn { background: rgba(255,193,7,.12); color: #a08000; }
+.ind-status.crit { background: rgba(229,115,115,.12); color: #c62828; }
+
+.sprint-grid { display: grid; gap: 10px; }
+.sprint-task {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+  border-radius: 10px; background: #faf7f0; border-left: 4px solid var(--line);
+}
+.sprint-task.done { border-left-color: var(--green); opacity: .7; }
+.sprint-task.ongoing { border-left-color: var(--gold); }
+.sprint-task.pending { border-left-color: var(--line); }
+.sprint-task.blocked { border-left-color: var(--red); }
+.sprint-task .task-icon { font-size: 16px; }
+.sprint-task .task-name { flex: 1; font-size: 13px; }
+.sprint-task .task-owner { font-size: 11px; color: var(--dim); white-space: nowrap; }
+
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th { text-align: left; padding: 8px; border-bottom: 2px solid var(--line); color: var(--dim); font-weight: 600; font-size: 11px; text-transform: uppercase; }
+td { padding: 8px; border-bottom: 1px solid var(--line); }
+tr:hover td { background: rgba(200,138,61,.04); }
+
+.footer { text-align: center; padding: 20px; color: var(--dim); font-size: 11px; border-top: 1px solid var(--line); margin-top: 20px; }
+.loading { text-align: center; padding: 40px; color: var(--dim); font-size: 14px; }
+.refresh-btn { cursor: pointer; color: var(--gold); font-weight: 600; font-size: 12px; margin-left: 12px; }
+
+.alert-card {
+  background: rgba(229,115,115,.08); border: 1px solid rgba(229,115,115,.2);
+  border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; font-size: 13px;
+}
+.alert-card.warning { background: rgba(255,193,7,.08); border-color: rgba(255,193,7,.2); }
+.alert-card .alert-icon { margin-right: 8px; }
+.alert-card .alert-text { color: var(--body); }
+
+.kaizen-box {
+  background: #f5efe6; border-radius: 10px; padding: 16px;
+  display: flex; gap: 12px; align-items: flex-start; margin-top: 8px;
+}
+.kaizen-box .kaizen-icon { font-size: 24px; flex-shrink: 0; }
+.kaizen-box .kaizen-text { font-size: 13px; color: var(--body); font-style: italic; }
+
+.login-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.75); display:flex;
+  align-items:center; justify-content:center; z-index:10000;
+}
+.login-box {
+  background:#fff; padding:40px; border-radius:16px; box-shadow:0 12px 40px rgba(0,0,0,.3);
+  text-align:center; max-width:360px; width:90%;
+}
+.login-box h2 { font-size:22px; margin-bottom:6px; }
+.login-box p { color:#8c7b6b; font-size:13px; margin-bottom:20px; }
+.login-box input {
+  width:100%; padding:12px 16px; border-radius:10px; border:2px solid #e0d6c8;
+  font-size:16px; text-align:center; margin-bottom:14px;
+}
+.login-box input:focus { outline:none; border-color:#c88a3d; }
+.login-box button {
+  width:100%; padding:12px; border-radius:10px; background:#c88a3d; color:#fff;
+  border:none; font-size:15px; font-weight:600; cursor:pointer;
+}
+.login-box button:hover { opacity:.9; }
+.login-error { color:#e57373; font-size:12px; margin-top:8px; display:none; }
+
+@media (max-width: 768px) { .card { min-width: 100%; } .card.wide { min-width: 100%; } .kpi-card { min-width: 140px; } }
+</style>
+</head>
+<body>
+
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <h2>Scrum · Madre Monte</h2>
+    <p>Acceso restringido</p>
+    <input type="password" id="passInput" placeholder="Clave de acceso" autofocus>
+    <button onclick="checkPass()">Ingresar</button>
+    <p class="login-error" id="loginError">Clave incorrecta</p>
+  </div>
+</div>
+
+<div id="mainContent" style="display:none;">
+
+<header class="topbar">
+  <div class="brand">
+    <h1>Scrum <span>Madre Monte</span></h1>
+    <p id="fecha-actualizacion">Cargando datos...</p>
+  </div>
+  <div class="topbar-meta" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <span class="pill wk" id="sprintBadge">Sprint 3</span>
+    <span class="pill nolink" id="weekBadge">Semana 31</span>
+    <span class="pill">
+      <a href="#" onclick="recargarDatos();return false;" class="refresh-btn">Recargar datos</a>
+    </span>
+  </div>
+</header>
+
+<main>
+
+<!-- KPI Row -->
+<div class="kpi-row" id="kpiRow">
+  <div class="kpi-card"><div class="kpi-val" id="kpiVentas">--</div><div class="kpi-label">Ventas del mes</div><div class="kpi-sub" id="kpiVentasFacturas"></div><span class="kpi-trend up" id="kpiVentasTrend"></span></div>
+  <div class="kpi-card"><div class="kpi-val" id="kpiLitros">--</div><div class="kpi-label">Litros en fermentacion</div><div class="kpi-sub" id="kpiCapacidad"></div><span class="kpi-trend warn" id="kpiLitrosTrend"></span></div>
+  <div class="kpi-card"><div class="kpi-val" id="kpiBotellas">--</div><div class="kpi-label">Botellas en stock</div><div class="kpi-sub" id="kpiBotellasDetail"></div><span class="kpi-trend up" id="kpiBotellasTrend"></span></div>
+  <div class="kpi-card"><div class="kpi-val" id="kpiPendientes">--</div><div class="kpi-label">Tareas del sprint</div><div class="kpi-sub" id="kpiPendientesDetail"></div><span class="kpi-trend warn" id="kpiPendientesTrend"></span></div>
+  <div class="kpi-card"><div class="kpi-val" id="kpiNotas">--</div><div class="kpi-label">Notas credito</div><div class="kpi-sub">procesadas</div><span class="kpi-trend up" id="kpiNotasTrend"></span></div>
+</div>
+
+<!-- Row 1: Fermentadores + Ventas -->
+<div class="row">
+  <div class="card wide">
+    <h2>Fermentadores</h2>
+    <div id="fermentadoresList"><div class="loading">Cargando datos del bridge...</div></div>
+  </div>
+  <div class="card">
+    <h2>Ventas por Mes</h2>
+    <div id="ventasResumen"><div class="loading">Cargando datos del bridge...</div></div>
+  </div>
+</div>
+
+<!-- Row 2: Sprint Board + Alertas -->
+<div class="row">
+  <div class="card wide">
+    <h2>Tareas del Sprint</h2>
+    <div class="sprint-grid" id="sprintBoard"></div>
+  </div>
+  <div class="card">
+    <h2>Alertas Activas</h2>
+    <div id="alertasList"></div>
+  </div>
+</div>
+
+<!-- Row 3: Kaizen + Materias Primas -->
+<div class="row">
+  <div class="card">
+    <h2>Kaizen · Micro-mejoras</h2>
+    <div id="kaizenContent">
+      <div class="kaizen-box">
+        <div class="kaizen-icon"></div>
+        <div class="kaizen-text">"Lo que no se mide, no se mejora. Lo que no se mejora, se degrada siempre." — Peter Drucker</div>
+      </div>
+      <div style="margin-top:12px;font-size:13px;color:var(--body);">
+        <strong>Pregunta al equipo:</strong> ¿Que micro-mejora de la semana pasada funciono? ¿Cual no?
+      </div>
+    </div>
+    <div style="margin-top:16px;">
+      <h3>Micro-problemas detectados</h3>
+      <table id="kaizenTable">
+        <thead><tr><th>Problema</th><th>Solucion</th><th>Responsable</th><th>Plazo</th></tr></thead>
+        <tbody>
+          <tr><td>Facturas draft acumuladas</td><td>Pipeline async de facturacion</td><td>Z1 + Johnny</td><td>7 dias</td></tr>
+          <tr><td>Inventario sin trazabilidad</td><td>Google Forms → Sheet → Z1</td><td>MULTIVAC</td><td>7 dias</td></tr>
+          <tr><td>Notas credito manuales</td><td>Modulo NC automatico</td><td>Johnny</td><td>En progreso</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Materia Prima Critica</h2>
+    <table>
+      <thead><tr><th>Insumo</th><th>Stock</th><th>Estado</th><th>Accion</th></tr></thead>
+      <tbody>
+        <tr><td>Malta Pilsen</td><td>10.18 kg</td><td><span class="ind-status ok">OK</span></td><td>—</td></tr>
+        <tr><td>Malta Pale Ale</td><td>0.75 kg</td><td><span class="ind-status crit">CRITICO</span></td><td>Comprar 10kg</td></tr>
+        <tr><td>Caramunich I</td><td>11.0 kg</td><td><span class="ind-status ok">OK</span></td><td>—</td></tr>
+        <tr><td>Lupulo Bravo</td><td>165g</td><td><span class="ind-status ok">OK</span></td><td>—</td></tr>
+        <tr><td>Lupulo Cascade</td><td>340g</td><td><span class="ind-status ok">OK</span></td><td>—</td></tr>
+        <tr><td>Lupulo Magnum</td><td>330g</td><td><span class="ind-status ok">OK</span></td><td>—</td></tr>
+        <tr><td>Levadura US-05</td><td>500g</td><td><span class="ind-status crit">CRITICO</span></td><td>Pedir 1kg</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Notas de Credito recientes -->
+<div class="row">
+  <div class="card full">
+    <h2>Notas de Credito Recientes</h2>
+    <div id="notasCreditoList"><div class="loading">Cargando datos del bridge...</div></div>
+  </div>
+</div>
+
+</main>
+
+<div class="footer">
+  Dashboard generado automaticamente · Madre Monte · Datos via Bridge API (Alegra + Google Sheets)
+</div>
+
+</div>
+
+<script>
+const BRIDGE_URL = 'http://localhost:5000';
+const PASS = 'madremonte2026';
+
+function checkPass() {
+  const input = document.getElementById('passInput').value;
+  if (input === PASS) {
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    cargarTodo();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+
+document.getElementById('passInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') checkPass();
+});
+
+async function fetchFromBridge(endpoint) {
+  try {
+    const res = await fetch(`${BRIDGE_URL}${endpoint}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (e) {
+    console.warn(`Error fetching ${endpoint}:`, e.message);
+    return null;
+  }
+}
+
+function updateDate() {
+  const now = new Date();
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById('fecha-actualizacion').textContent =
+    'Actualizado: ' + now.toLocaleDateString('es-CO', options) + ' · ' +
+    now.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('sprintBadge').textContent = 'Sprint 3';
+  const weekNum = Math.ceil((now - new Date(now.getFullYear(), 0, 1)) / (7 * 86400000));
+  document.getElementById('weekBadge').textContent = `Semana ${weekNum}`;
+}
+
+function renderFermentadores(data) {
+  const container = document.getElementById('fermentadoresList');
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    container.innerHTML = '<div style="padding:12px;color:var(--dim);text-align:center;">Sin datos de fermentadores</div>';
+    return;
+  }
+  let html = '';
+  let totalLitros = 0;
+  let capacidadTotal = 0;
+  const capacidades = { 'F1 Frankie': 400, 'F2 Igor': 1200, 'F3 Principito': 400, 'F4 Gargantua': 700, 'F5 Pantragruel': 800, 'F6 Potter': 1000, 'F7 HighLander': 500 };
+
+  data.forEach(f => {
+    const nombre = f.fermentador || '?';
+    const litros = parseFloat(f.litros) || 0;
+    const estilo = f.estilo || '—';
+    const alarma = f.alarma || 'OK';
+    const cap = capacidades[nombre] || 500;
+    const pct = Math.min(100, Math.round((litros / cap) * 100));
+    totalLitros += litros;
+    capacidadTotal += cap;
+
+    let barColor = 'green';
+    let icono = '🟢';
+    if (pct >= 85) { barColor = 'red'; icono = '🔴'; }
+    else if (pct >= 70) { barColor = 'amber'; icono = '🟡'; }
+
+    html += `
+      <div class="ind-row">
+        <div class="ind-icon">${icono}</div>
+        <div class="ind-label">${nombre} <span style="color:var(--dim);font-size:11px;">${estilo}</span></div>
+        <div class="ind-bar-wrap"><div class="ind-bar-fill ${barColor}" style="width:${pct}%"></div></div>
+        <div class="ind-value">${litros}L / ${cap}L</div>
+        <span class="ind-status ${pct >= 85 ? 'crit' : pct >= 70 ? 'warn' : 'ok'}">${pct}%</span>
+      </div>`;
+  });
+
+  const pctTotal = Math.round((totalLitros / capacidadTotal) * 100);
+  html += `<div class="ind-row" style="font-weight:700;border-top:2px solid var(--gold);margin-top:4px;padding-top:12px;">
+    <div class="ind-icon"></div>
+    <div class="ind-label">TOTAL</div>
+    <div class="ind-bar-wrap"><div class="ind-bar-fill gold" style="width:${pctTotal}%"></div></div>
+    <div class="ind-value">${totalLitros}L / ${capacidadTotal}L</div>
+    <span class="ind-status ok">${pctTotal}%</span>
+  </div>`;
+
+  container.innerHTML = html;
+
+  document.getElementById('kpiLitros').textContent = totalLitros.toLocaleString() + 'L';
+  document.getElementById('kpiCapacidad').textContent = `${capacidadTotal.toLocaleString()}L capacidad`;
+  document.getElementById('kpiLitrosTrend').textContent = pctTotal + '% ocupacion';
+}
+
+function renderVentasResumen(data) {
+  const container = document.getElementById('ventasResumen');
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    container.innerHTML = '<div style="padding:12px;color:var(--dim);text-align:center;">Sin datos de ventas</div>';
+    return;
+  }
+
+  let html = '<table><thead><tr><th>Mes</th><th>Facturas</th><th>Total COP</th></tr></thead><tbody>';
+  let totalVentas = 0;
+  let totalFacturas = 0;
+
+  data.forEach(m => {
+    const total = parseFloat(String(m.total || '0').replace(/[$,]/g, '')) || 0;
+    totalVentas += total;
+    totalFacturas += parseInt(m.facturas) || 0;
+    const totalStr = total >= 1e6 ? `$${(total/1e6).toFixed(1)}M` : `$${total.toLocaleString()}`;
+    html += `<tr><td>${m.mes || '—'}</td><td>${m.facturas || 0}</td><td>${totalStr}</td></tr>`;
+  });
+
+  html += `<tr style="font-weight:700;border-top:2px solid var(--gold);"><td>TOTAL</td><td>${totalFacturas}</td><td>$${(totalVentas/1e6).toFixed(1)}M COP</td></tr>`;
+  html += '</tbody></table>';
+  container.innerHTML = html;
+
+  document.getElementById('kpiVentas').textContent = '$' + (totalVentas/1e6).toFixed(1) + 'M';
+  document.getElementById('kpiVentasFacturas').textContent = totalFacturas + ' facturas';
+  document.getElementById('kpiVentasTrend').textContent = 'Junio 2026';
+}
+
+function renderNotasCredito(data) {
+  const container = document.getElementById('notasCreditoList');
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    container.innerHTML = '<div style="padding:12px;color:var(--dim);text-align:center;">Sin notas de credito registradas</div>';
+    document.getElementById('kpiNotas').textContent = '0';
+    return;
+  }
+
+  const recientes = data.slice(-5).reverse();
+  let html = '<table><thead><tr><th>NC</th><th>Factura</th><th>Cliente</th><th>Fecha</th><th>Responsable</th><th>Estado</th></tr></thead><tbody>';
+
+  recientes.forEach(nc => {
+    const estado = nc.ok ? '<span class="ind-status ok">Procesada</span>' : '<span class="ind-status crit">Error</span>';
+    html += `<tr>
+      <td><strong>${nc.nc || '—'}</strong></td>
+      <td>${nc.factura || '—'}</td>
+      <td>${nc.cliente || '—'}</td>
+      <td>${nc.fecha || '—'}</td>
+      <td>${nc.responsable || '—'}</td>
+      <td>${estado}</td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  container.innerHTML = html;
+  document.getElementById('kpiNotas').textContent = data.length;
+  document.getElementById('kpiNotasTrend').textContent = 'Total acumulado';
+}
+
+function renderAlertas() {
+  const alertas = [
+    { type: 'crit', icon: '🔴', text: 'F5 Pantragruel 85% — Envasar esta semana' },
+    { type: 'crit', icon: '🔴', text: 'Levadura US-05 — Solo 500g. Pedir 1kg YA' },
+    { type: 'crit', icon: '🔴', text: 'Malta Pale Ale — 0.75kg. Comprar urgente' },
+    { type: 'warn', icon: '🟡', text: '35 facturas draft ($3.77M) — Cerrar esta semana' },
+    { type: 'warn', icon: '🟡', text: 'Google Calendar OAuth pendiente' },
+    { type: 'warn', icon: '🟡', text: 'F3 Principito reportado a 540L (cap. 400L) — Verificar' },
+  ];
+
+  document.getElementById('alertasList').innerHTML = alertas.map(a =>
+    `<div class="alert-card ${a.type === 'warn' ? 'warning' : ''}">
+      <span class="alert-icon">${a.icon}</span>
+      <span class="alert-text">${a.text}</span>
+    </div>`
+  ).join('');
+}
+
+function renderSprintBoard() {
+  const tareas = [
+    { id: 'S3-01', name: 'Envasar F5 Pantragruel (680L IPA)', owner: 'Produccion', status: 'ongoing' },
+    { id: 'S3-02', name: 'Embotellar 60L Stout pendientes', owner: 'Produccion', status: 'pending' },
+    { id: 'S3-03', name: 'Cerrar 35 facturas draft ($3.77M)', owner: 'Johnny', status: 'ongoing' },
+    { id: 'S3-04', name: 'Pedir levadura US-05 (1kg)', owner: 'Produccion', status: 'pending' },
+    { id: 'S3-05', name: 'Comprar Malta Pale Ale (10kg)', owner: 'Produccion', status: 'pending' },
+    { id: 'S3-06', name: 'Llenar Forms inventario semanal', owner: 'Cervecero', status: 'done' },
+    { id: 'S3-07', name: 'Verificar F3 Principito (capacidad)', owner: 'Produccion', status: 'pending' },
+    { id: 'S3-08', name: 'Pipeline async de facturacion', owner: 'Z1 + Johnny', status: 'done' },
+    { id: 'S3-09', name: 'Modulo notas credito automatico', owner: 'Johnny', status: 'ongoing' },
+    { id: 'S3-10', name: 'Activar Google Calendar OAuth', owner: 'Johnny', status: 'pending' },
+  ];
+
+  const iconos = { done: '✅', ongoing: '🔄', pending: '⏳', blocked: '🚫' };
+  let completadas = 0;
+
+  const html = tareas.map(t => {
+    if (t.status === 'done') completadas++;
+    return `<div class="sprint-task ${t.status}">
+      <span class="task-icon">${iconos[t.status]}</span>
+      <span class="task-name">${t.name}</span>
+      <span class="task-owner">${t.owner}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('sprintBoard').innerHTML = html;
+  document.getElementById('kpiPendientes').textContent = `${completadas}/${tareas.length}`;
+  document.getElementById('kpiPendientesDetail').textContent = `${tareas.length - completadas} pendientes`;
+  document.getElementById('kpiPendientesTrend').textContent = Math.round((completadas/tareas.length)*100) + '% completado';
+}
+
+async function cargarTodo() {
+  updateDate();
+  renderAlertas();
+  renderSprintBoard();
+
+  const [fermentadores, ventas, notas] = await Promise.all([
+    fetchFromBridge('/inventario/fermentadores'),
+    fetchFromBridge('/ventas/resumen'),
+    fetchFromBridge('/notas-credito'),
+  ]);
+
+  renderFermentadores(fermentadores);
+  renderVentasResumen(ventas);
+  renderNotasCredito(notas);
+
+  document.getElementById('kpiBotellas').textContent = '1,119';
+  document.getElementById('kpiBotellasDetail').textContent = '5 estilos activos';
+  document.getElementById('kpiBotellasTrend').textContent = 'Stock OK';
+}
+
+function recargarDatos() {
+  document.getElementById('fermentadoresList').innerHTML = '<div class="loading">Cargando datos del bridge...</div>';
+  document.getElementById('ventasResumen').innerHTML = '<div class="loading">Cargando datos del bridge...</div>';
+  document.getElementById('notasCreditoList').innerHTML = '<div class="loading">Cargando datos del bridge...</div>';
+  cargarTodo();
+}
+</script>
+</body>
+</html>
