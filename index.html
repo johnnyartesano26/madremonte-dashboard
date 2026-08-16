@@ -436,6 +436,17 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
       <div class="chart-wrap"><canvas id="chart-historico"></canvas></div>
       <p class="historico-leyenda">Porcentaje de ocupación total de fermentadores a lo largo del tiempo</p>
     </section>
+
+    <!-- ═══ CONCILIACIÓN: Físico (Sheet) vs Facturado (Historial) ═══ -->
+    <section class="bloque" id="conciliacion-seccion" style="display:none;">
+      <div class="bloque-head">
+        <svg class="ico" viewBox="0 0 28 28" fill="none"><rect x="3" y="3" width="9" height="9" rx="2" fill="#39d2c0" opacity=".6"/><rect x="16" y="3" width="9" height="9" rx="2" fill="#c88a3d" opacity=".6"/><rect x="3" y="16" width="9" height="9" rx="2" fill="#c88a3d" opacity=".6"/><rect x="16" y="16" width="9" height="9" rx="2" fill="#39d2c0" opacity=".6"/></svg>
+        <h2>Conciliación — Físico (Sheet) vs Facturado (Historial)</h2>
+        <span id="conciliacion-fecha" class="resumen"></span>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-conciliacion"></canvas></div>
+      <div id="conciliacion-detalle" class="historico-leyenda" style="margin-top:8px;"></div>
+    </section>
     </div><!-- /tab-produccion -->
 
     <!-- ═══ MOVIMIENTO SEMANAL (NUEVO) ═══ -->
@@ -1322,6 +1333,9 @@ function renderBotellasVacias(ledger) {
     if (semanalOffset < 0) cargarSemanal(semanalOffset + 1);
   });
 
+  // Conciliación físico vs facturado (lee del dashboard-maestro, mismo dominio)
+  loadConciliacion('https://johnnyartesano26.github.io/dashboard-maestro/data/inventario_conciliado.json');
+
 })();
 </script>
 
@@ -1335,6 +1349,58 @@ function renderBotellasVacias(ledger) {
       document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
     });
   });
+
+  /* ── Conciliación físico (Sheet) vs facturado (historial) ── */
+  let conciliacionChart = null;
+  async function loadConciliacion(url) {
+    try {
+      const resp = await fetch(url + "?t=" + Date.now());
+      if (!resp.ok) return;
+      const d = await resp.json();
+      const seccion = document.getElementById('conciliacion-seccion');
+      if (seccion) seccion.style.display = '';
+      document.getElementById('conciliacion-fecha').textContent = d.fecha || '';
+
+      const estilos = Object.keys(d.neto || {});
+      const fisicoBot = estilos.map(e => d.fisico[e]?.bot || 0);
+      const netoBot = estilos.map(e => d.neto[e]?.bot || 0);
+      const fisicoBarril = estilos.map(e => d.fisico[e]?.barril || 0);
+      const netoBarril = estilos.map(e => d.neto[e]?.barril || 0);
+      const fisicoFerm = estilos.map(e => d.fisico[e]?.litros || 0);
+      const netoFerm = estilos.map(e => d.neto[e]?.litros || 0);
+
+      if (typeof Chart !== 'undefined') {
+        const ctx = document.getElementById('chart-conciliacion');
+        if (conciliacionChart) conciliacionChart.destroy();
+        conciliacionChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: estilos,
+            datasets: [
+              { label: 'Físico · Botellas', data: fisicoBot, backgroundColor: '#c88a3d' },
+              { label: 'Neto · Botellas', data: netoBot, backgroundColor: '#39d2c0' },
+              { label: 'Físico · Barril (L)', data: fisicoBarril, backgroundColor: '#7a9e7a' },
+              { label: 'Neto · Barril (L)', data: netoBarril, backgroundColor: '#58a6ff' },
+              { label: 'Físico · Fermentador (L)', data: fisicoFerm, backgroundColor: '#c9685e' },
+              { label: 'Neto · Fermentador (L)', data: netoFerm, backgroundColor: '#e8a84c' },
+            ]
+          },
+          options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+        });
+      }
+
+      const ded = d.deducciones || {};
+      let html = '<table style="width:100%;border-collapse:collapse;font-size:.82em"><tr><th>Estilo</th><th>Bot descontadas</th><th>Barril (L)</th><th>Fermentador (L)</th></tr>';
+      for (const e of estilos) {
+        const x = ded[e] || {};
+        html += `<tr><td>${e}</td><td>${x.bot || 0}</td><td>${x.barril || 0}</td><td>${x.litros || 0}</td></tr>`;
+      }
+      html += '</table>';
+      document.getElementById('conciliacion-detalle').innerHTML = html;
+    } catch (e) {
+      console.warn('Conciliación no disponible:', e);
+    }
+  }
 </script>
 </body>
 </html>
