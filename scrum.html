@@ -128,6 +128,14 @@ tr:hover td { background: rgba(200,138,61,.04); }
 .btn-action:hover { background: var(--gold); color: #fff; border-color: var(--gold); }
 .btn-del { cursor: pointer; border: none; background: transparent; font-size: 14px; opacity: .6; }
 .btn-del:hover { opacity: 1; }
+.highlight-row td { background: rgba(200,138,61,.18) !important; }
+#toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: #3d2a1d; color: #fff; padding: 12px 20px; border-radius: 999px;
+  font-size: 13px; opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 9999;
+  max-width: 90vw;
+}
+#toast.show { opacity: 1; }
 
 .timeline { position: relative; padding: 10px 0 30px; }
 .timeline-track { height: 6px; background: var(--line); border-radius: 3px; position: relative; margin: 30px 0; }
@@ -479,17 +487,37 @@ function editarCampo(id, campo, valor) {
   pintarResumen();
 }
 
+function mostrarToast(msg) {
+  let t = document.getElementById('toast');
+  if (!t) { t = document.createElement('div'); t.id = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
 function agregarItem() {
   const nums = invimaData.items.map(i => parseInt(String(i.id || '').replace(/\D/g, '')) || 0);
   const n = (nums.length ? Math.max(...nums) : 0) + 1;
   const id = 'INV-' + String(n).padStart(2, '0');
   invimaData.items.push({
-    id: id, item: 'Nuevo item', categoria: 'General', clasificacion: 'Importante',
+    id: id, item: '', categoria: 'General', clasificacion: 'Importante',
     responsable: '', avance: '', estado: 'Pendiente'
   });
   guardarInvima();
+  invimaFilter = 'Todos';
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === 'Todos'));
   pintarInvima();
   pintarResumen();
+  const fila = document.querySelector(`#invima-tbody tr[data-id="${id}"]`);
+  if (fila) {
+    fila.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    fila.classList.add('highlight-row');
+    setTimeout(() => fila.classList.remove('highlight-row'), 2200);
+    const input = fila.querySelector('.editable-input');
+    if (input) input.focus();
+  }
+  mostrarToast('✅ ' + id + ' agregado — escribe el nombre del item');
 }
 
 function eliminarItem(id) {
@@ -535,9 +563,9 @@ function pintarInvima() {
       `<td><input class="editable-input" value="${esc(i[f.key])}" placeholder="${esc(f.label)}…" onchange="editarCampo('${i.id}','${f.key}',this.value)"></td>`
     ).join('');
     const claSel = i.clasificacion === 'Urgente' ? 'sel-urgente' : 'sel-importante';
-    return `<tr>
+    return `<tr data-id="${esc(i.id)}">
       <td style="white-space:nowrap;"><strong>${esc(i.id)}</strong></td>
-      <td><input class="editable-input" value="${esc(i.item)}" onchange="editarCampo('${i.id}','item',this.value)"></td>
+      <td><input class="editable-input" value="${esc(i.item)}" placeholder="escribir item…" onchange="editarCampo('${i.id}','item',this.value)"></td>
       <td><input class="editable-input" value="${esc(i.categoria)}" onchange="editarCampo('${i.id}','categoria',this.value)"></td>
       <td><select class="editable-select ${claSel}" onchange="editarCampo('${i.id}','clasificacion',this.value)">
         ${CLASIFICACIONES.map(c => `<option value="${c}" ${c === i.clasificacion ? 'selected' : ''}>${c}</option>`).join('')}
