@@ -109,6 +109,26 @@ tr:hover td { background: rgba(200,138,61,.04); }
 
 .note-box { background: #f5efe6; border-radius: 10px; padding: 10px 14px; font-size: 12px; color: var(--dim); margin-bottom: 12px; }
 
+.editable-input {
+  width: 100%; min-width: 90px; border: 1px solid transparent; background: transparent;
+  font: inherit; color: inherit; padding: 4px 6px; border-radius: 6px;
+}
+.editable-input:hover, .editable-input:focus { border-color: var(--gold); background: #fff; outline: none; }
+.editable-select {
+  border: 1px solid transparent; background: transparent; font: inherit; color: inherit;
+  padding: 4px 6px; border-radius: 6px; cursor: pointer;
+}
+.editable-select:hover, .editable-select:focus { border-color: var(--gold); background: #fff; outline: none; }
+.sel-urgente { color: #c62828; font-weight: 600; }
+.sel-importante { color: #a08000; font-weight: 600; }
+.btn-action {
+  cursor: pointer; border: 1px solid var(--line); background: #faf7f0; color: var(--body);
+  padding: 6px 14px; border-radius: 999px; font-size: 12px; margin-right: 6px;
+}
+.btn-action:hover { background: var(--gold); color: #fff; border-color: var(--gold); }
+.btn-del { cursor: pointer; border: none; background: transparent; font-size: 14px; opacity: .6; }
+.btn-del:hover { opacity: 1; }
+
 .timeline { position: relative; padding: 10px 0 30px; }
 .timeline-track { height: 6px; background: var(--line); border-radius: 3px; position: relative; margin: 30px 0; }
 .timeline-fill { height: 100%; background: var(--gold); border-radius: 3px; transition: width .8s ease; }
@@ -180,22 +200,29 @@ tr:hover td { background: rgba(200,138,61,.04); }
 <div class="card full" style="margin-bottom:24px;">
   <h2>🏥 Visitas Invima — Lista de Chequeo</h2>
   <p style="font-size:13px;color:var(--body);margin-bottom:12px;">
-    Preparación para la primera visita de Invima. Clasificadas en <strong>Urgentes</strong> e <strong>Importantes</strong> con su responsable.
+    Preparación para la primera visita de Invima. Clasificadas en <strong>Urgentes</strong> e <strong>Importantes</strong>.
+    Edita responsable, avance, estado o clasificación directamente en la tabla (los cambios se guardan automáticamente en tu navegador).
   </p>
-  <div style="margin-bottom:14px;">
+  <div style="margin-bottom:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
     <button class="filter-btn active" data-filter="Todos" onclick="filtrarInvima('Todos', this)">Todos</button>
     <button class="filter-btn" data-filter="Urgente" onclick="filtrarInvima('Urgente', this)">Urgentes</button>
     <button class="filter-btn" data-filter="Importante" onclick="filtrarInvima('Importante', this)">Importantes</button>
+    <span style="flex:1;"></span>
+    <button class="btn-action" onclick="agregarItem()">➕ Añadir item</button>
+    <button class="btn-action" onclick="agregarVariable()">➕ Añadir variable</button>
+    <button class="btn-action" onclick="exportarInvima()">💾 Exportar JSON</button>
+    <button class="btn-action" onclick="recargarInvima()">↺ Recargar</button>
   </div>
   <div id="invima-resumen" style="margin-bottom:12px;"></div>
   <div style="overflow-x:auto;">
     <table id="invima-table">
-      <thead>
-        <tr><th>ID</th><th>Item</th><th>Categoría</th><th>Clasificación</th><th>Responsable</th><th>Estado</th></tr>
-      </thead>
+      <thead><tr><th>ID</th><th>Item</th><th>Categoría</th><th>Clasificación</th><th>Responsable</th><th>Avance</th><th>Estado</th></tr></thead>
       <tbody id="invima-tbody"></tbody>
     </table>
   </div>
+  <p style="font-size:11px;color:var(--dim);margin-top:10px;">
+    💡 Para guardar los cambios en GitHub: usa «Exportar JSON» y reemplaza <code>data/invima_checklist.json</code>, luego haz commit/push (o compártemelo y lo subo yo).
+  </p>
 </div>
 
 <!-- ROW 4: Cartera + Eventos -->
@@ -390,48 +417,175 @@ function renderInventario(ledger) {
 }
 
 // ═══ VISITAS INVIMA ═══
-let invimaData = [];
-function renderInvima(data) {
-  const container = document.getElementById('invima-table');
-  if (!data || !data.items) {
-    document.getElementById('invima-tbody').innerHTML = '<tr><td colspan="6">Sin datos de la lista de chequeo.</td></tr>';
-    return;
+const STORAGE_KEY = 'invima_checklist_v2';
+let invimaData = { items: [], customFields: [] };
+let invimaFilter = 'Todos';
+const ROLES = ['Johnny', 'Maestro Cervecero', 'Producción', 'Administración', 'Cervecero', 'Equipo'];
+const ESTADOS = ['Pendiente', 'En progreso', 'Listo'];
+const CLASIFICACIONES = ['Urgente', 'Importante'];
+
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function cargarInvima(fetched) {
+  let stored = null;
+  try { stored = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch(e) {}
+  if (stored && Array.isArray(stored.items) && stored.items.length) {
+    invimaData = { items: stored.items, customFields: stored.customFields || [] };
+  } else if (fetched && Array.isArray(fetched.items)) {
+    invimaData = {
+      items: fetched.items.map(i => ({ ...i, avance: i.avance || i.nota || '' })),
+      customFields: fetched.customFields || []
+    };
+  } else {
+    invimaData = { items: [], customFields: [] };
   }
-  invimaData = data.items;
-  const urgentes = data.items.filter(i => i.clasificacion === 'Urgente').length;
-  const importantes = data.items.filter(i => i.clasificacion === 'Importante').length;
-  const listos = data.items.filter(i => i.estado === 'Listo').length;
+  guardarInvima();
+}
+
+function guardarInvima() {
+  invimaData.actualizado = new Date().toISOString().slice(0, 10);
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(invimaData)); } catch(e) {}
+}
+
+function renderInvima(data) {
+  cargarInvima(data);
+  pintarResumen();
+  pintarInvima();
+}
+
+function pintarResumen() {
+  const items = invimaData.items;
+  const urgentes = items.filter(i => i.clasificacion === 'Urgente').length;
+  const importantes = items.filter(i => i.clasificacion === 'Importante').length;
+  const listos = items.filter(i => i.estado === 'Listo').length;
+  const enProgreso = items.filter(i => i.estado === 'En progreso').length;
   document.getElementById('invima-resumen').innerHTML =
     `<span class="badge urgente">${urgentes} Urgentes</span>
      <span class="badge importante">${importantes} Importantes</span>
      <span class="badge listo">${listos} Listos</span>
-     <span style="font-size:12px;color:var(--dim);margin-left:6px;">de ${data.items.length} items · actualizado ${data.actualizado || '—'}</span>`;
-  pintarInvima(data.items);
+     <span class="badge progreso">${enProgreso} En progreso</span>
+     <span style="font-size:12px;color:var(--dim);margin-left:6px;">de ${items.length} items · guardado automático</span>`;
 }
 
-function pintarInvima(items) {
+function editarCampo(id, campo, valor) {
+  const item = invimaData.items.find(i => i.id === id);
+  if (!item) return;
+  item[campo] = valor;
+  guardarInvima();
+  pintarResumen();
+}
+
+function agregarItem() {
+  const nums = invimaData.items.map(i => parseInt(String(i.id || '').replace(/\D/g, '')) || 0);
+  const n = (nums.length ? Math.max(...nums) : 0) + 1;
+  const id = 'INV-' + String(n).padStart(2, '0');
+  invimaData.items.push({
+    id: id, item: 'Nuevo item', categoria: 'General', clasificacion: 'Importante',
+    responsable: '', avance: '', estado: 'Pendiente'
+  });
+  guardarInvima();
+  pintarInvima();
+  pintarResumen();
+}
+
+function eliminarItem(id) {
+  if (!confirm('¿Eliminar ' + id + '?')) return;
+  invimaData.items = invimaData.items.filter(i => i.id !== id);
+  guardarInvima();
+  pintarInvima();
+  pintarResumen();
+}
+
+function agregarVariable() {
+  const label = prompt('Nombre de la nueva variable/columna:', '');
+  if (!label) return;
+  const key = 'campo_' + Date.now();
+  invimaData.customFields = invimaData.customFields || [];
+  invimaData.customFields.push({ key: key, label: label });
+  guardarInvima();
+  pintarInvima();
+}
+
+function eliminarVariable(key) {
+  if (!confirm('¿Eliminar esta columna?')) return;
+  invimaData.customFields = invimaData.customFields.filter(f => f.key !== key);
+  invimaData.items.forEach(i => { delete i[key]; });
+  guardarInvima();
+  pintarInvima();
+}
+
+function pintarInvima() {
+  const thead = document.querySelector('#invima-table thead tr');
   const tbody = document.getElementById('invima-tbody');
+  const cf = invimaData.customFields || [];
+  const items = invimaFilter === 'Todos'
+    ? invimaData.items
+    : invimaData.items.filter(i => i.clasificacion === invimaFilter);
+
+  thead.innerHTML = '<th>ID</th><th>Item</th><th>Categoría</th><th>Clasificación</th><th>Responsable</th><th>Avance</th><th>Estado</th>' +
+    cf.map(f => `<th>${esc(f.label)} <a href="#" onclick="eliminarVariable('${f.key}');return false;" style="color:var(--red);font-size:10px;" title="Eliminar columna">✕</a></th>`).join('') +
+    '<th></th>';
+
   tbody.innerHTML = items.map(i => {
-    const claCls = i.clasificacion === 'Urgente' ? 'urgente' : 'importante';
-    let estCls = 'pendiente';
-    if (i.estado === 'Listo') estCls = 'listo';
-    else if (i.estado === 'En progreso') estCls = 'progreso';
+    const cfInputs = cf.map(f =>
+      `<td><input class="editable-input" value="${esc(i[f.key])}" placeholder="${esc(f.label)}…" onchange="editarCampo('${i.id}','${f.key}',this.value)"></td>`
+    ).join('');
+    const claSel = i.clasificacion === 'Urgente' ? 'sel-urgente' : 'sel-importante';
     return `<tr>
-      <td><strong>${i.id}</strong></td>
-      <td>${i.item}${i.nota ? `<br><small style="color:var(--dim)">${i.nota}</small>` : ''}</td>
-      <td>${i.categoria}</td>
-      <td><span class="badge ${claCls}">${i.clasificacion}</span></td>
-      <td>${i.responsable}</td>
-      <td><span class="badge ${estCls}">${i.estado}</span></td>
+      <td style="white-space:nowrap;"><strong>${esc(i.id)}</strong></td>
+      <td><input class="editable-input" value="${esc(i.item)}" onchange="editarCampo('${i.id}','item',this.value)"></td>
+      <td><input class="editable-input" value="${esc(i.categoria)}" onchange="editarCampo('${i.id}','categoria',this.value)"></td>
+      <td><select class="editable-select ${claSel}" onchange="editarCampo('${i.id}','clasificacion',this.value)">
+        ${CLASIFICACIONES.map(c => `<option value="${c}" ${c === i.clasificacion ? 'selected' : ''}>${c}</option>`).join('')}
+      </select></td>
+      <td><input class="editable-input" list="roles-list" value="${esc(i.responsable)}" placeholder="asignar…" onchange="editarCampo('${i.id}','responsable',this.value)"></td>
+      <td><input class="editable-input" value="${esc(i.avance)}" placeholder="notas de avance…" onchange="editarCampo('${i.id}','avance',this.value)"></td>
+      <td><select class="editable-select" onchange="editarCampo('${i.id}','estado',this.value)">
+        ${ESTADOS.map(e => `<option value="${e}" ${e === i.estado ? 'selected' : ''}>${e}</option>`).join('')}
+      </select></td>
+      ${cfInputs}
+      <td><button class="btn-del" onclick="eliminarItem('${i.id}')" title="Eliminar item">🗑</button></td>
     </tr>`;
   }).join('');
+
+  if (!document.getElementById('roles-list')) {
+    const dl = document.createElement('datalist');
+    dl.id = 'roles-list';
+    dl.innerHTML = ROLES.map(r => `<option value="${r}">`).join('');
+    document.body.appendChild(dl);
+  }
 }
 
 function filtrarInvima(filtro, btn) {
+  invimaFilter = filtro;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  const items = filtro === 'Todos' ? invimaData : invimaData.filter(i => i.clasificacion === filtro);
-  pintarInvima(items);
+  pintarInvima();
+}
+
+function exportarInvima() {
+  const out = {
+    actualizado: new Date().toISOString().slice(0, 10),
+    visita: 'Primera visita Invima',
+    objetivo: 'Tener la planta y documentación listas antes de la primera visita de Invima.',
+    customFields: invimaData.customFields || [],
+    items: invimaData.items
+  };
+  const blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'invima_checklist.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function recargarInvima() {
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
 }
 
 // ═══ SPRINT BOARD ═══

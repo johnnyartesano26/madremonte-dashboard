@@ -16,7 +16,7 @@
       "clasificacion": "Urgente",
       "responsable": "Johnny",
       "estado": "Pendiente",
-      "nota": ""
+      "avance": ""
     },
     {
       "id": "INV-02",
@@ -25,7 +25,7 @@
       "clasificacion": "Urgente",
       "responsable": "Johnny",
       "estado": "Pendiente",
-      "nota": ""
+      "avance": ""
     },
     {
       "id": "INV-03",
@@ -34,7 +34,7 @@
       "clasificacion": "Urgente",
       "responsable": "Johnny",
       "estado": "Pendiente",
-      "nota": ""
+      "avance": ""
     },
     {
       "id": "INV-04",
@@ -43,7 +43,7 @@
       "clasificacion": "Importante",
       "responsable": "Maestro Cervecero",
       "estado": "Pendiente",
-      "nota": ""
+      "avance": ""
     },
     {
       "id": "INV-05",
@@ -52,7 +52,7 @@
       "clasificacion": "Importante",
       "responsable": "Administración",
       "estado": "Pendiente",
-      "nota": ""
+      "avance": ""
     },
     {
       "id": "INV-06",
@@ -61,7 +61,7 @@
       "clasificacion": "Urgente",
       "responsable": "Producción",
       "estado": "Pendiente",
-      "nota": ""
+      "avance": ""
     },
     {
       "id": "INV-07",
@@ -70,7 +70,7 @@
       "clasificacion": "Importante",
       "responsable": "Producción",
       "estado": "Pendiente",
-      "nota": ""
+      "avance": ""
     },
     {
       "id": "INV-08",
@@ -79,7 +79,7 @@
       "clasificacion": "Urgente",
       "responsable": "Producción",
       "estado": "Pendiente",
-      "nota": ""
+      "avance": ""
     },
     {
       "id": "INV-09",
@@ -88,7 +88,7 @@
       "clasificacion": "Importante",
       "responsable": "Producción",
       "estado": "Pendiente",
-      "nota": ""
+      "avance": ""
     },
     {
       "id": "INV-10",
@@ -97,7 +97,7 @@
       "clasificacion": "Importante",
       "responsable": "Producción",
       "estado": "Pendiente",
-      "nota": ""
+      "avance": ""
     },
     {
       "id": "INV-11",
@@ -106,7 +106,7 @@
       "clasificacion": "Urgente",
       "responsable": "Johnny",
       "estado": "Pendiente",
-      "nota": ""
+      "avance": ""
     },
     {
       "id": "INV-12",
@@ -115,7 +115,7 @@
       "clasificacion": "Importante",
       "responsable": "Maestro Cervecero",
       "estado": "Pendiente",
-      "nota": ""
+      "avance": ""
     },
     {
       "id": "INV-13",
@@ -124,7 +124,7 @@
       "clasificacion": "Urgente",
       "responsable": "Maestro Cervecero",
       "estado": "Pendiente",
-      "nota": ""
+      "avance": ""
     },
     {
       "id": "INV-14",
@@ -133,7 +133,7 @@
       "clasificacion": "Urgente",
       "responsable": "Johnny",
       "estado": "Pendiente",
-      "nota": ""
+      "avance": ""
     },
     {
       "id": "INV-15",
@@ -142,7 +142,7 @@
       "clasificacion": "Importante",
       "responsable": "Administración",
       "estado": "Pendiente",
-      "nota": ""
+      "avance": ""
     },
     {
       "id": "INV-16",
@@ -151,7 +151,7 @@
       "clasificacion": "Importante",
       "responsable": "Producción",
       "estado": "Pendiente",
-      "nota": ""
+      "avance": ""
     },
     {
       "id": "INV-17",
@@ -160,7 +160,7 @@
       "clasificacion": "Urgente",
       "responsable": "Johnny",
       "estado": "Pendiente",
-      "nota": ""
+      "avance": ""
     },
     {
       "id": "INV-18",
@@ -169,7 +169,7 @@
       "clasificacion": "Importante",
       "responsable": "Maestro Cervecero",
       "estado": "Pendiente",
-      "nota": ""
+      "avance": ""
     }
   ]
 }
