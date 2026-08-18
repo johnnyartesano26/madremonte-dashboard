@@ -1,100 +1,283 @@
 {
-  "version": "1.0",
-  "actualizado": "2026-07-29T13:14:03.320713",
+  "version": "2.0",
+  "actualizado": "2026-08-18T12:43:28.764664",
   "movimientos": [
     {
       "id": "mov_0001",
-      "fecha": "2026-07-29",
+      "fecha": "10/08/2026 14:15:24",
       "tipo": "ENTRADA",
       "origen": "nucleo_snapshot",
       "estilo": "GOLDEN ALE",
       "capa": "fermentador_litros",
-      "cantidad": 550.0,
-      "nota": "Anterior: 0L → Actual: 550.0L (delta: +550.0L)",
-      "saldo_capa": 550.0
+      "cantidad": 210.0,
+      "nota": "Anterior: 410.0L → Actual: 210.0L (delta: -200.0L)",
+      "saldo_capa": 210.0
     },
     {
       "id": "mov_0002",
-      "fecha": "2026-07-29",
+      "fecha": "10/08/2026 14:15:24",
       "tipo": "ENTRADA",
       "origen": "nucleo_snapshot",
       "estilo": "IRISH RED ALE",
       "capa": "fermentador_litros",
-      "cantidad": 600.0,
-      "nota": "Anterior: 0L → Actual: 600.0L (delta: +600.0L)",
-      "saldo_capa": 600.0
+      "cantidad": 340.0,
+      "nota": "Anterior: 440.0L → Actual: 340.0L (delta: -100.0L)",
+      "saldo_capa": 340.0
     },
     {
       "id": "mov_0003",
-      "fecha": "2026-07-29",
+      "fecha": "10/08/2026 14:15:24",
       "tipo": "ENTRADA",
       "origen": "nucleo_snapshot",
       "estilo": "IPA",
       "capa": "fermentador_litros",
-      "cantidad": 490.0,
-      "nota": "Anterior: 0L → Actual: 490.0L (delta: +490.0L)",
-      "saldo_capa": 490.0
+      "cantidad": 240.0,
+      "nota": "Anterior: 340.0L → Actual: 240.0L (delta: -100.0L)",
+      "saldo_capa": 240.0
     },
     {
       "id": "mov_0004",
-      "fecha": "2026-07-29",
+      "fecha": "10/08/2026 14:15:24",
       "tipo": "ENTRADA",
       "origen": "nucleo_snapshot",
       "estilo": "STOUT",
       "capa": "fermentador_litros",
-      "cantidad": 290.0,
-      "nota": "Anterior: 0L → Actual: 290.0L (delta: +290.0L)",
-      "saldo_capa": 290.0
+      "cantidad": 120.0,
+      "nota": "Anterior: 193.0L → Actual: 120.0L (delta: -73.0L)",
+      "saldo_capa": 120.0
     },
     {
       "id": "mov_0005",
-      "fecha": "2026-07-29",
+      "fecha": "10/08/2026 14:15:24",
       "tipo": "ENTRADA",
-      "origen": "nucleo_delta_barril",
-      "estilo": "APA",
-      "capa": "barril_litros",
-      "cantidad": 156.5,
-      "nota": "Anterior: 0L → Actual: 156.5L (delta: +156.5L)",
-      "saldo_capa": 156.5
+      "origen": "nucleo_snapshot",
+      "estilo": "GERMAN PILS",
+      "capa": "fermentador_litros",
+      "cantidad": 240.0,
+      "nota": "Anterior: 320.0L → Actual: 240.0L (delta: -80.0L)",
+      "saldo_capa": 240.0
     },
     {
       "id": "mov_0006",
-      "fecha": "2026-07-29",
+      "fecha": "10/08/2026 14:15:24",
       "tipo": "ENTRADA",
+      "origen": "nucleo_snapshot",
+      "estilo": "HIDROMIEL",
+      "capa": "fermentador_litros",
+      "cantidad": 310.0,
+      "nota": "Anterior: 316.0L → Actual: 310.0L (delta: -6.0L)",
+      "saldo_capa": 310.0
+    },
+    {
+      "id": "mov_0007",
+      "fecha": "2026-06-17 15:05",
+      "tipo": "SALIDA",
+      "origen": "nucleo_delta_barril",
+      "estilo": "GOLDEN ALE",
+      "capa": "barril_litros",
+      "cantidad": -34.0,
+      "nota": "Anterior: 34.0L → Actual: 0L (delta: -34.0L)",
+      "saldo_capa": 0
+    },
+    {
+      "id": "mov_0008",
+      "fecha": "2026-06-17 15:05",
+      "tipo": "SALIDA",
+      "origen": "nucleo_delta_barril",
+      "estilo": "APA",
+      "capa": "barril_litros",
+      "cantidad": -106.5,
+      "nota": "Anterior: 106.5L → Actual: 0L (delta: -106.5L)",
+      "saldo_capa": 0
+    },
+    {
+      "id": "mov_0009",
+      "fecha": "2026-06-17 15:05",
+      "tipo": "SALIDA",
       "origen": "nucleo_delta_barril",
       "estilo": "IPA",
       "capa": "barril_litros",
-      "cantidad": 15.7,
-      "nota": "Anterior: 0L → Actual: 15.7L (delta: +15.7L)",
-      "saldo_capa": 15.7
+      "cantidad": -104.1,
+      "nota": "Anterior: 104.1L → Actual: 0L (delta: -104.1L)",
+      "saldo_capa": 0
+    },
+    {
+      "id": "mov_0010",
+      "fecha": "2026-06-17 15:05",
+      "tipo": "SALIDA",
+      "origen": "nucleo_delta_barril",
+      "estilo": "STOUT",
+      "capa": "barril_litros",
+      "cantidad": -43.0,
+      "nota": "Anterior: 43.0L → Actual: 0L (delta: -43.0L)",
+      "saldo_capa": 0
+    },
+    {
+      "id": "mov_0011",
+      "fecha": "2026-06-17 15:05",
+      "tipo": "SALIDA",
+      "origen": "nucleo_delta_barril",
+      "estilo": "HIDROMIEL",
+      "capa": "barril_litros",
+      "cantidad": -25.0,
+      "nota": "Anterior: 25.0L → Actual: 0L (delta: -25.0L)",
+      "saldo_capa": 0
+    },
+    {
+      "id": "mov_0012",
+      "fecha": "2026-06-17 15:05",
+      "tipo": "SALIDA",
+      "origen": "nucleo_delta_botella",
+      "estilo": "GOLDEN ALE",
+      "capa": "botella_und",
+      "cantidad": -199,
+      "nota": "Anterior: 199 und → Actual: 0 und (delta: -199)",
+      "saldo_capa": 0
+    },
+    {
+      "id": "mov_0013",
+      "fecha": "10/08/2026 14:15:24",
+      "tipo": "ENTRADA",
+      "origen": "nucleo_snapshot",
+      "estilo": "GOLDEN ALE",
+      "capa": "fermentador_litros",
+      "cantidad": 210.0,
+      "nota": "Anterior: 0L → Actual: 210.0L (delta: +210.0L)",
+      "saldo_capa": 210.0
+    },
+    {
+      "id": "mov_0014",
+      "fecha": "10/08/2026 14:15:24",
+      "tipo": "ENTRADA",
+      "origen": "nucleo_snapshot",
+      "estilo": "IRISH RED ALE",
+      "capa": "fermentador_litros",
+      "cantidad": 340.0,
+      "nota": "Anterior: 0L → Actual: 340.0L (delta: +340.0L)",
+      "saldo_capa": 340.0
+    },
+    {
+      "id": "mov_0015",
+      "fecha": "10/08/2026 14:15:24",
+      "tipo": "ENTRADA",
+      "origen": "nucleo_snapshot",
+      "estilo": "IPA",
+      "capa": "fermentador_litros",
+      "cantidad": 240.0,
+      "nota": "Anterior: 0L → Actual: 240.0L (delta: +240.0L)",
+      "saldo_capa": 240.0
+    },
+    {
+      "id": "mov_0016",
+      "fecha": "10/08/2026 14:15:24",
+      "tipo": "ENTRADA",
+      "origen": "nucleo_snapshot",
+      "estilo": "STOUT",
+      "capa": "fermentador_litros",
+      "cantidad": 120.0,
+      "nota": "Anterior: 0L → Actual: 120.0L (delta: +120.0L)",
+      "saldo_capa": 120.0
+    },
+    {
+      "id": "mov_0017",
+      "fecha": "10/08/2026 14:15:24",
+      "tipo": "ENTRADA",
+      "origen": "nucleo_snapshot",
+      "estilo": "GERMAN PILS",
+      "capa": "fermentador_litros",
+      "cantidad": 240.0,
+      "nota": "Anterior: 0L → Actual: 240.0L (delta: +240.0L)",
+      "saldo_capa": 240.0
+    },
+    {
+      "id": "mov_0018",
+      "fecha": "10/08/2026 14:15:24",
+      "tipo": "ENTRADA",
+      "origen": "nucleo_snapshot",
+      "estilo": "HIDROMIEL",
+      "capa": "fermentador_litros",
+      "cantidad": 310.0,
+      "nota": "Anterior: 0L → Actual: 310.0L (delta: +310.0L)",
+      "saldo_capa": 310.0
     }
   ],
+  "fermentadores": {
+    "F1": {
+      "nombre": "F1 Frankie",
+      "estilo": "STOUT",
+      "litros": 120.0,
+      "capacidad": 400,
+      "porcentaje": 30
+    },
+    "F2": {
+      "nombre": "F2 Igor",
+      "estilo": "IRISH RED ALE",
+      "litros": 340.0,
+      "capacidad": 1200,
+      "porcentaje": 28
+    },
+    "F3": {
+      "nombre": "F3 Principito",
+      "estilo": "GERMAN PILS",
+      "litros": 240.0,
+      "capacidad": 400,
+      "porcentaje": 60
+    },
+    "F4": {
+      "nombre": "F4 Gargantua",
+      "estilo": "VACIO",
+      "litros": 0.0,
+      "capacidad": 700,
+      "porcentaje": 0
+    },
+    "F5": {
+      "nombre": "F5 Pantagruel",
+      "estilo": "IPA",
+      "litros": 240.0,
+      "capacidad": 800,
+      "porcentaje": 30
+    },
+    "F6": {
+      "nombre": "F6 Potter",
+      "estilo": "GOLDEN ALE",
+      "litros": 210.0,
+      "capacidad": 1000,
+      "porcentaje": 21
+    },
+    "F7": {
+      "nombre": "F7 HighLander",
+      "estilo": "HIDROMIEL",
+      "litros": 310.0,
+      "capacidad": 500,
+      "porcentaje": 62
+    }
+  },
   "saldos": {
     "fermentador": {
       "GOLDEN ALE": {
-        "litros": 550.0,
+        "litros": 210.0,
         "fermentadores": [
           {
             "nombre": "F6 Potter",
-            "litros": 550.0,
+            "litros": 210.0,
             "capacidad": 1000,
-            "porcentaje": 55
+            "porcentaje": 21
           }
         ],
-        "pct_max": 55,
+        "pct_max": 21,
         "alerta": "verde"
       },
       "IRISH RED ALE": {
-        "litros": 600.0,
+        "litros": 340.0,
         "fermentadores": [
           {
             "nombre": "F2 Igor",
-            "litros": 600.0,
+            "litros": 340.0,
             "capacidad": 1200,
-            "porcentaje": 50
+            "porcentaje": 28
           }
         ],
-        "pct_max": 50,
+        "pct_max": 28,
         "alerta": "verde"
       },
       "APA": {
@@ -104,30 +287,62 @@
         "alerta": "roja"
       },
       "IPA": {
-        "litros": 490.0,
+        "litros": 240.0,
         "fermentadores": [
           {
             "nombre": "F5 Pantagruel",
-            "litros": 490.0,
+            "litros": 240.0,
             "capacidad": 800,
-            "porcentaje": 61
+            "porcentaje": 30
           }
         ],
-        "pct_max": 61,
+        "pct_max": 30,
         "alerta": "verde"
       },
       "STOUT": {
-        "litros": 290.0,
+        "litros": 120.0,
         "fermentadores": [
           {
             "nombre": "F1 Frankie",
-            "litros": 290.0,
+            "litros": 120.0,
             "capacidad": 400,
-            "porcentaje": 72
+            "porcentaje": 30
           }
         ],
-        "pct_max": 72,
+        "pct_max": 30,
         "alerta": "verde"
+      },
+      "GERMAN PILS": {
+        "litros": 240.0,
+        "fermentadores": [
+          {
+            "nombre": "F3 Principito",
+            "litros": 240.0,
+            "capacidad": 400,
+            "porcentaje": 60
+          }
+        ],
+        "pct_max": 60,
+        "alerta": "verde"
+      },
+      "HIDROMIEL": {
+        "litros": 310.0,
+        "fermentadores": [
+          {
+            "nombre": "F7 HighLander",
+            "litros": 310.0,
+            "capacidad": 500,
+            "porcentaje": 62
+          }
+        ],
+        "pct_max": 62,
+        "alerta": "verde"
+      },
+      "RED IPA": {
+        "litros": 0,
+        "fermentadores": [],
+        "pct_max": 0,
+        "alerta": "roja"
       }
     },
     "barril": {
@@ -142,16 +357,36 @@
         "disponible": 0
       },
       "APA": {
-        "litros": 156.5,
+        "litros": 0,
         "comprometido": 0,
-        "disponible": 156.5
+        "disponible": 0
       },
       "IPA": {
-        "litros": 15.7,
+        "litros": 0,
         "comprometido": 0,
-        "disponible": 15.7
+        "disponible": 0
       },
       "STOUT": {
+        "litros": 0,
+        "comprometido": 0,
+        "disponible": 0
+      },
+      "GERMAN PILS": {
+        "litros": 0,
+        "comprometido": 0,
+        "disponible": 0
+      },
+      "HIDROMIEL": {
+        "litros": 0,
+        "comprometido": 0,
+        "disponible": 0
+      },
+      "RED IPA": {
+        "litros": 0,
+        "comprometido": 0,
+        "disponible": 0
+      },
+      "VACIO": {
         "litros": 0,
         "comprometido": 0,
         "disponible": 0
@@ -182,6 +417,26 @@
         "unidades": 0,
         "comprometido": 0,
         "disponible": 0
+      },
+      "GERMAN PILS": {
+        "unidades": 0,
+        "comprometido": 0,
+        "disponible": 0
+      },
+      "HIDROMIEL": {
+        "unidades": 0,
+        "comprometido": 0,
+        "disponible": 0
+      },
+      "RED IPA": {
+        "unidades": 0,
+        "comprometido": 0,
+        "disponible": 0
+      },
+      "VACIO": {
+        "unidades": 0,
+        "comprometido": 0,
+        "disponible": 0
       }
     }
   },
@@ -203,53 +458,79 @@
       "tipo": "EMBOTELLAR_PENDIENTE",
       "urgencia": "alta",
       "estilo": "GOLDEN ALE",
-      "mensaje": "GOLDEN ALE: 550L en fermentador → solo 0 botellas disponibles. Se necesita embotellar.",
+      "mensaje": "GOLDEN ALE: 210L en fermentador → solo 0 botellas disponibles. Se necesita embotellar.",
       "fermentadores": []
     },
     {
       "tipo": "EMBOTELLAR_PENDIENTE",
       "urgencia": "alta",
       "estilo": "IRISH RED ALE",
-      "mensaje": "IRISH RED ALE: 600L en fermentador → solo 0 botellas disponibles. Se necesita embotellar.",
+      "mensaje": "IRISH RED ALE: 340L en fermentador → solo 0 botellas disponibles. Se necesita embotellar.",
       "fermentadores": []
     },
     {
       "tipo": "EMBOTELLAR_PENDIENTE",
       "urgencia": "alta",
       "estilo": "IPA",
-      "mensaje": "IPA: 490L en fermentador → solo 0 botellas disponibles. Se necesita embotellar.",
+      "mensaje": "IPA: 240L en fermentador → solo 0 botellas disponibles. Se necesita embotellar.",
       "fermentadores": []
     },
     {
       "tipo": "EMBOTELLAR_PENDIENTE",
       "urgencia": "alta",
       "estilo": "STOUT",
-      "mensaje": "STOUT: 290L en fermentador → solo 0 botellas disponibles. Se necesita embotellar.",
+      "mensaje": "STOUT: 120L en fermentador → solo 0 botellas disponibles. Se necesita embotellar.",
+      "fermentadores": []
+    },
+    {
+      "tipo": "EMBOTELLAR_PENDIENTE",
+      "urgencia": "alta",
+      "estilo": "GERMAN PILS",
+      "mensaje": "GERMAN PILS: 240L en fermentador → solo 0 botellas disponibles. Se necesita embotellar.",
+      "fermentadores": []
+    },
+    {
+      "tipo": "EMBOTELLAR_PENDIENTE",
+      "urgencia": "alta",
+      "estilo": "HIDROMIEL",
+      "mensaje": "HIDROMIEL: 310L en fermentador → solo 0 botellas disponibles. Se necesita embotellar.",
       "fermentadores": []
     },
     {
       "tipo": "EMBARRILAR_PENDIENTE",
       "urgencia": "alta",
       "estilo": "GOLDEN ALE",
-      "mensaje": "GOLDEN ALE: 550L en fermentador → solo 0.0L en barril. Se necesita embarrilar."
+      "mensaje": "GOLDEN ALE: 210L en fermentador → solo 0.0L en barril. Se necesita embarrilar."
     },
     {
       "tipo": "EMBARRILAR_PENDIENTE",
       "urgencia": "alta",
       "estilo": "IRISH RED ALE",
-      "mensaje": "IRISH RED ALE: 600L en fermentador → solo 0.0L en barril. Se necesita embarrilar."
+      "mensaje": "IRISH RED ALE: 340L en fermentador → solo 0.0L en barril. Se necesita embarrilar."
     },
     {
       "tipo": "EMBARRILAR_PENDIENTE",
-      "urgencia": "media",
+      "urgencia": "alta",
       "estilo": "IPA",
-      "mensaje": "IPA: 490L en fermentador → solo 15.7L en barril. Se necesita embarrilar."
+      "mensaje": "IPA: 240L en fermentador → solo 0.0L en barril. Se necesita embarrilar."
     },
     {
       "tipo": "EMBARRILAR_PENDIENTE",
       "urgencia": "alta",
       "estilo": "STOUT",
-      "mensaje": "STOUT: 290L en fermentador → solo 0.0L en barril. Se necesita embarrilar."
+      "mensaje": "STOUT: 120L en fermentador → solo 0.0L en barril. Se necesita embarrilar."
+    },
+    {
+      "tipo": "EMBARRILAR_PENDIENTE",
+      "urgencia": "alta",
+      "estilo": "GERMAN PILS",
+      "mensaje": "GERMAN PILS: 240L en fermentador → solo 0.0L en barril. Se necesita embarrilar."
+    },
+    {
+      "tipo": "EMBARRILAR_PENDIENTE",
+      "urgencia": "alta",
+      "estilo": "HIDROMIEL",
+      "mensaje": "HIDROMIEL: 310L en fermentador → solo 0.0L en barril. Se necesita embarrilar."
     }
   ]
 }

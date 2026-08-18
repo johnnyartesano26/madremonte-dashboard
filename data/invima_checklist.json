@@ -1,0 +1,175 @@
+{
+  "actualizado": "2026-08-18",
+  "visita": "Primera visita Invima",
+  "objetivo": "Tener la planta y documentación listas antes de la primera visita de Invima.",
+  "resumen": {
+    "total": 18,
+    "urgentes": 10,
+    "importantes": 8,
+    "listos": 0
+  },
+  "items": [
+    {
+      "id": "INV-01",
+      "categoria": "Legal y Documentación",
+      "item": "Solicitar/verificar registro sanitario INVIMA por producto o estilo",
+      "clasificacion": "Urgente",
+      "responsable": "Johnny",
+      "estado": "Pendiente",
+      "nota": ""
+    },
+    {
+      "id": "INV-02",
+      "categoria": "Legal y Documentación",
+      "item": "Permiso sanitario de funcionamiento",
+      "clasificacion": "Urgente",
+      "responsable": "Johnny",
+      "estado": "Pendiente",
+      "nota": ""
+    },
+    {
+      "id": "INV-03",
+      "categoria": "Legal y Documentación",
+      "item": "Manual de Buenas Prácticas de Manufactura (BPM)",
+      "clasificacion": "Urgente",
+      "responsable": "Johnny",
+      "estado": "Pendiente",
+      "nota": ""
+    },
+    {
+      "id": "INV-04",
+      "categoria": "Legal y Documentación",
+      "item": "Fichas técnicas de insumos y producto terminado",
+      "clasificacion": "Importante",
+      "responsable": "Maestro Cervecero",
+      "estado": "Pendiente",
+      "nota": ""
+    },
+    {
+      "id": "INV-05",
+      "categoria": "Legal y Documentación",
+      "item": "Documentos legales (RUT, Cámara de Comercio, uso de suelo)",
+      "clasificacion": "Importante",
+      "responsable": "Administración",
+      "estado": "Pendiente",
+      "nota": ""
+    },
+    {
+      "id": "INV-06",
+      "categoria": "Infraestructura y Planta",
+      "item": "Pisos, paredes y techos lavables e impermeables",
+      "clasificacion": "Urgente",
+      "responsable": "Producción",
+      "estado": "Pendiente",
+      "nota": ""
+    },
+    {
+      "id": "INV-07",
+      "categoria": "Infraestructura y Planta",
+      "item": "Iluminación y ventilación adecuadas en planta",
+      "clasificacion": "Importante",
+      "responsable": "Producción",
+      "estado": "Pendiente",
+      "nota": ""
+    },
+    {
+      "id": "INV-08",
+      "categoria": "Infraestructura y Planta",
+      "item": "Programa de control de plagas",
+      "clasificacion": "Urgente",
+      "responsable": "Producción",
+      "estado": "Pendiente",
+      "nota": ""
+    },
+    {
+      "id": "INV-09",
+      "categoria": "Infraestructura y Planta",
+      "item": "Manejo y disposición de residuos",
+      "clasificacion": "Importante",
+      "responsable": "Producción",
+      "estado": "Pendiente",
+      "nota": ""
+    },
+    {
+      "id": "INV-10",
+      "categoria": "Infraestructura y Planta",
+      "item": "Señalización y flujo de zonas (sin cruce limpio/sucio)",
+      "clasificacion": "Importante",
+      "responsable": "Producción",
+      "estado": "Pendiente",
+      "nota": ""
+    },
+    {
+      "id": "INV-11",
+      "categoria": "Calidad y Agua",
+      "item": "Análisis de potabilidad del agua",
+      "clasificacion": "Urgente",
+      "responsable": "Johnny",
+      "estado": "Pendiente",
+      "nota": ""
+    },
+    {
+      "id": "INV-12",
+      "categoria": "Calidad y Agua",
+      "item": "Plan de control de calidad y muestreo (pH, densidad, microbiología)",
+      "clasificacion": "Importante",
+      "responsable": "Maestro Cervecero",
+      "estado": "Pendiente",
+      "nota": ""
+    },
+    {
+      "id": "INV-13",
+      "categoria": "Calidad y Agua",
+      "item": "Registro de lotes y fechas de vencimiento",
+      "clasificacion": "Urgente",
+      "responsable": "Maestro Cervecero",
+      "estado": "Pendiente",
+      "nota": ""
+    },
+    {
+      "id": "INV-14",
+      "categoria": "Personal",
+      "item": "Capacitación en BPM y manipulación de alimentos",
+      "clasificacion": "Urgente",
+      "responsable": "Johnny",
+      "estado": "Pendiente",
+      "nota": ""
+    },
+    {
+      "id": "INV-15",
+      "categoria": "Personal",
+      "item": "Certificados médicos y curso de manipulación del equipo",
+      "clasificacion": "Importante",
+      "responsable": "Administración",
+      "estado": "Pendiente",
+      "nota": ""
+    },
+    {
+      "id": "INV-16",
+      "categoria": "Personal",
+      "item": "Uniformes y elementos de protección personal (EPP)",
+      "clasificacion": "Importante",
+      "responsable": "Producción",
+      "estado": "Pendiente",
+      "nota": ""
+    },
+    {
+      "id": "INV-17",
+      "categoria": "Trazabilidad y Etiquetado",
+      "item": "Sistema de trazabilidad (insumo → producto final)",
+      "clasificacion": "Urgente",
+      "responsable": "Johnny",
+      "estado": "Pendiente",
+      "nota": ""
+    },
+    {
+      "id": "INV-18",
+      "categoria": "Trazabilidad y Etiquetado",
+      "item": "Etiquetado conforme a normativa (lote, vencimiento, registro)",
+      "clasificacion": "Importante",
+      "responsable": "Maestro Cervecero",
+      "estado": "Pendiente",
+      "nota": ""
+    }
+  ]
+}

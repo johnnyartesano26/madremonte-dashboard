@@ -23,7 +23,6 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
 .brand p { color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
 .pill { background: #f5efe6; padding: 7px 16px; border-radius: 999px; font-size: 12px; color: var(--dim); border: 1px solid var(--line); }
 .pill.wk { background: var(--gold); color: #fff; border-color: var(--gold); font-weight: 600; }
-.pill.nolink { background: transparent; border: none; color: var(--dim); }
 .pill a { color: var(--gold); text-decoration: none; font-weight: 500; }
 main { max-width: 1300px; margin: 0 auto; padding: 28px 20px; }
 .row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; }
@@ -32,68 +31,39 @@ main { max-width: 1300px; margin: 0 auto; padding: 28px 20px; }
   padding: 22px 20px; box-shadow: var(--shadow);
 }
 .card.wide { flex: 2; min-width: 500px; }
+.card.full { flex: 1 0 100%; min-width: 100%; }
 .card h2 { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--gold); display: inline-block; }
 .card h3 { font-size: 14px; color: var(--body); margin-bottom: 10px; }
 
-/* KPI cards */
 .kpi-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 24px; }
 .kpi-card {
-  flex: 1; min-width: 180px; background: var(--card); border-radius: var(--radius);
+  flex: 1; min-width: 170px; background: var(--card); border-radius: var(--radius);
   padding: 18px 16px; box-shadow: var(--shadow); text-align: center;
 }
-.kpi-card .kpi-val { font-size: 28px; font-weight: 700; color: var(--text); margin: 4px 0; }
+.kpi-card .kpi-val { font-size: 26px; font-weight: 700; color: var(--text); margin: 4px 0; }
 .kpi-card .kpi-label { font-size: 12px; color: var(--dim); margin-top: 2px; }
 .kpi-card .kpi-sub { font-size: 11px; color: var(--body); margin-top: 4px; }
-.kpi-card .kpi-trend { font-size: 12px; padding: 2px 8px; border-radius: 999px; display: inline-block; margin-top: 6px; }
+.kpi-trend { font-size: 12px; padding: 2px 8px; border-radius: 999px; display: inline-block; margin-top: 6px; }
 .kpi-trend.up { background: rgba(76,175,80,.12); color: #2e7d32; }
 .kpi-trend.down { background: rgba(229,115,115,.12); color: #c62828; }
 .kpi-trend.warn { background: rgba(255,193,7,.12); color: #a08000; }
 
-/* Timeline */
-.timeline { position: relative; padding: 10px 0 30px; }
-.timeline-track { height: 6px; background: var(--line); border-radius: 3px; position: relative; margin: 30px 0; }
-.timeline-fill { height: 100%; background: var(--gold); border-radius: 3px; transition: width .8s ease; }
-.timeline-weeks { display: flex; justify-content: space-between; position: relative; margin-top: -38px; }
-.tl-week { text-align: center; flex: 1; position: relative; }
-.tl-dot {
-  width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--line);
-  margin: -5px auto 4px; position: relative; z-index: 2;
-}
-.tl-dot.done { background: var(--green); border-color: var(--green); }
-.tl-dot.current { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 0 4px rgba(200,138,61,.20); }
-.tl-dot.future { background: #fff; border-color: var(--line); }
-.tl-label { font-size: 10px; color: var(--dim); }
-.tl-label strong { color: var(--text); font-size: 12px; }
-
-/* Objective cards */
-.obj-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-.obj-badge {
-  padding: 6px 16px; border-radius: 999px; font-size: 22px; font-weight: 700;
-  color: #fff; min-width: 70px; text-align: center;
-}
-.obj-badge.ok { background: var(--green); }
-.obj-badge.progress { background: var(--gold); }
-.obj-badge.warn { background: var(--amber); color: #5d4037; }
-.obj-info h3 { margin: 0; color: var(--text); }
-.obj-info p { font-size: 12px; color: var(--dim); margin-top: 2px; }
-
-/* Indicators */
 .ind-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
 .ind-row:last-child { border-bottom: none; }
 .ind-icon { font-size: 18px; width: 28px; text-align: center; }
 .ind-label { flex: 1; font-size: 13px; color: var(--body); }
 .ind-value { font-weight: 700; font-size: 13px; min-width: 60px; text-align: right; }
-.ind-bar-wrap { width: 80px; height: 8px; background: #e8e0d6; border-radius: 4px; overflow: hidden; }
+.ind-bar-wrap { width: 90px; height: 8px; background: #e8e0d6; border-radius: 4px; overflow: hidden; }
 .ind-bar-fill { height: 100%; border-radius: 4px; }
 .ind-bar-fill.green { background: var(--green); }
 .ind-bar-fill.gold { background: var(--gold); }
 .ind-bar-fill.amber { background: var(--amber); }
-.ind-status { font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 500; }
-.ind-status.check { background: rgba(76,175,80,.12); color: #2e7d32; }
+.ind-bar-fill.red { background: var(--red); }
+.ind-status { font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 500; white-space: nowrap; }
+.ind-status.ok { background: rgba(76,175,80,.12); color: #2e7d32; }
 .ind-status.warn { background: rgba(255,193,7,.12); color: #a08000; }
-.ind-status.wait { background: rgba(200,138,61,.10); color: var(--gold); }
+.ind-status.crit { background: rgba(229,115,115,.12); color: #c62828; }
 
-/* Sprint board */
 .sprint-grid { display: grid; gap: 10px; }
 .sprint-task {
   display: flex; align-items: center; gap: 10px; padding: 10px 14px;
@@ -103,182 +73,162 @@ main { max-width: 1300px; margin: 0 auto; padding: 28px 20px; }
 .sprint-task.ongoing { border-left-color: var(--gold); }
 .sprint-task.pending { border-left-color: var(--line); }
 .sprint-task.blocked { border-left-color: var(--red); }
-.sprint-task .task-status { font-size: 16px; }
+.sprint-task .task-icon { font-size: 16px; }
 .sprint-task .task-name { flex: 1; font-size: 13px; }
 .sprint-task .task-owner { font-size: 11px; color: var(--dim); white-space: nowrap; }
 
-.chart-wrap { position: relative; width: 100%; }
-.chart-wrap canvas { width: 100% !important; max-height: 280px; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th { text-align: left; padding: 8px; border-bottom: 2px solid var(--line); color: var(--dim); font-weight: 600; font-size: 11px; text-transform: uppercase; }
+td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:hover td { background: rgba(200,138,61,.04); }
+
+.badge { font-size: 11px; padding: 3px 10px; border-radius: 999px; font-weight: 600; white-space: nowrap; }
+.badge.urgente { background: rgba(229,115,115,.15); color: #c62828; }
+.badge.importante { background: rgba(255,193,7,.18); color: #a08000; }
+.badge.listo { background: rgba(76,175,80,.15); color: #2e7d32; }
+.badge.pendiente { background: rgba(140,123,107,.14); color: #6b5a4a; }
+.badge.progreso { background: rgba(200,138,61,.15); color: #a06a20; }
+
+.filter-btn { cursor: pointer; border: 1px solid var(--line); background: #faf7f0; color: var(--body); padding: 6px 14px; border-radius: 999px; font-size: 12px; margin-right: 6px; }
+.filter-btn.active { background: var(--gold); color: #fff; border-color: var(--gold); font-weight: 600; }
+
+.alert-card {
+  background: rgba(229,115,115,.08); border: 1px solid rgba(229,115,115,.2);
+  border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; font-size: 13px;
+}
+.alert-card.warning { background: rgba(255,193,7,.08); border-color: rgba(255,193,7,.2); }
+.alert-card .alert-icon { margin-right: 8px; }
+.alert-card .alert-text { color: var(--body); }
+
+.kaizen-box {
+  background: #f5efe6; border-radius: 10px; padding: 16px;
+  display: flex; gap: 12px; align-items: flex-start; margin-top: 8px;
+}
+.kaizen-box .kaizen-icon { font-size: 24px; flex-shrink: 0; }
+.kaizen-box .kaizen-text { font-size: 13px; color: var(--body); font-style: italic; }
+
+.note-box { background: #f5efe6; border-radius: 10px; padding: 10px 14px; font-size: 12px; color: var(--dim); margin-bottom: 12px; }
+
+.timeline { position: relative; padding: 10px 0 30px; }
+.timeline-track { height: 6px; background: var(--line); border-radius: 3px; position: relative; margin: 30px 0; }
+.timeline-fill { height: 100%; background: var(--gold); border-radius: 3px; transition: width .8s ease; }
+.timeline-weeks { display: flex; justify-content: space-between; position: relative; margin-top: -38px; }
+.tl-week { text-align: center; flex: 1; position: relative; }
+.tl-dot {
+  width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 3px solid var(--line);
+  margin: -5px auto 4px; position: relative; z-index: 2;
+}
+.tl-dot.done { background: var(--green); border-color: var(--green); }
+.tl-dot.current { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 0 4px rgba(200,138,61,.20); }
+.tl-dot.future { background: #fff; border-color: var(--line); }
+.tl-label { font-size: 9px; color: var(--dim); }
 
 .footer { text-align: center; padding: 20px; color: var(--dim); font-size: 11px; border-top: 1px solid var(--line); margin-top: 20px; }
 .loading { text-align: center; padding: 40px; color: var(--dim); font-size: 14px; }
-.refresh-btn { cursor: pointer; color: var(--gold); font-weight: 600; font-size: 12px; }
-
 @media (max-width: 768px) { .card { min-width: 100%; } .card.wide { min-width: 100%; } .kpi-card { min-width: 140px; } }
-
-/* Login */
-.login-overlay {
-  position:fixed; inset:0; background:rgba(0,0,0,.75); display:flex;
-  align-items:center; justify-content:center; z-index:10000;
-}
-.login-box {
-  background:#fff; padding:40px; border-radius:16px; box-shadow:0 12px 40px rgba(0,0,0,.3);
-  text-align:center; max-width:360px; width:90%;
-}
-.login-box h2 { font-size:22px; margin-bottom:6px; }
-.login-box p { color:#8c7b6b; font-size:13px; margin-bottom:20px; }
-.login-box input {
-  width:100%; padding:12px 16px; border-radius:10px; border:2px solid #e0d6c8;
-  font-size:16px; text-align:center; margin-bottom:14px;
-}
-.login-box input:focus { outline:none; border-color:#c88a3d; }
-.login-box button {
-  width:100%; padding:12px; border-radius:10px; background:#c88a3d; color:#fff;
-  border:none; font-size:15px; font-weight:600; cursor:pointer;
-}
-.login-box button:hover { opacity:.9; }
-.login-error { color:#e57373; font-size:12px; margin-top:8px; display:none; }
 </style>
 </head>
 <body>
 
-<div class="login-overlay" id="loginOverlay">
-  <div class="login-box">
-    <h2>🔐 Scrum Dashboard</h2>
-    <p>Acceso restringido · Madre Monte</p>
-    <input type="password" id="passInput" placeholder="Clave de acceso" autofocus>
-    <button onclick="checkPass()">Ingresar</button>
-    <p class="login-error" id="loginError">Clave incorrecta</p>
-  </div>
-</div>
-
-<div id="mainContent" style="display:none;">
-
 <header class="topbar">
-  <div class="brand"><h1>📊 Scrum <span>Madre Monte</span></h1><p id="fecha-actualizacion">Cargando datos...</p></div>
+  <div class="brand"><h1>Scrum <span>Madre Monte</span></h1><p id="fecha-actualizacion">Cargando datos...</p></div>
   <div class="topbar-meta" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
     <span class="pill wk" id="pill-semana">Semana --</span>
-    <span class="pill" id="pill-sprint">Sprint --</span>
-    <span class="pill nolink"><a href="https://johnnyartesano26.github.io/dashboard-maestro/" target="_blank">📊 Dashboard Maestro ↗</a></span>
-    <span class="pill nolink"><a href="https://johnnyartesano26.github.io/madremonte-dashboard/bar.html" target="_blank">🍺 Bar Dashboard ↗</a></span>
+    <span class="pill" id="pill-sprint">Sprint actual</span>
+    <span class="pill"><a href="https://johnnyartesano26.github.io/dashboard-maestro/" target="_blank">Dashboard Maestro ↗</a></span>
+    <span class="pill"><a href="https://johnnyartesano26.github.io/madremonte-dashboard/bar.html" target="_blank">Bar Dashboard ↗</a></span>
   </div>
 </header>
 
 <main>
 
-<!-- KPIs EN VIVO -->
-<div class="kpi-row" id="kpi-row">
-  <div class="kpi-card"><div class="kpi-label">Loading...</div></div>
-</div>
+<!-- KPIs -->
+<div class="kpi-row" id="kpi-row"></div>
 
 <!-- TIMELINE -->
-<div class="card wide" style="margin-bottom:24px;">
+<div class="card full" style="margin-bottom:24px;">
   <h2 id="timeline-title">⏳ Progreso Trimestral</h2>
   <div class="timeline" id="timeline"></div>
-  <div class="chart-wrap"><canvas id="chart-progress"></canvas></div>
 </div>
 
+<!-- ROW 1: Inventario (producto terminado) + Producción (fermentadores) -->
 <div class="row">
-  <!-- VENTAS SEMANALES -->
   <div class="card">
-    <h2>💰 Ventas Bar — Última Semana</h2>
-    <div class="chart-wrap"><canvas id="chart-ventas-semana"></canvas></div>
-    <div id="ventas-semana-resumen" style="text-align:center;padding-top:8px;font-size:13px;color:var(--dim);"></div>
+    <h2>📦 Inventario — Producto Terminado</h2>
+    <div class="note-box">Solo producto terminado (materias primas no incluidas por ahora).</div>
+    <div id="inventario-list"><div class="loading">Cargando inventario...</div></div>
   </div>
-
-  <!-- FACTURAS PENDIENTES -->
-  <div class="card">
-    <h2>⚠️ Cartera por Cobrar</h2>
-    <div id="cartera-list"></div>
+  <div class="card wide">
+    <h2>🏭 Producción — Fermentadores</h2>
+    <div id="fermentadores-list"><div class="loading">Cargando producción...</div></div>
   </div>
 </div>
 
+<!-- ROW 2: Sprint board + Alertas -->
 <div class="row">
-  <!-- OBJETIVO 1: Estilos -->
-  <div class="card">
-    <div class="obj-header">
-      <div class="obj-badge ok">100%</div>
-      <div class="obj-info"><h3>Objetivo 1: Mantener 5 estilos base</h3><p>Sostenido · Q3</p></div>
-    </div>
-    <div class="ind-row"><span class="ind-icon">🍺</span><span class="ind-label">Golden · Siempre Viva</span><span class="ind-status check">OK</span></div>
-    <div class="ind-row"><span class="ind-icon">🍺</span><span class="ind-label">APA · Cienfuegos</span><span class="ind-status check">OK</span></div>
-    <div class="ind-row"><span class="ind-icon">🍺</span><span class="ind-label">IPA · Vagabundo</span><span class="ind-status check">OK</span></div>
-    <div class="ind-row"><span class="ind-icon">🍺</span><span class="ind-label">Irish Red · Mística</span><span class="ind-status check">OK</span></div>
-    <div class="ind-row"><span class="ind-icon">🍺</span><span class="ind-label">Stout · Sangre Negra</span><span class="ind-status check">OK</span></div>
-    <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--line);">
-      <div class="ind-row"><span class="ind-icon">🏭</span><span class="ind-label">Ocupación fermentadores</span><span class="ind-value" id="ocupacion-tanques">--</span></div>
-      <div class="ind-row"><span class="ind-icon">📦</span><span class="ind-label">Stock botellas</span><span class="ind-value" id="stock-botellas">--</span></div>
-      <div class="ind-row"><span class="ind-icon">⚠️</span><span class="ind-label">Alertas inventario</span><span class="ind-value" id="alertas-inv">--</span></div>
-    </div>
-  </div>
-
-  <!-- OBJETIVO 2: Temporada + Copas -->
-  <div class="card">
-    <div class="obj-header">
-      <div class="obj-badge progress" id="obj2-badge">--%</div>
-      <div class="obj-info"><h3>Objetivo 2: Temporada IPA, Copas y Eventos</h3><p>En progreso · Q3</p></div>
-    </div>
-    <div id="obj2-indicators"></div>
-    <div class="chart-wrap" style="margin-top:10px;"><canvas id="chart-obj2"></canvas></div>
-  </div>
-</div>
-
-<div class="row">
-  <!-- SPRINT BOARD -->
   <div class="card wide">
     <h2>🏃 Sprint — Tablero</h2>
     <div class="sprint-grid" id="sprint-board"></div>
   </div>
+  <div class="card">
+    <h2>⚠️ Alertas Activas</h2>
+    <div id="alertas-list"></div>
+  </div>
 </div>
 
-<div class="row">
-  <!-- CONSECUTIVO -->
-  <div class="card" id="card-consecutivo">
-    <h2>🔢 Consecutivo Facturas</h2>
-    <div id="consecutivo-data"></div>
+<!-- ROW 3: Visitas Invima (full width) -->
+<div class="card full" style="margin-bottom:24px;">
+  <h2>🏥 Visitas Invima — Lista de Chequeo</h2>
+  <p style="font-size:13px;color:var(--body);margin-bottom:12px;">
+    Preparación para la primera visita de Invima. Clasificadas en <strong>Urgentes</strong> e <strong>Importantes</strong> con su responsable.
+  </p>
+  <div style="margin-bottom:14px;">
+    <button class="filter-btn active" data-filter="Todos" onclick="filtrarInvima('Todos', this)">Todos</button>
+    <button class="filter-btn" data-filter="Urgente" onclick="filtrarInvima('Urgente', this)">Urgentes</button>
+    <button class="filter-btn" data-filter="Importante" onclick="filtrarInvima('Importante', this)">Importantes</button>
   </div>
+  <div id="invima-resumen" style="margin-bottom:12px;"></div>
+  <div style="overflow-x:auto;">
+    <table id="invima-table">
+      <thead>
+        <tr><th>ID</th><th>Item</th><th>Categoría</th><th>Clasificación</th><th>Responsable</th><th>Estado</th></tr>
+      </thead>
+      <tbody id="invima-tbody"></tbody>
+    </table>
+  </div>
+</div>
 
-  <!-- HITOS + EVENTOS -->
+<!-- ROW 4: Cartera + Eventos -->
+<div class="row">
+  <div class="card">
+    <h2>💰 Cartera por Cobrar</h2>
+    <div id="cartera-list"></div>
+  </div>
   <div class="card">
     <h2>📅 Próximos Eventos</h2>
     <div id="eventos-list"></div>
   </div>
 </div>
 
+<!-- ROW 5: Kaizen -->
+<div class="card full" style="margin-bottom:24px;">
+  <h2>🔁 Kaizen — Micro-mejoras</h2>
+  <div id="kaizen-list"></div>
+</div>
+
 </main>
 
 <footer class="footer" id="footer-text">Scrum Dashboard · Madre Monte · Q3 2026</footer>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-// ═══ AUTH ═══
-const PASS = 'MadreMonte2026';
-function checkPass() {
-  if (document.getElementById('passInput').value === PASS) {
-    document.getElementById('loginOverlay').style.display = 'none';
-    document.getElementById('mainContent').style.display = 'block';
-    initDashboard();
-  } else {
-    document.getElementById('loginError').style.display = 'block';
-  }
-}
-document.getElementById('passInput').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') checkPass();
-});
-
 // ═══ CONFIG ═══
-const SEMANA = 4, TOTAL_SEMANAS = 12;
-const DATA_BASE = 'https://johnnyartesano26.github.io/dashboard-maestro/data';
-const CATALOGO_URL = 'https://johnnyartesano26.github.io/dashboard-maestro/catalogo.json';
 const Q3_INICIO = new Date('2026-07-01');
-let charts = [];
+const TOTAL_SEMANAS = 13;
+const DATA_BASE = 'https://johnnyartesano26.github.io/dashboard-maestro/data';
 
-function fmt(n, dec) { return n.toLocaleString('es-CO', dec ? {minimumFractionDigits:2,maximumFractionDigits:2} : {maximumFractionDigits:0}); }
+function fmt(n) { return (n||0).toLocaleString('es-CO', {maximumFractionDigits:0}); }
 function fmt$(n) { return '$' + fmt(n); }
-function pct(a, b) { return b > 0 ? Math.round(a / b * 100) : 0; }
 
-// ═══ DATA FETCH ═══
 async function fetchJSON(url) {
   try {
     const resp = await fetch(url);
@@ -287,105 +237,84 @@ async function fetchJSON(url) {
   } catch(e) { console.warn('Fetch failed:', url, e); return null; }
 }
 
+function semanaActual() {
+  const diff = Math.floor((Date.now() - Q3_INICIO.getTime()) / (7 * 86400000)) + 1;
+  return Math.max(1, Math.min(TOTAL_SEMANAS, diff));
+}
+
 // ═══ INIT ═══
-async function initDashboard() {
-  document.getElementById('pill-semana').textContent = `Semana ${SEMANA} · ${TOTAL_SEMANAS}`;
-  document.getElementById('pill-sprint').textContent = `Sprint "Temporada IPA" · 20 jul - 2 ago`;
-  document.getElementById('timeline-title').textContent = `⏳ Progreso Trimestral — Semana ${SEMANA} de ${TOTAL_SEMANAS}`;
+async function init() {
+  const semana = semanaActual();
+  document.getElementById('pill-semana').textContent = `Semana ${semana} · ${TOTAL_SEMANAS}`;
+  document.getElementById('pill-sprint').textContent = `Q3 2026 · ${new Date().toLocaleDateString('es-CO', {day:'numeric', month:'short'})}`;
+  document.getElementById('timeline-title').textContent = `⏳ Progreso Trimestral — Semana ${semana} de ${TOTAL_SEMANAS}`;
+  document.getElementById('fecha-actualizacion').textContent = `Actualizado: ${new Date().toLocaleDateString('es-CO', {weekday:'long', day:'numeric', month:'long', year:'numeric'})}`;
   document.getElementById('footer-text').textContent = `Scrum Dashboard · Madre Monte · Q3 2026 · ${new Date().toLocaleDateString('es-CO')}`;
 
-  buildTimeline();
+  buildTimeline(semana);
 
-  const [ventasMensuales, facturas, catalogo] = await Promise.all([
+  const [ledger, invima, ventas, facturas] = await Promise.all([
+    fetchJSON('data/ledger_inventario.json'),
+    fetchJSON('data/invima_checklist.json'),
     fetchJSON(DATA_BASE + '/ventas_mensuales.json'),
     fetchJSON(DATA_BASE + '/facturas_detalle.json'),
-    fetchJSON(CATALOGO_URL),
   ]);
 
-  if (ventasMensuales) renderKPIs(ventasMensuales, facturas);
-  if (facturas) renderFacturas(facturas, ventasMensuales);
-  if (ventasMensuales) renderVentasSemana(ventasMensuales);
-  if (catalogo) renderInventario(catalogo);
-  renderObjetivo2();
+  renderProduccion(ledger);
+  renderInventario(ledger);
+  renderInvima(invima);
+  renderAlertas(ledger);
   renderSprintBoard();
   renderEventos();
-  renderTimelineChart();
-
-  document.getElementById('fecha-actualizacion').textContent = `Datos: ${facturas ? facturas.actualizado || 'dashboard-maestro' : 'sin conexión'} · Q3 2026`;
+  renderKaizen();
+  renderKPIs(ventas, facturas, ledger, invima);
+  renderCartera(facturas);
 }
 
 // ═══ TIMELINE ═══
-function buildTimeline() {
+function buildTimeline(semana) {
   const tl = document.getElementById('timeline');
-  const pct = Math.round(SEMANA / TOTAL_SEMANAS * 100);
+  const pct = Math.round(semana / TOTAL_SEMANAS * 100);
   let dots = '';
   for (let w = 1; w <= TOTAL_SEMANAS; w++) {
-    const cls = w < SEMANA ? 'done' : (w === SEMANA ? 'current' : 'future');
-    dots += `<div class="tl-week"><div class="tl-dot ${cls}"></div><div class="tl-label"><strong>S${w}</strong></div></div>`;
+    const cls = w < semana ? 'done' : (w === semana ? 'current' : 'future');
+    dots += `<div class="tl-week"><div class="tl-dot ${cls}"></div><div class="tl-label">S${w}</div></div>`;
   }
   tl.innerHTML = `<div class="timeline-track"><div class="timeline-fill" style="width:${pct}%"></div></div><div class="timeline-weeks">${dots}</div>`;
 }
 
-function renderTimelineChart() {
-  const ctx = document.getElementById('chart-progress').getContext('2d');
-  // S1: setup, S2: Desfile Silleteros, S3: Bazar Confianza, S4: esta semana
-  const progress = [8, 18, 24, 30, null, null, null, null, null, null, null, null];
-  const ideal = [8, 16, 25, 33, 42, 50, 58, 67, 75, 83, 92, 100];
-  
-  charts.push(new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: ['S1','S2','S3','S4','S5','S6','S7','S8','S9','S10','S11','S12'],
-      datasets: [{
-        label: 'Progreso real', data: progress,
-        borderColor: '#c88a3d', backgroundColor: 'rgba(200,138,61,.08)', borderWidth: 3,
-        pointRadius: 6, pointBackgroundColor: '#c88a3d', tension: .3, fill: true,
-      }, {
-        label: 'Meta ideal', data: ideal,
-        borderColor: '#d6c9b8', borderDash: [5, 3], borderWidth: 2, pointRadius: 0, tension: .3, fill: false,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      plugins: {
-        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + c.raw + '%' } },
-        legend: { labels: { usePointStyle: true, boxWidth: 8 } }
-      },
-      scales: {
-        y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#e8e0d6' } },
-        x: { grid: { display: false } }
-      }
-    }
-  }));
-}
-
 // ═══ KPIs ═══
-function renderKPIs(ventas, facturas) {
-  const jul = ventas.find(v => v.mes === 'Jul 26') || ventas[ventas.length-1];
-  const totalVentas = ventas.reduce((s, v) => s + v.total_ventas, 0);
-  const promDiario = jul ? jul.promedio_diario : 0;
-  const metaSemanal = 21000000;
-  const semanalEst = promDiario * 7;
-  const metaJul = jul ? (jul.meta_mes || 24000000) : 24000000;
-  const progresoJul = jul ? pct(jul.total_ventas, metaJul) : 0;
+function renderKPIs(ventas, facturas, ledger, invima) {
+  let totalLitros = 0;
+  if (ledger && ledger.fermentadores) {
+    Object.values(ledger.fermentadores).forEach(f => totalLitros += (f.litros || 0));
+  }
+  let botellas = 0;
+  if (ledger && ledger.saldos && ledger.saldos.botella) {
+    Object.values(ledger.saldos.botella).forEach(b => botellas += (b.unidades || 0));
+  }
+  const urgentes = invima ? invima.items.filter(i => i.clasificacion === 'Urgente' && i.estado !== 'Listo').length : '--';
+  const listos = invima ? invima.items.filter(i => i.estado === 'Listo').length : 0;
+  const totalInvima = invima ? invima.items.length : 0;
 
-  let pendientes = 0, pendMonto = 0;
-  if (facturas) {
+  const jul = ventas && ventas.length ? (ventas.find(v => v.mes === 'Jul 26') || ventas[ventas.length-1]) : null;
+  const ventasMes = jul ? jul.total_ventas : 0;
+
+  let pendMonto = 0, pendCount = 0;
+  if (facturas && facturas.facturas) {
     facturas.facturas.forEach(f => {
       if (f.pago_realizado && f.pago_realizado.toLowerCase().includes('debe')) {
-        pendientes++;
-        pendMonto += (f.valor || 0) + (f.domicilio || 0);
+        pendCount++; pendMonto += (f.valor || 0) + (f.domicilio || 0);
       }
     });
   }
 
   const kpis = [
-    { val: fmt$(totalVentas), label: 'Ventas Bar 2026', sub: 'Nov 25 — Jul 26', trend: '', cls: '' },
-    { val: fmt$(jul ? jul.total_ventas : 0), label: 'Julio Ventas Bar', sub: `${jul ? jul.dias_con_dato : '?'} días · meta ${fmt$(metaJul)}`, trend: progresoJul >= 65 ? 'up' : 'warn', cls: `(${progresoJul}%)` },
-    { val: fmt$(promDiario), label: 'Promedio Diario Julio', sub: `Meta semanal: ${fmt$(metaSemanal)}`, trend: semanalEst >= metaSemanal ? 'up' : 'warn', cls: `${fmt$(semanalEst)}/sem est` },
-    { val: facturas ? facturas.total_facturas : '--', label: 'Facturas Registradas', sub: facturas ? `FE: ${facturas.total_fe} · RC: ${facturas.total_rc}` : '', trend: '', cls: '' },
-    { val: fmt$(pendMonto), label: 'Cartera Pendiente', sub: `${pendientes} facturas 'debe'`, trend: pendientes > 10 ? 'down' : 'warn', cls: '' },
-    { val: facturas ? facturas.total_con_domicilio : 0, label: 'Facturación Total 2026', sub: facturas ? fmt$(facturas.total_general) + ' + domicilios' : '', trend: 'up', cls: '' },
+    { val: jul ? fmt$(ventasMes) : '--', label: 'Ventas Bar Julio', sub: jul ? `${jul.dias_con_dato || '?'} días` : 'sin conexión', cls: '' },
+    { val: fmt(totalLitros) + 'L', label: 'Litros en fermentación', sub: 'producción en curso', cls: 'warn' },
+    { val: fmt(botellas), label: 'Botellas (producto terminado)', sub: 'stock en bodega', cls: botellas > 0 ? 'up' : 'down' },
+    { val: urgentes, label: 'Urgentes Invima', sub: `${listos}/${totalInvima} listos`, cls: urgentes > 0 ? 'down' : 'up' },
+    { val: fmt$(pendMonto), label: 'Cartera pendiente', sub: `${pendCount} facturas 'debe'`, cls: pendCount > 0 ? 'warn' : 'up' },
   ];
 
   document.getElementById('kpi-row').innerHTML = kpis.map(k => `
@@ -393,204 +322,218 @@ function renderKPIs(ventas, facturas) {
       <div class="kpi-val">${k.val}</div>
       <div class="kpi-label">${k.label}</div>
       <div class="kpi-sub">${k.sub}</div>
-      ${k.trend ? `<span class="kpi-trend ${k.trend}">${k.cls}</span>` : ''}
+      ${k.cls ? `<span class="kpi-trend ${k.cls}">●</span>` : ''}
     </div>
   `).join('');
 }
 
-// ═══ CARTERA ═══
-function renderFacturas(facturas, ventas) {
-  if (!facturas) return;
-
-  const deudas = {};
-  facturas.facturas.forEach(f => {
-    if (f.pago_realizado && f.pago_realizado.toLowerCase().includes('debe')) {
-      const key = f.cliente;
-      if (!deudas[key]) deudas[key] = { monto: 0, facturas: [] };
-      deudas[key].monto += (f.valor || 0) + (f.domicilio || 0);
-      deudas[key].facturas.push(f.factura);
-    }
-  });
-
-  const sorted = Object.entries(deudas).sort((a, b) => b[1].monto - a[1].monto);
-  document.getElementById('cartera-list').innerHTML = sorted.length === 0
-    ? '<div style="text-align:center;padding:20px;color:var(--green);">✅ Sin cartera pendiente</div>'
-    : sorted.map(([cliente, d]) => `
-      <div class="ind-row">
-        <span class="ind-icon">🔴</span>
-        <span class="ind-label">${cliente}<br><small style="color:var(--dim)">${d.facturas.slice(0,3).join(', ')}${d.facturas.length > 3 ? '...' : ''}</small></span>
-        <span class="ind-value">${fmt$(d.monto)}</span>
-      </div>
-    `).join('');
-
-  // Consecutivo
-  if (facturas) {
-    const fe = facturas.facturas.filter(f => f.tipo === 'FE');
-    const rc = facturas.facturas.filter(f => f.tipo === 'RC');
-    const feNums = fe.map(f => f.numero).filter(n => n > 0).sort((a,b) => a-b);
-    const rcNums = rc.map(f => f.numero).filter(n => n > 0).sort((a,b) => a-b);
-
-    const feCompletitud = feNums.length > 0 ? pct(feNums.length, feNums[feNums.length-1] - feNums[0] + 1) : 0;
-    const rcRelevantes = rcNums.filter(n => n > 4000);
-    const rcCompletitud = rcRelevantes.length > 0 ? pct(rcRelevantes.length, rcRelevantes[rcRelevantes.length-1] - rcRelevantes[0] + 1) : 0;
-
-    document.getElementById('consecutivo-data').innerHTML = `
-      <div class="ind-row"><span class="ind-icon">📄</span><span class="ind-label">FE: ${feNums.length} facturas</span><span class="ind-value">${feCompletitud}%</span></div>
-      <div class="ind-row"><span class="ind-icon">🧾</span><span class="ind-label">RC (+4000): ${rcRelevantes.length} facturas</span><span class="ind-value">${rcCompletitud}%</span></div>
-      <div class="ind-row"><span class="ind-icon">📋</span><span class="ind-label">Total facturas registradas</span><span class="ind-value">${facturas.total_facturas}</span></div>
-      <div class="ind-row"><span class="ind-icon">👥</span><span class="ind-label">Clientes activos</span><span class="ind-value">${new Set(facturas.facturas.map(f => f.cliente)).size}</span></div>
-    `;
+// ═══ PRODUCCIÓN — FERMENTADORES ═══
+function renderProduccion(ledger) {
+  const container = document.getElementById('fermentadores-list');
+  if (!ledger || !ledger.fermentadores) {
+    container.innerHTML = '<div class="loading">Sin datos de producción.</div>';
+    return;
   }
-}
-
-// ═══ VENTAS SEMANA ═══
-function renderVentasSemana(ventas) {
-  if (!ventas) return;
-  const jul = ventas.find(v => v.mes === 'Jul 26');
-  if (!jul) return;
-
-  document.getElementById('ventas-semana-resumen').textContent = 
-    `Julio: ${fmt$(jul.total_ventas)} en ${jul.dias_con_dato} días · Meta mes: ${fmt$(jul.meta_mes || 24000000)}`;
-
-  const ctx = document.getElementById('chart-ventas-semana').getContext('2d');
-  const labels = ventas.map(v => v.mes);
-  const data = ventas.map(v => v.total_ventas);
-  const metas = ventas.map(v => v.meta_mes || null);
-  const colors = data.map((d, i) => {
-    const meta = metas[i];
-    if (!meta) return 'rgba(200,138,61,.7)';
-    return d >= meta ? 'rgba(76,175,80,.7)' : 'rgba(229,115,115,.7)';
-  });
-
-  charts.push(new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Ventas Bar', data: data,
-        backgroundColor: colors,
-        borderColor: '#fff', borderWidth: 1, borderRadius: 4,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => fmt$(c.raw) } } },
-      scales: {
-        y: { ticks: { callback: v => fmt$(v) }, grid: { color: '#e8e0d6' } },
-        x: { grid: { display: false } }
-      }
-    }
-  }));
-}
-
-// ═══ INVENTARIO ═══
-function renderInventario(catalogo) {
-  if (!catalogo) return;
-  const jun = catalogo.periodos.find(p => p.mes && p.mes.includes('Junio'));
-  if (!jun || !jun.inventario) return;
-  const inv = jun.inventario;
-
-  document.getElementById('ocupacion-tanques').textContent = inv.ocupacion_tanques ? inv.ocupacion_tanques + '%' : '--';
-  document.getElementById('stock-botellas').textContent = inv.botellas_stock ? inv.botellas_stock + ' und' : '--';
-  const alertas = inv.alertas || 0;
-  document.getElementById('alertas-inv').textContent = alertas;
-  document.getElementById('alertas-inv').style.color = alertas > 0 ? 'var(--red)' : 'var(--green)';
-}
-
-// ═══ OBJETIVO 2 ═══
-function renderObjetivo2() {
-  const items = [
-    { icon: '🍻', label: 'Cervezas temporada producidas', target: 3, current: 2, unit: 'estilos', detail: 'Red IPA (cocinando 21 jul) · Hoppy IPA · Doble IPA pendiente' },
-    { icon: '🏆', label: 'Competencias / Copas', target: 2, current: 1, unit: 'copas', detail: 'Copa IPA Montaña ✅ · Copa Raíces (cierre 8 ago)' },
-    { icon: '🎪', label: 'Eventos Q3', target: 4, current: 2, unit: 'eventos', detail: 'Silleteros ✓ · Bazar ✓ · IPA Day · Torneo Flores' },
-    { icon: '📋', label: 'IPA Day — preparación', target: 100, current: 40, unit: '%', detail: 'Batch IPA programado, falta marketing y logística' },
-    { icon: '🌱', label: 'Copa Raíces — inscripción (cierre 8 ago)', target: 100, current: 10, unit: '%', detail: 'Definir si participamos, estilo a inscribir, preparar muestra' },
-    { icon: '🌸', label: 'Torneo Flores — logística', target: 100, current: 50, unit: '%', detail: '✅ Confirmado: Golden Ale + 4 estilos más (5 total) · Neveras, vasos, personal pendientes' },
-  ];
-
-  const total = items.reduce((s, i) => s + (i.current / i.target) * (100 / items.length), 0);
-  document.getElementById('obj2-badge').textContent = Math.round(total) + '%';
-
-  document.getElementById('obj2-indicators').innerHTML = items.map(i => {
-    const pct2 = Math.min(100, Math.round(i.current / i.target * 100));
-    const barCls = pct2 >= 80 ? 'green' : (pct2 >= 40 ? 'gold' : 'amber');
-    const statusCls = pct2 >= 80 ? 'check' : (pct2 >= 40 ? 'wait' : 'warn');
-    const statusTxt = pct2 >= 80 ? '✓' : (pct2 >= 40 ? 'En curso' : 'Pendiente');
-    return `<div class="ind-row">
-      <span class="ind-icon">${i.icon}</span>
-      <span class="ind-label">${i.label}<br><small style="color:var(--dim)">${i.detail}</small></span>
-      <div class="ind-bar-wrap"><div class="ind-bar-fill ${barCls}" style="width:${pct2}%"></div></div>
-      <span class="ind-value">${i.current}/${i.target} ${i.unit}</span>
-      <span class="ind-status ${statusCls}">${statusTxt}</span>
+  let html = '', totalLitros = 0, totalCap = 0;
+  Object.values(ledger.fermentadores).forEach(f => {
+    const pct = f.porcentaje || Math.round((f.litros / f.capacidad) * 100);
+    totalLitros += f.litros || 0;
+    totalCap += f.capacidad || 0;
+    const barCls = pct >= 85 ? 'red' : (pct >= 60 ? 'amber' : 'green');
+    const statusCls = pct >= 85 ? 'crit' : (pct >= 60 ? 'warn' : 'ok');
+    const icono = f.litros <= 0 ? '⚪' : (pct >= 85 ? '🔴' : (pct >= 60 ? '🟡' : '🟢'));
+    html += `<div class="ind-row">
+      <span class="ind-icon">${icono}</span>
+      <span class="ind-label">${f.nombre}<br><small style="color:var(--dim)">${f.estilo || '—'}</small></span>
+      <div class="ind-bar-wrap"><div class="ind-bar-fill ${barCls}" style="width:${Math.min(100,pct)}%"></div></div>
+      <span class="ind-value">${fmt(f.litros)}L / ${fmt(f.capacidad)}L</span>
+      <span class="ind-status ${statusCls}">${pct}%</span>
     </div>`;
-  }).join('');
+  });
+  html += `<div class="ind-row" style="font-weight:700;border-top:2px solid var(--gold);margin-top:4px;padding-top:10px;">
+    <span class="ind-icon">🏭</span>
+    <span class="ind-label">TOTAL</span>
+    <span class="ind-value">${fmt(totalLitros)}L / ${fmt(totalCap)}L</span>
+    <span class="ind-status ok">${totalCap ? Math.round(totalLitros/totalCap*100) : 0}%</span>
+  </div>`;
+  container.innerHTML = html;
+}
 
-  const ctx = document.getElementById('chart-obj2').getContext('2d');
-  charts.push(new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: items.map(i => i.label.split(' ').slice(0, 2).join(' ')),
-      datasets: [{
-        label: 'Progreso', data: items.map(i => Math.round(i.current / i.target * 100)),
-        backgroundColor: items.map(i => {
-          const p = Math.round(i.current / i.target * 100);
-          return p >= 80 ? 'rgba(76,175,80,.7)' : (p >= 40 ? 'rgba(200,138,61,.7)' : 'rgba(255,193,7,.5)');
-        }),
-        borderColor: '#fff', borderWidth: 1, borderRadius: 6,
-      }]
-    },
-    options: {
-      indexAxis: 'y', responsive: true, maintainAspectRatio: true,
-      plugins: { tooltip: { callbacks: { label: (c) => c.raw + '% completado' } }, legend: { display: false } },
-      scales: {
-        x: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#e8e0d6' } },
-        y: { grid: { display: false }, ticks: { font: { size: 10 } } }
-      }
-    }
-  }));
+// ═══ INVENTARIO — PRODUCTO TERMINADO ═══
+function renderInventario(ledger) {
+  const container = document.getElementById('inventario-list');
+  if (!ledger || !ledger.saldos) {
+    container.innerHTML = '<div class="loading">Sin datos de inventario.</div>';
+    return;
+  }
+  const estilos = Object.keys(ledger.saldos.botella || {}).filter(e => e !== 'VACIO');
+  let html = '<table><thead><tr><th>Estilo</th><th>Botellas (und)</th><th>Barril (L)</th></tr></thead><tbody>';
+  let totBot = 0, totBarril = 0;
+  estilos.forEach(est => {
+    const b = ledger.saldos.botella[est] || {};
+    const k = ledger.saldos.barril ? (ledger.saldos.barril[est] || {}) : {};
+    const und = b.unidades || 0;
+    const lit = k.litros || 0;
+    totBot += und; totBarril += lit;
+    html += `<tr><td><strong>${est}</strong></td><td>${fmt(und)}</td><td>${fmt(lit)}</td></tr>`;
+  });
+  html += `<tr style="font-weight:700;"><td>TOTAL</td><td>${fmt(totBot)}</td><td>${fmt(totBarril)}</td></tr></tbody></table>`;
+
+  const botellasVacias = ledger.insumos && ledger.insumos.botellas_vacias_limpias;
+  if (botellasVacias) {
+    html += `<div style="margin-top:12px;font-size:12px;color:var(--body);">
+      <strong>Botellas vacías limpias:</strong> ${fmt(botellasVacias.stock)} und
+      ${botellasVacias.estado === 'AGOTADO' ? '· <span class="badge urgente">AGOTADO</span>' : ''}
+    </div>`;
+  }
+  container.innerHTML = html;
+}
+
+// ═══ VISITAS INVIMA ═══
+let invimaData = [];
+function renderInvima(data) {
+  const container = document.getElementById('invima-table');
+  if (!data || !data.items) {
+    document.getElementById('invima-tbody').innerHTML = '<tr><td colspan="6">Sin datos de la lista de chequeo.</td></tr>';
+    return;
+  }
+  invimaData = data.items;
+  const urgentes = data.items.filter(i => i.clasificacion === 'Urgente').length;
+  const importantes = data.items.filter(i => i.clasificacion === 'Importante').length;
+  const listos = data.items.filter(i => i.estado === 'Listo').length;
+  document.getElementById('invima-resumen').innerHTML =
+    `<span class="badge urgente">${urgentes} Urgentes</span>
+     <span class="badge importante">${importantes} Importantes</span>
+     <span class="badge listo">${listos} Listos</span>
+     <span style="font-size:12px;color:var(--dim);margin-left:6px;">de ${data.items.length} items · actualizado ${data.actualizado || '—'}</span>`;
+  pintarInvima(data.items);
+}
+
+function pintarInvima(items) {
+  const tbody = document.getElementById('invima-tbody');
+  tbody.innerHTML = items.map(i => {
+    const claCls = i.clasificacion === 'Urgente' ? 'urgente' : 'importante';
+    let estCls = 'pendiente';
+    if (i.estado === 'Listo') estCls = 'listo';
+    else if (i.estado === 'En progreso') estCls = 'progreso';
+    return `<tr>
+      <td><strong>${i.id}</strong></td>
+      <td>${i.item}${i.nota ? `<br><small style="color:var(--dim)">${i.nota}</small>` : ''}</td>
+      <td>${i.categoria}</td>
+      <td><span class="badge ${claCls}">${i.clasificacion}</span></td>
+      <td>${i.responsable}</td>
+      <td><span class="badge ${estCls}">${i.estado}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function filtrarInvima(filtro, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const items = filtro === 'Todos' ? invimaData : invimaData.filter(i => i.clasificacion === filtro);
+  pintarInvima(items);
 }
 
 // ═══ SPRINT BOARD ═══
 function renderSprintBoard() {
   const tasks = [
-    { name: 'Cocinar Red IPA (esta semana 21 jul)', owner: 'Maestro Cervecero', status: 'ongoing' },
-    { name: 'Alcanzar meta semanal $21M (bar + vendedores)', owner: 'Todos', status: 'ongoing' },
-    { name: 'Producir batch IPA para IPA Day (post-Red)', owner: 'Maestro Cervecero', status: 'pending' },
-    { name: 'Revisar alerta de inventario activa', owner: 'Maestro Cervecero', status: 'ongoing' },
-    { name: 'Definir logística Torneo de las Flores (1 ago)', owner: 'Johnny + Equipo', status: 'ongoing' },
-    { name: 'Preparar material IPA Day (marketing, promos)', owner: 'Robotina', status: 'pending' },
-    { name: 'Decidir inscripción Copa Raíces (cierre 8 ago)', owner: 'Johnny', status: 'ongoing' },
-    { name: 'Actualizar dashboard maestro (consolidar ventas)', owner: 'MULTIVAC', status: 'done' },
+    { name: 'Llenar Forms inventario semanal', owner: 'Cervecero', status: 'done' },
+    { name: 'Pipeline async de facturación', owner: 'Z1 + Johnny', status: 'done' },
+    { name: 'Embotellar / embarrilar producción (botellas y barril en 0)', owner: 'Producción', status: 'ongoing' },
+    { name: 'Cerrar 35 facturas draft ($3.77M)', owner: 'Johnny', status: 'ongoing' },
+    { name: 'Módulo notas crédito automático', owner: 'Johnny', status: 'ongoing' },
+    { name: 'Preparar checklist Visitas Invima con el equipo', owner: 'Johnny + Equipo', status: 'ongoing' },
+    { name: 'Cocinar APA (0L — alerta roja)', owner: 'Maestro Cervecero', status: 'pending' },
+    { name: 'Cocinar Red IPA (0L)', owner: 'Maestro Cervecero', status: 'pending' },
+    { name: 'Pedir levadura US-05 (1kg)', owner: 'Producción', status: 'pending' },
+    { name: 'Comprar Malta Pale Ale (10kg)', owner: 'Producción', status: 'pending' },
+    { name: 'Verificar F3 Principito', owner: 'Producción', status: 'pending' },
+    { name: 'Activar Google Calendar OAuth', owner: 'Johnny', status: 'pending' },
   ];
-
-  document.getElementById('sprint-board').innerHTML = tasks.map(t => {
-    const icons = { done: '✅', ongoing: '🟡', pending: '⬜', blocked: '🔴' };
-    return `<div class="sprint-task ${t.status}">
-      <span class="task-status">${icons[t.status]}</span>
+  const iconos = { done: '✅', ongoing: '🔄', pending: '⬜', blocked: '🚫' };
+  document.getElementById('sprint-board').innerHTML = tasks.map(t =>
+    `<div class="sprint-task ${t.status}">
+      <span class="task-icon">${iconos[t.status]}</span>
       <span class="task-name">${t.name}</span>
       <span class="task-owner">${t.owner}</span>
-    </div>`;
-  }).join('');
+    </div>`).join('');
+}
+
+// ═══ ALERTAS ═══
+function renderAlertas(ledger) {
+  const alertas = [];
+  if (ledger && ledger.alertas) {
+    ledger.alertas.forEach(a => {
+      if (a.tipo === 'BOTELLAS_VACIAS') alertas.push({ icon: '🔴', crit: true, text: a.mensaje });
+    });
+  }
+  const hasCritBotellas = alertas.length > 0;
+  alertas.push({ icon: '🔴', crit: true, text: 'Botellas de producto terminado: 0 — hay que embotellar/embarrilar.' });
+  alertas.push({ icon: '🔴', crit: true, text: 'APA y Red IPA sin producción (0L) — programar cocción.' });
+  alertas.push({ icon: '🟡', crit: false, text: '35 facturas draft ($3.77M) — cerrar esta semana.' });
+  alertas.push({ icon: '🟡', crit: false, text: 'Levadura US-05 (500g) y Malta Pale Ale (0.75kg) por comprar.' });
+  alertas.push({ icon: '🟡', crit: false, text: 'Google Calendar OAuth pendiente.' });
+  document.getElementById('alertas-list').innerHTML = alertas.map(a =>
+    `<div class="alert-card ${a.crit ? '' : 'warning'}">
+      <span class="alert-icon">${a.icon}</span>
+      <span class="alert-text">${a.text}</span>
+    </div>`).join('');
+}
+
+// ═══ CARTERA ═══
+function renderCartera(facturas) {
+  const container = document.getElementById('cartera-list');
+  if (!facturas || !facturas.facturas) {
+    container.innerHTML = '<div class="loading">Sin datos de facturación.</div>';
+    return;
+  }
+  const deudas = {};
+  facturas.facturas.forEach(f => {
+    if (f.pago_realizado && f.pago_realizado.toLowerCase().includes('debe')) {
+      const key = f.cliente || 'Sin nombre';
+      if (!deudas[key]) deudas[key] = { monto: 0, facturas: [] };
+      deudas[key].monto += (f.valor || 0) + (f.domicilio || 0);
+      deudas[key].facturas.push(f.factura);
+    }
+  });
+  const sorted = Object.entries(deudas).sort((a, b) => b[1].monto - a[1].monto);
+  container.innerHTML = sorted.length === 0
+    ? '<div style="text-align:center;padding:20px;color:var(--green);">✅ Sin cartera pendiente</div>'
+    : sorted.slice(0, 10).map(([cliente, d]) =>
+      `<div class="ind-row">
+        <span class="ind-icon">🔴</span>
+        <span class="ind-label">${cliente}<br><small style="color:var(--dim)">${d.facturas.slice(0,3).join(', ')}${d.facturas.length > 3 ? '…' : ''}</small></span>
+        <span class="ind-value">${fmt$(d.monto)}</span>
+      </div>`).join('');
 }
 
 // ═══ EVENTOS ═══
 function renderEventos() {
   const eventos = [
-    { nombre: 'Desfile de Silleteros', fecha: '5 jul', estado: '✅' },
-    { nombre: 'Bazar de la Confianza', fecha: '12 jul', estado: '✅' },
-    { nombre: 'Cocción Red IPA', fecha: '21 jul', estado: '🟡' },
-    { nombre: 'Cocción Doble IPA', fecha: '23 jul', estado: '🟡' },
-    { nombre: 'Torneo de las Flores', fecha: '1 ago', estado: '🟡' },
-    { nombre: 'IPA Day 🍻', fecha: '1-7 ago', estado: '🟡' },
-    { nombre: 'Copa IPA de la Montaña', fecha: 'Cerrada ✅', estado: '✅' },
-    { nombre: 'Copa Raíces', fecha: 'Cierre 8 ago', estado: '🟡' },
+    { nombre: 'Torneo de las Flores', fecha: '1 ago', estado: '✅' },
+    { nombre: 'IPA Day 🍻', fecha: '1-7 ago', estado: '✅' },
+    { nombre: 'Primera visita Invima (preparación)', fecha: 'Por definir', estado: '🟡' },
     { nombre: 'Fin Q3 — revisión objetivos', fecha: '21 sep', estado: '⬜' },
   ];
-
   document.getElementById('eventos-list').innerHTML = eventos.map(e =>
     `<div class="ind-row"><span class="ind-icon">${e.estado}</span><span class="ind-label"><strong>${e.nombre}</strong><br><span style="font-size:11px;color:var(--dim)">${e.fecha}</span></span></div>`
   ).join('');
 }
+
+// ═══ KAIZEN ═══
+function renderKaizen() {
+  const items = [
+    { icon: '📄', text: 'Facturas draft acumuladas → pipeline async de facturación (Z1 + Johnny)' },
+    { icon: '🧾', text: 'Notas crédito manuales → módulo NC automático (Johnny)' },
+    { icon: '📦', text: 'Inventario sin producto terminado visible → checklist embotellado/embarrilado (Producción)' },
+    { icon: '🏥', text: 'Sin preparación para Invima → lista de chequeo Urgente/Importante (Equipo)' },
+  ];
+  document.getElementById('kaizen-list').innerHTML = items.map(k =>
+    `<div class="kaizen-box"><div class="kaizen-icon">${k.icon}</div><div class="kaizen-text">${k.text}</div></div>`
+  ).join('');
+}
+
+init();
 </script>
 </body>
 </html>
