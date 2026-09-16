@@ -225,7 +225,7 @@ async function verificarPass() {
   const input = document.getElementById('gate-pass').value;
   const hashHex = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
   const hashStr = Array.from(new Uint8Array(hashHex)).map(b => b.toString(16).padStart(2,'0')).join('');
-  if (hashStr === '176f00676e67338a0a72d34c2b71058aafc76c6c790681ca0da2a35688864105') {
+  if (hashStr === '700686426580d0bb78aebaabf76399a10f806705c93c4e826f8c982f0028ab74') {
     document.getElementById('login-gate').remove();
   } else {
     document.getElementById('gate-msg').textContent = 'Contraseña incorrecta';
