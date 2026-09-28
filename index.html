@@ -738,23 +738,136 @@ function parseFermEstilo(raw) { if (!raw) return ''; const eq = raw.match(/=\s*(
 function parsePTL(raw) { if (!raw) return null; const m = raw.match(/\(PTL(\d+)\)/); return m ? { codigo: 'PTL' + m[1], estilo: mapEstiloSheet(raw.split(/ [–—-] /)[0].trim()) } : null; }
 function parsePTB(raw) { if (!raw) return null; const m = raw.match(/\(PTB(\d+)\)/); return m ? { codigo: 'PTB' + m[1], estilo: mapEstiloSheet(raw.split(/ [–—-] /)[0].trim()) } : null; }
 function nthHeader(headers, pat, n) { let found = 0; const pl = pat.toLowerCase(); for (let i = 0; i < headers.length; i++) { if (headers[i].replace(/\s+/g, ' ').trim().toLowerCase().startsWith(pl)) { if (found === n) return i; found++; } } return -1; }
-function parseOneRow(headers, row) {
-  function ci(pat) { const pl = pat.toLowerCase(); for (let i = 0; i < headers.length; i++) if (headers[i].replace(/\s+/g, ' ').trim().toLowerCase().startsWith(pl)) return i; return -1; }
+/* ── Forward-fill de inventario ─────────────────────────────────────────────
+   REGLA DEL README DE INVENTARIO ("Celda vacía = sin cambios"):
+   - Celda vacía  → conserva el último valor conocido (por tanque en fermentador,
+     por estilo en barril/botella).
+   - "0" explícito → significa "se agotó" (NO se confunde con vacío).
+   - "VACIO"      → tanque vaciado explícito (se resetea a 0).
+   El Sheet es un registro incremental (cada fila solo trae lo que cambió), por
+   eso hay que reproducir TODO el historial en orden cronológico, no leer solo
+   la última fila. Equivale a `procesar_historico` de nucleo_de_inventario.py.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+// Encuentra el índice de la primera columna cuyo encabezado empieza con `pat`.
+function ciHeader(headers, pat) {
+  const pl = pat.toLowerCase();
+  for (let i = 0; i < headers.length; i++) {
+    if (headers[i].replace(/\s+/g, ' ').trim().toLowerCase().startsWith(pl)) return i;
+  }
+  return -1;
+}
+
+// Convierte "DD/MM/YYYY HH:MM:SS" en "YYYYMMDDHHMMSS" para ordenar por fecha.
+function sortKey(ts) {
+  if (!ts) return '';
+  const m = String(ts).match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (!m) return '';
+  const d = m[1].padStart(2, '0'), mo = m[2].padStart(2, '0'), y = m[3];
+  const h = (m[4] || '0').padStart(2, '0'), mi = (m[5] || '0').padStart(2, '0'), s = (m[6] || '0').padStart(2, '0');
+  return y + mo + d + h + mi + s;
+}
+
+// Forward-fill de un fermentador (equivale a `_resolver_ferm` de nucleo).
+function resolveFerm(prev, litRaw, estRaw) {
+  prev = prev || { litros: 0, estilo: '' };
+  const litEmpty = litRaw == null || String(litRaw).trim() === '';
+  const estEmpty = estRaw == null || String(estRaw).trim() === '';
+  if (litEmpty && estEmpty) return { litros: prev.litros, estilo: prev.estilo }; // sin cambios
+  const estNorm = estEmpty ? null : parseFermEstilo(estRaw);
+  if (estNorm === 'VACIO') return { litros: 0, estilo: '' }; // tanque vaciado explícito
+  const litros = litEmpty ? prev.litros : (parseInt(String(litRaw).replace(',', '.')) || 0);
+  const estilo = estEmpty ? prev.estilo : (estNorm || '');
+  return { litros, estilo };
+}
+
+// Forward-fill de un par barril/botella (equivale a `_resolver_par` de nucleo).
+// Devuelve null si la celda está incompleta (no cambia); si no, {codigo, estilo, valor}.
+function resolvePar(cantRaw, estRaw, parseFn) {
+  const cantEmpty = cantRaw == null || String(cantRaw).trim() === '';
+  const estEmpty = estRaw == null || String(estRaw).trim() === '';
+  if (cantEmpty && estEmpty) return null;
+  if (cantEmpty || estEmpty) return null;
+  const parsed = parseFn(estRaw);
+  if (!parsed) return null;
+  const valor = parseFloat(String(cantRaw).replace(',', '.')) || 0;
+  return { codigo: parsed.codigo, estilo: parsed.estilo, valor };
+}
+
+// Reproduce todo el historial con forward-fill y devuelve el estado final + snapshots.
+function buildForwardFill(headers, rows) {
   const fermNames = ['F1 Frankie','F2 Igor','F3 Principito','F4 Gargantua','F5 Pantagruel','F6 Potter','F7 HighLander'];
-  const fermentadores = fermNames.map(name => {
-    const li = ci(name + ' - LITROS'), ei = ci(name + ' - ESTILO');
-    const litros = parseInt(row[li]) || 0;
-    const estilo = parseFermEstilo(row[ei] || '');
+
+  // Índices de columna por nombre (robusto a cambios de orden del formulario).
+  const fermIdx = fermNames.map(name => ({
+    li: ciHeader(headers, name + ' - LITROS'),
+    ei: ciHeader(headers, name + ' - ESTILO')
+  }));
+  const barrIdx = [];
+  for (let p = 0; p < 7; p++) barrIdx.push(nthHeader(headers, 'CANTIDAD', p));
+  const botIdx = [];
+  for (let p = 0; p < 6; p++) botIdx.push(nthHeader(headers, 'CANTIDAD DE UNIDADES', p));
+
+  // Estado persistente (se arrastra fila a fila).
+  const ferm = fermNames.map(() => ({ litros: 0, estilo: '' }));
+  const barril = {};   // codigo (PTLxx) -> {codigo, estilo, litros}
+  const botella = {};  // codigo (PTBxx) -> {codigo, estilo, cantidad}
+
+  const snapshots = [];
+
+  for (const row of rows) {
+    // Fermentadores F1..F7 (columnas 1..14, pares [LITROS, ESTILO]).
+    for (let k = 0; k < fermNames.length; k++) {
+      const litRaw = fermIdx[k].li >= 0 && fermIdx[k].li < row.length ? row[fermIdx[k].li] : '';
+      const estRaw = fermIdx[k].ei >= 0 && fermIdx[k].ei < row.length ? row[fermIdx[k].ei] : '';
+      ferm[k] = resolveFerm(ferm[k], litRaw, estRaw);
+    }
+
+    // Barriles (columnas 15..28): acumular por código dentro de la fila,
+    // porque un mismo estilo puede repetirse (ej. IPA 20 + 96 = 116 L).
+    const rowBarril = {};
+    for (const c of barrIdx) {
+      if (c < 0 || c + 1 >= row.length) continue;
+      const r = resolvePar(row[c], row[c + 1], parsePTL);
+      if (!r) continue;
+      const prev = rowBarril[r.codigo] || { codigo: r.codigo, estilo: r.estilo, litros: 0 };
+      rowBarril[r.codigo] = { codigo: r.codigo, estilo: r.estilo, litros: prev.litros + r.valor };
+    }
+    for (const cod in rowBarril) barril[cod] = rowBarril[cod];
+
+    // Botellas (columnas 29..40): idem.
+    const rowBot = {};
+    for (const c of botIdx) {
+      if (c < 0 || c + 1 >= row.length) continue;
+      const r = resolvePar(row[c], row[c + 1], parsePTB);
+      if (!r) continue;
+      const prev = rowBot[r.codigo] || { codigo: r.codigo, estilo: r.estilo, cantidad: 0 };
+      rowBot[r.codigo] = { codigo: r.codigo, estilo: r.estilo, cantidad: prev.cantidad + r.valor };
+    }
+    for (const cod in rowBot) botella[cod] = rowBot[cod];
+
+    // Snapshot para el gráfico de ocupación histórica.
+    snapshots.push({
+      ferm: ferm.map(f => ({ litros: f.litros, estilo: f.estilo })),
+      barril: { ...barril },
+      botella: { ...botella }
+    });
+  }
+
+  return { fermNames, ferm, barril, botella, snapshots };
+}
+
+// Convierte el estado resuelto (forward-fill) a la forma que espera renderProduccion.
+function estadoToData(fermNames, ferm, barril, botella) {
+  const fermentadores = fermNames.map((name, k) => {
+    const litros = ferm[k].litros;
+    const estilo = ferm[k].estilo;
     const cap = FERM_CAPACIDADES[name] || 0;
     const pct = cap ? Math.round(litros / cap * 100) : 0;
     let alarma = 'verde'; if (pct <= 20) alarma = 'roja'; else if (pct <= 40) alarma = 'amarilla';
     return { nombre: name, estilo, litros, capacidad: cap, porcentaje: pct, alarma };
   });
-  const barriles = [];
-  for (let p = 0; p < 8; p++) { const ci = nthHeader(headers, 'CANTIDAD', p); if (ci < 0 || ci >= row.length) break; const litros = parseFloat(row[ci]) || 0; const parsed = parsePTL(row[ci + 1] || ''); if (parsed) barriles.push({ codigo: parsed.codigo, estilo: parsed.estilo, litros }); }
-  const botellas = [];
-  for (let p = 0; p < 6; p++) { const ci = nthHeader(headers, 'CANTIDAD DE UNIDADES', p); if (ci < 0 || ci >= row.length) break; const cantidad = parseInt(row[ci]) || 0; const parsed = parsePTB(row[ci + 1] || ''); if (parsed) botellas.push({ codigo: parsed.codigo, estilo: parsed.estilo, cantidad }); }
-  return { fermentadores, barriles, botellas };
+  return { fermentadores, barriles: Object.values(barril), botellas: Object.values(botella) };
 }
 
 async function fetchSheetData() {
@@ -763,8 +876,18 @@ async function fetchSheetData() {
     const txt = await resp.text(); const lines = txt.trim().split('\n');
     if (lines.length < 2) return null;
     const headers = csvParseLine(lines[0]);
-    const last = csvParseLine(lines[lines.length - 1]);
-    const parsed = parseOneRow(headers, last);
+
+    // Leer TODAS las filas y ordenarlas por marca temporal (por si el
+    // formulario se editó fuera de orden), antes de aplicar forward-fill.
+    const rows = [];
+    for (let r = 1; r < lines.length; r++) rows.push(csvParseLine(lines[r]));
+    rows.sort((a, b) => sortKey(a[0]).localeCompare(sortKey(b[0])));
+
+    const res = buildForwardFill(headers, rows);
+    const parsed = estadoToData(res.fermNames, res.ferm, res.barril, res.botella);
+
+    // Rellenar los 5 estilos base con 0 si no aparecieron (para que siempre
+    // se muestren sus tarjetas, incluso con 0 de stock).
     ['PTL01','PTL02','PTL03','PTL04','PTL05'].forEach((cod, i) => {
       const ests = ['Golden Ale','Irish Red Ale','APA','IPA','Stout'];
       if (!parsed.barriles.find(b => b.codigo === cod)) parsed.barriles.push({codigo:cod, estilo:ests[i], litros:0});
@@ -773,6 +896,7 @@ async function fetchSheetData() {
       const ests = ['Golden Ale','Irish Red Ale','APA','IPA','Stout'];
       if (!parsed.botellas.find(b => b.codigo === cod)) parsed.botellas.push({codigo:cod, estilo:ests[i], cantidad:0});
     });
+
     return { generado: 'Google Sheets · ' + new Date().toISOString().split('T')[0], planta: 'Cervecería Madre Monte', fermentadores: parsed.fermentadores, barriles: parsed.barriles, botellas: parsed.botellas };
   } catch (e) { return null; }
 }
@@ -782,18 +906,24 @@ async function fetchSheetHistory() {
     const resp = await fetch(SHEET_CSV_URL); if (!resp.ok) return [];
     const txt = await resp.text(); const lines = txt.trim().split('\n');
     if (lines.length < 2) return [];
-    const headers = csvParseLine(lines[0]); const points = [];
-    for (let r = 1; r < lines.length; r++) {
-      const row = csvParseLine(lines[r]);
-      const parsed = parseOneRow(headers, row);
-      const totLit = parsed.fermentadores.reduce((s, f) => s + (f.litros || 0), 0);
-      const totCap = parsed.fermentadores.reduce((s, f) => s + (f.capacidad || 0), 0);
+    const headers = csvParseLine(lines[0]);
+
+    // Forward-fill sobre el historial completo; así una fila parcial (que solo
+    // actualiza un tanque) no hace caer la ocupación a ~0 en el gráfico.
+    const rows = [];
+    for (let r = 1; r < lines.length; r++) rows.push(csvParseLine(lines[r]));
+    rows.sort((a, b) => sortKey(a[0]).localeCompare(sortKey(b[0])));
+
+    const res = buildForwardFill(headers, rows);
+    const points = res.snapshots.map((snap, i) => {
+      const ts = rows[i][0] || '';
+      const totLit = snap.ferm.reduce((s, f) => s + (f.litros || 0), 0);
+      const totCap = TOTAL_CAP;
       const pct = totCap ? Math.round(totLit / totCap * 100) : 0;
-      const ts = row[0] || '';
-      const dateMatch = ts.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-      const label = dateMatch ? dateMatch[1] + '/' + dateMatch[2] : ('R' + r);
-      points.push({ label, pct, litros: totLit, capacidad: totCap });
-    }
+      const dateMatch = String(ts).match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      const label = dateMatch ? dateMatch[1] + '/' + dateMatch[2] : ('R' + (i + 1));
+      return { label, pct, litros: totLit, capacidad: totCap };
+    });
     return points;
   } catch (e) { return []; }
 }
