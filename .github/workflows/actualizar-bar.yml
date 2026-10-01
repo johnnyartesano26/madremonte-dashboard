@@ -1,11 +1,10 @@
 name: Actualizar Bar (arqueo)
 
-# Automático desde GitHub: martes a domingo, 4:00 pm hora Colombia.
-# (El lunes lo actualiza el cron de la PC, así no hay cruces.)
+# Automático desde GitHub, todos los días a las 3:00 am, 11:00 am y 3:00 pm hora Colombia.
 on:
   schedule:
-    - cron: '0 21 * * 0,2,3,4,5,6'   # 16:00 COT (UTC-5) mar–dom (0=dom,1=lun excluido)
-  workflow_dispatch:                  # botón "Run workflow" para actualizar a mano
+    - cron: '0 8,16,20 * * *'   # 03:00, 11:00, 15:00 COT (UTC-5) → 08:00, 16:00, 20:00 UTC
+  workflow_dispatch:            # botón "Run workflow" para actualizar a mano
 
 permissions:
   contents: write
