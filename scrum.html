@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scrum · Madre Monte · Q3 2026</title>
+<title>Scrum · Madre Monte · Q4 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -179,6 +179,12 @@ tr:hover td { background: rgba(200,138,61,.04); }
   <div class="timeline" id="timeline"></div>
 </div>
 
+<!-- OBJETIVOS DEL TRIMESTRE -->
+<div class="card full" style="margin-bottom:24px;">
+  <h2>🎯 Objetivos del Trimestre</h2>
+  <div id="objetivos-list"><div class="loading">Cargando objetivos...</div></div>
+</div>
+
 <!-- ROW 1: Inventario (producto terminado) + Producción (fermentadores) -->
 <div class="row">
   <div class="card">
@@ -253,11 +259,11 @@ tr:hover td { background: rgba(200,138,61,.04); }
 
 </main>
 
-<footer class="footer" id="footer-text">Scrum Dashboard · Madre Monte · Q3 2026</footer>
+<footer class="footer" id="footer-text">Scrum Dashboard · Madre Monte · Q4 2026</footer>
 
 <script>
 // ═══ CONFIG ═══
-const Q3_INICIO = new Date('2026-07-01');
+const Q4_INICIO = new Date('2026-10-01');
 const TOTAL_SEMANAS = 13;
 const DATA_BASE = 'https://johnnyartesano26.github.io/dashboard-maestro/data';
 
@@ -273,7 +279,7 @@ async function fetchJSON(url) {
 }
 
 function semanaActual() {
-  const diff = Math.floor((Date.now() - Q3_INICIO.getTime()) / (7 * 86400000)) + 1;
+  const diff = Math.floor((Date.now() - Q4_INICIO.getTime()) / (7 * 86400000)) + 1;
   return Math.max(1, Math.min(TOTAL_SEMANAS, diff));
 }
 
@@ -281,18 +287,19 @@ function semanaActual() {
 async function init() {
   const semana = semanaActual();
   document.getElementById('pill-semana').textContent = `Semana ${semana} · ${TOTAL_SEMANAS}`;
-  document.getElementById('pill-sprint').textContent = `Q3 2026 · ${new Date().toLocaleDateString('es-CO', {day:'numeric', month:'short'})}`;
+  document.getElementById('pill-sprint').textContent = `Q4 2026 · ${new Date().toLocaleDateString('es-CO', {day:'numeric', month:'short'})}`;
   document.getElementById('timeline-title').textContent = `⏳ Progreso Trimestral — Semana ${semana} de ${TOTAL_SEMANAS}`;
   document.getElementById('fecha-actualizacion').textContent = `Actualizado: ${new Date().toLocaleDateString('es-CO', {weekday:'long', day:'numeric', month:'long', year:'numeric'})}`;
-  document.getElementById('footer-text').textContent = `Scrum Dashboard · Madre Monte · Q3 2026 · ${new Date().toLocaleDateString('es-CO')}`;
+  document.getElementById('footer-text').textContent = `Scrum Dashboard · Madre Monte · Q4 2026 · ${new Date().toLocaleDateString('es-CO')}`;
 
   buildTimeline(semana);
 
-  const [ledger, invima, ventas, facturas] = await Promise.all([
+  const [ledger, invima, ventas, facturas, objetivos] = await Promise.all([
     fetchJSON('data/ledger_inventario.json'),
     fetchJSON('data/invima_checklist.json'),
     fetchJSON(DATA_BASE + '/ventas_mensuales.json'),
     fetchJSON(DATA_BASE + '/facturas_detalle.json'),
+    fetchJSON('data/objetivos.json'),
   ]);
 
   renderProduccion(ledger);
@@ -304,6 +311,7 @@ async function init() {
   renderKaizen();
   renderKPIs(ventas, facturas, ledger, invima);
   renderCartera(facturas);
+  renderObjetivos(objetivos);
 }
 
 // ═══ TIMELINE ═══
@@ -332,8 +340,8 @@ function renderKPIs(ventas, facturas, ledger, invima) {
   const listos = invima ? invima.items.filter(i => i.estado === 'Listo').length : 0;
   const totalInvima = invima ? invima.items.length : 0;
 
-  const jul = ventas && ventas.length ? (ventas.find(v => v.mes === 'Jul 26') || ventas[ventas.length-1]) : null;
-  const ventasMes = jul ? jul.total_ventas : 0;
+  const ultimoMes = ventas && ventas.length ? ventas[ventas.length-1] : null;
+  const ventasMes = ultimoMes ? ultimoMes.total_ventas : 0;
 
   let pendMonto = 0, pendCount = 0;
   if (facturas && facturas.facturas) {
@@ -345,7 +353,7 @@ function renderKPIs(ventas, facturas, ledger, invima) {
   }
 
   const kpis = [
-    { val: jul ? fmt$(ventasMes) : '--', label: 'Ventas Bar Julio', sub: jul ? `${jul.dias_con_dato || '?'} días` : 'sin conexión', cls: '' },
+    { val: ultimoMes ? fmt$(ventasMes) : '--', label: 'Ventas Bar (' + (ultimoMes ? ultimoMes.mes : 'sin datos') + ')', sub: ultimoMes ? `${ultimoMes.dias_con_dato || '?'} días` : 'sin conexión', cls: '' },
     { val: fmt(totalLitros) + 'L', label: 'Litros en fermentación', sub: 'producción en curso', cls: 'warn' },
     { val: fmt(botellas), label: 'Botellas (producto terminado)', sub: 'stock en bodega', cls: botellas > 0 ? 'up' : 'down' },
     { val: urgentes, label: 'Urgentes Invima', sub: `${listos}/${totalInvima} listos`, cls: urgentes > 0 ? 'down' : 'up' },
@@ -713,6 +721,34 @@ function renderKaizen() {
   document.getElementById('kaizen-list').innerHTML = items.map(k =>
     `<div class="kaizen-box"><div class="kaizen-icon">${k.icon}</div><div class="kaizen-text">${k.text}</div></div>`
   ).join('');
+}
+
+// ═══ OBJETIVOS ═══
+function renderObjetivos(objetivos) {
+  const container = document.getElementById('objetivos-list');
+  if (!objetivos || !Array.isArray(objetivos.trimestres) || !objetivos.trimestres.length) {
+    container.innerHTML = '<div class="loading">Sin objetivos definidos.</div>';
+    return;
+  }
+  container.innerHTML = objetivos.trimestres.map(t => {
+    if (t.estado === 'completado') {
+      const logros = (t.logros || []).map(l => `<div>${esc(l)}</div>`).join('');
+      return `<div class="kaizen-box" style="margin-bottom:10px;">
+        <div class="kaizen-icon">✅</div>
+        <div class="kaizen-text"><strong>${esc(t.trimestre)} — Cumplido</strong><br>
+        <em>Meta:</em> ${esc(t.meta)}<br>
+        <em>Resultado:</em> ${esc(t.resultado)}</div>
+        ${logros ? `<div style="margin-left:auto;text-align:right;font-size:12px;color:var(--body);white-space:nowrap;">${logros}</div>` : ''}
+      </div>`;
+    }
+    const objs = (t.objetivos || []).map(o =>
+      `<div style="margin-top:4px;">• <strong>${esc(o.texto)}</strong>${o.detalle ? ` — <span style="color:var(--dim)">${esc(o.detalle)}</span>` : ''}</div>`
+    ).join('');
+    return `<div class="kaizen-box" style="margin-bottom:10px;">
+      <div class="kaizen-icon">🎯</div>
+      <div class="kaizen-text"><strong>${esc(t.trimestre)} — En curso</strong>${objs}</div>
+    </div>`;
+  }).join('');
 }
 
 init();

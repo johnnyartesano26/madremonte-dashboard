@@ -1,0 +1,20 @@
+{
+  "trimestre_actual": "Q4 2026",
+  "trimestres": [
+    {
+      "trimestre": "Q3 2026",
+      "estado": "completado",
+      "meta": "Participar y ganar medallas en competencias cerveceras",
+      "resultado": "3 medallas de plata, 1 de bronce y participación en una copa adicional",
+      "logros": ["🥈 3 medallas de plata", "🥉 1 medalla de bronce", "🏆 Copa adicional en curso"]
+    },
+    {
+      "trimestre": "Q4 2026",
+      "estado": "en_curso",
+      "objetivos": [
+        { "texto": "Gestionar la visita de Invima", "detalle": "Preparar planta y documentación para la primera visita" },
+        { "texto": "Hacer cervezas de temporada", "detalle": "Desarrollar y lanzar cervezas de temporada" }
+      ]
+    }
+  ]
+}
