@@ -177,7 +177,8 @@ tr:hover td { background: rgba(200,138,61,.04); }
 <!-- TIMELINE -->
 <div class="card full" style="margin-bottom:24px;">
   <h2 id="timeline-title">⏳ Progreso Trimestral</h2>
-  <div id="cuartiles-overview" style="display:flex;gap:8px;margin-bottom:16px;"></div>
+  <div id="cuartiles-overview" style="display:flex;gap:8px;margin-bottom:10px;"></div>
+  <div id="cuartil-meta" style="font-size:12px;color:var(--dim);margin-bottom:14px;"></div>
   <div class="timeline" id="timeline"></div>
 </div>
 
@@ -336,7 +337,8 @@ function trimestreActual() {
   const now = new Date();
   const q = Math.floor(now.getMonth() / 3);            // 0..3
   const inicio = new Date(now.getFullYear(), q * 3, 1);
-  return { numero: q + 1, nombre: 'Q' + (q + 1) + ' ' + now.getFullYear(), inicio, totalSemanas: 13 };
+  const fin = new Date(now.getFullYear(), q * 3 + 3, 0);
+  return { numero: q + 1, nombre: 'Q' + (q + 1) + ' ' + now.getFullYear(), inicio, fin, totalSemanas: 13 };
 }
 
 function semanaActual(trimestre) {
@@ -358,6 +360,7 @@ async function init() {
 
   buildCuartiles(trimestre);
   buildTimeline(semana, trimestre.totalSemanas);
+  renderCuartilMeta(trimestre);
 
   const [ledger, invima, ventas, facturas, objetivos] = await Promise.all([
     fetchJSON('data/ledger_inventario.json'),
@@ -401,6 +404,17 @@ function buildCuartiles(trimestre) {
     </div>`;
   }
   el.innerHTML = html;
+}
+
+function renderCuartilMeta(trimestre) {
+  const el = document.getElementById('cuartil-meta');
+  if (!el) return;
+  const now = new Date();
+  const diasRestantes = Math.max(0, Math.ceil((trimestre.fin.getTime() - now.getTime()) / 86400000));
+  const totalDias = (trimestre.fin.getTime() - trimestre.inicio.getTime()) / 86400000;
+  const pct = Math.min(100, Math.round(((now.getTime() - trimestre.inicio.getTime()) / 86400000) / totalDias * 100));
+  const fechaFin = trimestre.fin.toLocaleDateString('es-CO', { day: 'numeric', month: 'long' });
+  el.textContent = `📅 ${trimestre.nombre} termina el ${fechaFin} · quedan ${diasRestantes} días · ${pct}% transcurrido`;
 }
 
 // ═══ TIMELINE ═══
