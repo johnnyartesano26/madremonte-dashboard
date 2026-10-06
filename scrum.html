@@ -332,6 +332,51 @@ async function fetchJSON(url) {
   } catch(e) { console.warn('Fetch failed:', url, e); return null; }
 }
 
+function parseCSVLine(line) {
+  const out = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (inQ) {
+      if (c === '"') { if (line[i + 1] === '"') { cur += '"'; i++; } else inQ = false; }
+      else cur += c;
+    } else {
+      if (c === '"') inQ = true;
+      else if (c === ',') { out.push(cur); cur = ''; }
+      else cur += c;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+
+// Cartera ("debe") desde el Google Sheet en vivo
+async function fetchCarteraSheet() {
+  try {
+    const url = 'https://docs.google.com/spreadsheets/d/1WFq09-LDg4le6FqC9BnBZfKZXSmb8Kn195wnFZaEMys/gviz/tq?tqx=out:csv&sheet=Respuestas%20de%20formulario%201';
+    const resp = await fetch(url);
+    if (!resp.ok) return [];
+    const csv = await resp.text();
+    const lines = csv.trim().split('\n');
+    const deudas = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = parseCSVLine(lines[i]);
+      if (cols.length < 10) continue;
+      const nombre = (cols[2] || '').trim();
+      const factura = (cols[3] || '').trim();
+      const obs = (cols[6] || '').trim();
+      const pagoR = (cols[9] || '').trim();
+      if (pagoR.toLowerCase() !== 'debe') continue;
+      if (obs.toLowerCase().includes('nota crédito')) continue;
+      const valor = parseFloat(String(cols[4] || '0').replace(/[$ ]/g, '').replace(/\./g, '').replace(/,/g, '.')) || 0;
+      const domicilio = parseFloat(String(cols[5] || '0').replace(/[$ ]/g, '').replace(/\./g, '').replace(/,/g, '.')) || 0;
+      if (valor === 0 && domicilio === 0) continue;
+      deudas.push({ nombre, factura, monto: valor + domicilio });
+    }
+    return deudas;
+  } catch (e) { console.error(e); return []; }
+}
+
 // Cuartil actual (dinámico): Q1/Q2/Q3/Q4 según la fecha. Año = 52 semanas → 4 trimestres de 13 semanas.
 function trimestreActual() {
   const now = new Date();
@@ -396,13 +441,16 @@ async function init() {
 
   renderVistaCuartil(trimestre.numero);
 
-  const [ledger, invima, ventas, facturas, objetivos] = await Promise.all([
+  const [ledger, invima, ventas, facturas, objetivos, catalogo] = await Promise.all([
     fetchJSON('data/ledger_inventario.json'),
     fetchJSON('data/invima_checklist.json'),
     fetchJSON(DATA_BASE + '/ventas_mensuales.json'),
     fetchJSON(DATA_BASE + '/facturas_detalle.json'),
     fetchJSON('data/objetivos.json'),
+    fetchJSON(DATA_BASE + '/catalogo.json'),
   ]);
+
+  const carteraList = await fetchCarteraSheet();
 
   renderProduccion(ledger);
   renderInventario(ledger);
@@ -411,8 +459,8 @@ async function init() {
   await renderSprintBoard();
   renderEventos();
   renderKaizen();
-  renderKPIs(ventas, facturas, ledger, invima);
-  renderCartera(facturas);
+  renderKPIs(catalogo, carteraList, ledger, invima);
+  renderCartera(carteraList);
   await renderObjetivos(objetivos);
   renderRegistroForm();
   loadHistorial();
@@ -466,7 +514,7 @@ function buildTimeline(semana, totalSemanas) {
 }
 
 // ═══ KPIs ═══
-function renderKPIs(ventas, facturas, ledger, invima) {
+function renderKPIs(catalogo, carteraList, ledger, invima) {
   let totalLitros = 0;
   if (ledger && ledger.fermentadores) {
     Object.values(ledger.fermentadores).forEach(f => totalLitros += (f.litros || 0));
@@ -479,20 +527,15 @@ function renderKPIs(ventas, facturas, ledger, invima) {
   const listos = invima ? invima.items.filter(i => i.estado === 'Listo').length : 0;
   const totalInvima = invima ? invima.items.length : 0;
 
-  const ultimoMes = ventas && ventas.length ? ventas[ventas.length-1] : null;
-  const ventasMes = ultimoMes ? ultimoMes.total_ventas : 0;
+  const conVentas = (catalogo && catalogo.periodos) ? catalogo.periodos.filter(p => p.ventas_bar && p.ventas_bar.total_ventas) : [];
+  const periodo = conVentas.length ? conVentas[conVentas.length - 1] : null;
+  const ventasMes = periodo ? periodo.ventas_bar.total_ventas : 0;
 
   let pendMonto = 0, pendCount = 0;
-  if (facturas && facturas.facturas) {
-    facturas.facturas.forEach(f => {
-      if (f.pago_realizado && f.pago_realizado.toLowerCase().includes('debe')) {
-        pendCount++; pendMonto += (f.valor || 0) + (f.domicilio || 0);
-      }
-    });
-  }
+  (carteraList || []).forEach(d => { pendCount++; pendMonto += (d.monto || 0); });
 
   const kpis = [
-    { val: ultimoMes ? fmt$(ventasMes) : '--', label: 'Ventas Bar (' + (ultimoMes ? ultimoMes.mes : 'sin datos') + ')', sub: ultimoMes ? `${ultimoMes.dias_con_dato || '?'} días` : 'sin conexión', cls: '' },
+    { val: periodo ? fmt$(ventasMes) : '--', label: 'Ventas Bar (' + (periodo ? periodo.mes : 'sin datos') + ')', sub: periodo ? `${periodo.ventas_bar.dias_con_dato || '?'} días` : 'sin conexión', cls: '' },
     { val: fmt(totalLitros) + 'L', label: 'Litros en fermentación', sub: 'producción en curso', cls: 'warn' },
     { val: fmt(botellas), label: 'Botellas (producto terminado)', sub: 'stock en bodega', cls: botellas > 0 ? 'up' : 'down' },
     { val: urgentes, label: 'Urgentes Invima', sub: `${listos}/${totalInvima} listos`, cls: urgentes > 0 ? 'down' : 'up' },
@@ -824,20 +867,14 @@ function renderAlertas(ledger) {
 }
 
 // ═══ CARTERA ═══
-function renderCartera(facturas) {
+function renderCartera(carteraList) {
   const container = document.getElementById('cartera-list');
-  if (!facturas || !facturas.facturas) {
-    container.innerHTML = '<div class="loading">Sin datos de facturación.</div>';
-    return;
-  }
   const deudas = {};
-  facturas.facturas.forEach(f => {
-    if (f.pago_realizado && f.pago_realizado.toLowerCase().includes('debe')) {
-      const key = f.cliente || 'Sin nombre';
-      if (!deudas[key]) deudas[key] = { monto: 0, facturas: [] };
-      deudas[key].monto += (f.valor || 0) + (f.domicilio || 0);
-      deudas[key].facturas.push(f.factura);
-    }
+  (carteraList || []).forEach(d => {
+    const key = d.nombre || 'Sin nombre';
+    if (!deudas[key]) deudas[key] = { monto: 0, facturas: [] };
+    deudas[key].monto += (d.monto || 0);
+    deudas[key].facturas.push(d.factura);
   });
   const sorted = Object.entries(deudas).sort((a, b) => b[1].monto - a[1].monto);
   container.innerHTML = sorted.length === 0
