@@ -7,19 +7,60 @@ Dashboard de metodología Scrum para la cervecería Madre Monte, con **históric
 
 ---
 
+## Funcionalidades
+
+- **Encabezado dinámico**: cuartil actual (Q1–Q4), semana del cuartil, semana del año, fecha y días restantes del trimestre.
+- **Navegación entre cuartiles**: clic en Q1–Q4 para ver cada trimestre, botón "↺ Hoy" para volver al actual.
+- **Objetivos del trimestre** y **tablero de sprint** (con histórico, últimos cambios por ítem).
+- **Formulario "✍️ Registrar datos"**: guarda objetivos, tareas, checklist Invima y métricas en SQL.
+- **Gráficos "📈 Avances"**: progreso de objetivos, sprint por estado y evolución de métricas (Chart.js).
+- **KPIs**: ventas del bar, litros en fermentación, botellas, urgentes Invima y cartera pendiente.
+- **Deduplicación**: agrupa objetivos/tareas con texto similar (acentos, mayúsculas, artículos).
+
+---
+
+## Fuentes de datos
+
+| Sección | Fuente | Actualización |
+|---------|--------|---------------|
+| Ventas Bar (KPI) | `dashboard-maestro/catalogo.json` | Automática (workflow diario) |
+| Cartera pendiente | Google Sheet "Respuestas de formulario 1" (en vivo) | En vivo |
+| Litros / botellas | `data/ledger_inventario.json` (núcleo de inventario) | Automática (sync) |
+| Invima | `data/invima_checklist.json` + localStorage | Manual / edición en navegador |
+| Objetivos / sprint / métricas | Supabase (SQL) | Formulario del dashboard |
+| Objetivos (respaldo) | `data/objetivos.json` | Solo si Supabase está vacío |
+
+> `DATA_BASE` apunta a `https://johnnyartesano26.github.io/dashboard-maestro/data`; `catalogo.json` vive en la **raíz** de ese repo (por eso se usa `ROOT_BASE`).
+
+---
+
+## Cuartiles y semanas
+
+La lógica está en `scrum.html` y es **automática según la fecha**:
+
+- Un año = 52 semanas → **4 trimestres de 13 semanas**.
+- `trimestreActual()` calcula el cuartil (Q1–Q4), su fecha de inicio/fin y `totalSemanas = 13`.
+- `semanaActual(trimestre)` calcula la semana dentro del cuartil.
+- Semana del año = `(cuartil − 1) × 13 + semana` (ej. Q4 semana 1 = semana 40 del año).
+- `renderVistaCuartil(q)` dibuja encabezado, timeline, meta (días restantes / % transcurrido) y la fila de cuartiles clicables.
+
+No hay que cambiar fechas al pasar de trimestre: se recalcula al abrir la página.
+
+---
+
 ## Histórico SQL (Supabase)
 
-El dashboard es un sitio estático (GitHub Pages), así que para guardar datos en una base de datos SQL se usa **[Supabase](https://supabase.com)** (Postgres con API REST). El formulario del dashboard hace POST directo a Supabase y cada registro queda con su fecha (`creado_el`) → **historial completo**.
+El dashboard es un sitio estático (GitHub Pages), así que para guardar datos en una base de datos SQL se usa **[Supabase](https://supabase.com)** (Postgres con API REST). El formulario hace POST directo a Supabase y cada registro queda con su fecha (`creado_el`) → **historial completo**.
 
 ### Flujo de datos
 
 ```
-scrum.html (formulario)  ──POST──▶  Supabase REST (/rest/v1/<tabla>)
+scrum.html (formulario)      ──POST──▶  Supabase REST (/rest/v1/<tabla>)
 scrum.html (tablero/objetivos) ──GET──▶  Supabase REST
 ```
 
 - **Escritura**: sección "✍️ Registrar datos" (4 pestañas: 🎯 Objetivo, 🏃 Tarea sprint, 🏥 Invima, 📊 Métrica).
-- **Lectura**: tablero de sprint y objetivos leen del histórico SQL (última fila por ítem). Si la tabla está vacía o no hay conexión, usan un respaldo local.
+- **Lectura**: tablero de sprint y objetivos leen del histórico SQL (última fila por ítem, agrupando por texto normalizado). Si la tabla está vacía o no hay conexión, usan un respaldo local.
 
 ### Esquema (4 tablas, append-only)
 
@@ -30,7 +71,7 @@ scrum.html (tablero/objetivos) ──GET──▶  Supabase REST
 | `invima_items` | `item`, `categoria`, `clasificacion` (Urgente/Importante), `responsable`, `avance`, `estado`, `creado_el` |
 | `metricas` | `clave`, `valor`, `unidad`, `creado_el` |
 
-Cada cambio es una **fila nueva** (append-only). El "estado actual" de una tarea/objetivo se obtiene tomando la última fila por nombre.
+Cada cambio es una **fila nueva** (append-only). El "estado actual" se obtiene tomando la última fila por nombre (normalizado).
 
 ### Conexión
 
@@ -129,14 +170,16 @@ with check (current_setting('request.headers', true)::json->>'x-write-key' = '70
 
 ## Nota de mantenimiento
 
-- El cuartil y las semanas se calculan **automáticamente** en `scrum.html` (`trimestreActual()`): un año = 52 semanas → 4 trimestres de 13 semanas. No hay que cambiar fechas al pasar de trimestre; solo revisar `SPRINT_FALLBACK` (tareas de respaldo).
+- El cuartil, las semanas y la navegación Q1–Q4 son **automáticos** (ver "Cuartiles y semanas"). Al pasar de trimestre solo revisar `SPRINT_FALLBACK` (tareas de respaldo).
 - `data/objetivos.json` es el **respaldo local** de objetivos; la fuente principal es Supabase.
+- Los KPIs dependen de fuentes externas: si "Ventas Bar" aparece "sin datos", verifica que `dashboard-maestro/catalogo.json` exista en la **raíz** del repo.
 
 ---
 
 ## Solución de problemas
 
 - **"❌ Error al guardar"** en el formulario: al insertar con `Prefer: return=minimal`, Supabase responde `201` con **cuerpo vacío**. `sbFetch` ya lo maneja (lee el texto y solo hace `JSON.parse` si hay contenido). Si vuelve a ocurrir, abre la **Consola del navegador** (F12) para ver el error real devuelto por Supabase.
+- **Cambios que no se ven**: el navegador cachea la página. Recarga con `Ctrl+Shift+R` o añade `?v=2` a la URL para forzar la versión nueva.
 - **Borrar filas**: el rol `anon` solo tiene `select` e `insert` (sin `delete`). Para eliminar filas usa el **SQL Editor** de Supabase, por ejemplo:
   ```sql
   delete from public.metricas where clave in ('test_conexion', 'test_minimal');
