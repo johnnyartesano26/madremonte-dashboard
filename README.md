@@ -122,3 +122,17 @@ create policy "escritura anon metricas" on public.metricas for insert to anon wi
 
 - El dashboard Q4 usa la fecha de inicio `Q4_INICIO = 2026-10-01` en `scrum.html`. Al cambiar de trimestre, actualizar esa fecha y los `SPRINT_FALLBACK`.
 - `data/objetivos.json` es el **respaldo local** de objetivos; la fuente principal es Supabase.
+
+---
+
+## Solución de problemas
+
+- **"❌ Error al guardar"** en el formulario: al insertar con `Prefer: return=minimal`, Supabase responde `201` con **cuerpo vacío**. `sbFetch` ya lo maneja (lee el texto y solo hace `JSON.parse` si hay contenido). Si vuelve a ocurrir, abre la **Consola del navegador** (F12) para ver el error real devuelto por Supabase.
+- **Borrar filas**: el rol `anon` solo tiene `select` e `insert` (sin `delete`). Para eliminar filas usa el **SQL Editor** de Supabase, por ejemplo:
+  ```sql
+  delete from public.metricas where clave in ('test_conexion', 'test_minimal');
+  ```
+- **Vaciar una tabla** y empezar de cero:
+  ```sql
+  truncate table public.metricas;
+  ```
