@@ -185,6 +185,24 @@ tr:hover td { background: rgba(200,138,61,.04); }
   <div id="objetivos-list"><div class="loading">Cargando objetivos...</div></div>
 </div>
 
+<!-- REGISTRAR DATOS (histórico SQL) -->
+<div class="card full" style="margin-bottom:24px;">
+  <h2>✍️ Registrar datos <span style="font-size:.7em;color:var(--dim);font-weight:400">· se guarda en SQL (histórico)</span></h2>
+  <div id="registro-tabs" style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap;">
+    <button class="filter-btn active" onclick="switchRegistro('objetivo', this)">🎯 Objetivo</button>
+    <button class="filter-btn" onclick="switchRegistro('sprint', this)">🏃 Tarea sprint</button>
+    <button class="filter-btn" onclick="switchRegistro('invima', this)">🏥 Invima</button>
+    <button class="filter-btn" onclick="switchRegistro('metrica', this)">📊 Métrica</button>
+  </div>
+  <div id="registro-form"></div>
+</div>
+
+<!-- HISTORIAL -->
+<div class="card full" style="margin-bottom:24px;">
+  <h2>📜 Historial reciente</h2>
+  <div id="historial-list"><div class="loading">Cargando historial...</div></div>
+</div>
+
 <!-- ROW 1: Inventario (producto terminado) + Producción (fermentadores) -->
 <div class="row">
   <div class="card">
@@ -312,6 +330,8 @@ async function init() {
   renderKPIs(ventas, facturas, ledger, invima);
   renderCartera(facturas);
   renderObjetivos(objetivos);
+  renderRegistroForm();
+  loadHistorial();
 }
 
 // ═══ TIMELINE ═══
@@ -749,6 +769,138 @@ function renderObjetivos(objetivos) {
       <div class="kaizen-text"><strong>${esc(t.trimestre)} — En curso</strong>${objs}</div>
     </div>`;
   }).join('');
+}
+
+// ═══ SUPABASE (histórico SQL) ═══
+const SUPABASE_URL = 'https://xrhuonbgjlocjusmniel.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_bBvT83l6Ak_7Z2DImE3Obg_DfH6z7eZ';
+
+async function sbFetch(path, options = {}) {
+  const r = await fetch(SUPABASE_URL + path, {
+    ...options,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    }
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.status === 204 ? null : r.json();
+}
+
+const REGISTRO_TIPOS = {
+  objetivo: { tabla: 'objetivos', label: '🎯 Objetivo', campos: [
+    { id: 'trimestre', label: 'Trimestre', tipo: 'text', req: true, valor: 'Q4 2026' },
+    { id: 'texto', label: 'Objetivo', tipo: 'text', req: true },
+    { id: 'estado', label: 'Estado', tipo: 'select', opciones: ['en_curso', 'completado'] },
+    { id: 'progreso', label: 'Progreso %', tipo: 'number' },
+    { id: 'notas', label: 'Notas', tipo: 'text' }
+  ]},
+  sprint: { tabla: 'sprint_tareas', label: '🏃 Tarea sprint', campos: [
+    { id: 'tarea', label: 'Tarea', tipo: 'text', req: true },
+    { id: 'responsable', label: 'Responsable', tipo: 'text' },
+    { id: 'estado', label: 'Estado', tipo: 'select', opciones: ['pendiente', 'en_progreso', 'hecho', 'bloqueado'] },
+    { id: 'sprint', label: 'Sprint', tipo: 'text', valor: 'Q4 2026' }
+  ]},
+  invima: { tabla: 'invima_items', label: '🏥 Invima', campos: [
+    { id: 'item', label: 'Item', tipo: 'text', req: true },
+    { id: 'categoria', label: 'Categoría', tipo: 'text' },
+    { id: 'clasificacion', label: 'Clasificación', tipo: 'select', opciones: ['Urgente', 'Importante'], valor: 'Importante' },
+    { id: 'responsable', label: 'Responsable', tipo: 'text' },
+    { id: 'avance', label: 'Avance', tipo: 'text' },
+    { id: 'estado', label: 'Estado', tipo: 'select', opciones: ['Pendiente', 'En progreso', 'Listo'] }
+  ]},
+  metrica: { tabla: 'metricas', label: '📊 Métrica', campos: [
+    { id: 'clave', label: 'Clave (ej: litros_fermentacion)', tipo: 'text', req: true },
+    { id: 'valor', label: 'Valor', tipo: 'number', req: true },
+    { id: 'unidad', label: 'Unidad (ej: L, bot, COP)', tipo: 'text' }
+  ]}
+};
+
+let registroTipo = 'objetivo';
+
+function switchRegistro(tipo, btn) {
+  registroTipo = tipo;
+  document.querySelectorAll('#registro-tabs .filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderRegistroForm();
+}
+
+function renderRegistroForm() {
+  const cfg = REGISTRO_TIPOS[registroTipo];
+  const campos = cfg.campos.map(c => {
+    let input;
+    if (c.tipo === 'select') {
+      input = '<select id="rf_' + c.id + '" style="border:1px solid var(--line);background:#fff;padding:8px;border-radius:6px;width:100%;">' +
+        c.opciones.map(o => '<option value="' + o + '"' + (o === c.valor ? ' selected' : '') + '>' + o + '</option>').join('') +
+        '</select>';
+    } else {
+      input = '<input id="rf_' + c.id + '" type="' + (c.tipo === 'number' ? 'number' : 'text') + '"' +
+        (c.valor ? ' value="' + esc(c.valor) + '"' : '') +
+        ' placeholder="' + esc(c.label) + '" style="border:1px solid var(--line);background:#fff;padding:8px;border-radius:6px;width:100%;">';
+    }
+    return '<label style="display:block;font-size:12px;color:var(--dim);margin-top:6px;">' + esc(c.label) + (c.req ? ' *' : '') + '</label>' + input;
+  }).join('');
+  document.getElementById('registro-form').innerHTML =
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">' + campos + '</div>' +
+    '<button class="btn-action" style="margin-top:14px;background:var(--gold);color:#fff;border-color:var(--gold);" onclick="submitRegistro(this)">💾 Guardar</button>';
+}
+
+async function submitRegistro(btn) {
+  const cfg = REGISTRO_TIPOS[registroTipo];
+  const obj = {};
+  let missing = false;
+  cfg.campos.forEach(c => {
+    const el = document.getElementById('rf_' + c.id);
+    let v = el.value.trim();
+    if (c.tipo === 'number') v = (v === '') ? null : Number(v);
+    obj[c.id] = v;
+    if (c.req && (v === '' || v == null)) missing = true;
+  });
+  if (missing) { mostrarToast('⚠️ Completa los campos marcados con *'); return; }
+  btn.disabled = true;
+  try {
+    await sbFetch('/rest/v1/' + cfg.tabla, { method: 'POST', body: JSON.stringify(obj), headers: { 'Prefer': 'return=minimal' } });
+    mostrarToast('✅ Guardado en ' + cfg.label);
+    renderRegistroForm();
+    loadHistorial();
+  } catch (e) {
+    console.error(e);
+    mostrarToast('❌ Error al guardar');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function loadHistorial() {
+  const container = document.getElementById('historial-list');
+  try {
+    const [objs, sprints, invima, metricas] = await Promise.all([
+      sbFetch('/rest/v1/objetivos?select=*&order=creado_el.desc&limit=5'),
+      sbFetch('/rest/v1/sprint_tareas?select=*&order=creado_el.desc&limit=5'),
+      sbFetch('/rest/v1/invima_items?select=*&order=creado_el.desc&limit=5'),
+      sbFetch('/rest/v1/metricas?select=*&order=creado_el.desc&limit=5')
+    ]);
+    const items = [
+      ...(objs || []).map(o => ({ tipo: '🎯', texto: o.texto, fecha: o.creado_el })),
+      ...(sprints || []).map(s => ({ tipo: '🏃', texto: s.tarea + ' · ' + s.estado, fecha: s.creado_el })),
+      ...(invima || []).map(i => ({ tipo: '🏥', texto: i.item + ' · ' + i.estado, fecha: i.creado_el })),
+      ...(metricas || []).map(m => ({ tipo: '📊', texto: m.clave + ' = ' + m.valor + (m.unidad ? ' ' + m.unidad : ''), fecha: m.creado_el }))
+    ];
+    items.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    if (!items.length) {
+      container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--dim)">Aún no hay registros. Usa el formulario de arriba para guardar el primero.</div>';
+      return;
+    }
+    container.innerHTML = items.slice(0, 10).map(i =>
+      '<div class="ind-row"><span class="ind-icon">' + i.tipo + '</span><span class="ind-label">' + esc(i.texto) +
+      '<br><small style="color:var(--dim)">' + new Date(i.fecha).toLocaleString('es-CO') + '</small></span></div>'
+    ).join('');
+  } catch (e) {
+    console.error(e);
+    container.innerHTML = '<div style="color:var(--red);padding:20px;">No se pudo cargar el historial.</div>';
+  }
 }
 
 init();
