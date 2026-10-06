@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Scrum · Madre Monte · Q4 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 :root {
   --bg: #faf7f0; --card: #fff; --text: #3d2a1d; --body: #6b5a4a; --dim: #8c7b6b;
@@ -208,6 +209,25 @@ tr:hover td { background: rgba(200,138,61,.04); }
   <div id="historial-list"><div class="loading">Cargando historial...</div></div>
 </div>
 
+<!-- AVANCES (gráficos) -->
+<div class="card full" style="margin-bottom:24px;">
+  <h2>📈 Avances</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;">
+    <div style="position:relative;height:260px;">
+      <h3 style="font-size:14px;color:var(--body);margin-bottom:8px;">🎯 Objetivos — progreso</h3>
+      <canvas id="chart-objetivos"></canvas>
+    </div>
+    <div style="position:relative;height:260px;">
+      <h3 style="font-size:14px;color:var(--body);margin-bottom:8px;">🏃 Sprint — por estado</h3>
+      <canvas id="chart-sprint"></canvas>
+    </div>
+    <div style="position:relative;height:260px;">
+      <h3 style="font-size:14px;color:var(--body);margin-bottom:8px;">📊 Métricas — histórico</h3>
+      <canvas id="chart-metricas"></canvas>
+    </div>
+  </div>
+</div>
+
 <!-- ROW 1: Inventario (producto terminado) + Producción (fermentadores) -->
 <div class="row">
   <div class="card">
@@ -337,6 +357,7 @@ async function init() {
   await renderObjetivos(objetivos);
   renderRegistroForm();
   loadHistorial();
+  renderAvances();
 }
 
 // ═══ TIMELINE ═══
@@ -973,6 +994,101 @@ async function loadHistorial() {
     console.error(e);
     container.innerHTML = '<div style="color:var(--red);padding:20px;">No se pudo cargar el historial.</div>';
   }
+}
+
+// ═══ GRÁFICOS DE AVANCE ═══
+let avanceCharts = {};
+
+async function renderAvances() {
+  try {
+    const [objs, sprints, metricas] = await Promise.all([
+      sbFetch('/rest/v1/objetivos?select=*&order=creado_el.asc'),
+      sbFetch('/rest/v1/sprint_tareas?select=*&order=creado_el.asc'),
+      sbFetch('/rest/v1/metricas?select=*&order=creado_el.asc')
+    ]);
+
+    const objLatest = {};
+    (objs || []).forEach(o => { objLatest[o.trimestre + '|' + o.texto] = o; });
+    const sprLatest = {};
+    (sprints || []).forEach(s => { if (s.tarea) sprLatest[s.tarea] = s; });
+
+    renderChartObjetivos(Object.values(objLatest));
+    renderChartSprint(Object.values(sprLatest));
+    renderChartMetricas(metricas || []);
+  } catch (e) { console.error(e); }
+}
+
+function renderChartObjetivos(list) {
+  const ctx = document.getElementById('chart-objetivos');
+  if (!ctx || typeof Chart === 'undefined') return;
+  if (avanceCharts.objetivos) avanceCharts.objetivos.destroy();
+  const labels = list.map(o => o.texto.length > 42 ? o.texto.slice(0, 42) + '…' : o.texto);
+  const data = list.map(o => (o.progreso != null ? o.progreso : 0));
+  avanceCharts.objetivos = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Progreso %',
+        data,
+        backgroundColor: list.map(o => o.estado === 'completado' ? '#4caf50' : '#c88a3d'),
+        borderRadius: 4
+      }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      scales: { x: { min: 0, max: 100, ticks: { callback: v => v + '%' } } },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+function renderChartSprint(list) {
+  const ctx = document.getElementById('chart-sprint');
+  if (!ctx || typeof Chart === 'undefined') return;
+  if (avanceCharts.sprint) avanceCharts.sprint.destroy();
+  const counts = {};
+  list.forEach(s => { const e = s.estado || 'pendiente'; counts[e] = (counts[e] || 0) + 1; });
+  const orden = ['hecho', 'en_progreso', 'pendiente', 'bloqueado'];
+  const labels = orden.filter(e => counts[e]);
+  const colores = { hecho: '#4caf50', en_progreso: '#c88a3d', pendiente: '#e0d6c8', bloqueado: '#e57373' };
+  avanceCharts.sprint = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: labels.map(e => counts[e]), backgroundColor: labels.map(e => colores[e]), borderColor: '#fff', borderWidth: 2 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+  });
+}
+
+function renderChartMetricas(list) {
+  const ctx = document.getElementById('chart-metricas');
+  if (!ctx || typeof Chart === 'undefined') return;
+  if (avanceCharts.metricas) avanceCharts.metricas.destroy();
+  if (!list.length) return;
+  const porClave = {};
+  list.forEach(m => { (porClave[m.clave] = porClave[m.clave] || []).push(m); });
+  const claves = Object.keys(porClave);
+  const fechas = [...new Set(list.map(m => m.creado_el))].sort();
+  const colores = ['#c88a3d', '#4caf50', '#39d2c0', '#a78bfa', '#e8a84c', '#e57373'];
+  const datasets = claves.map((clave, i) => {
+    const mapF = {};
+    porClave[clave].forEach(m => { mapF[m.creado_el] = Number(m.valor); });
+    return {
+      label: clave,
+      data: fechas.map(f => (mapF[f] != null ? mapF[f] : null)),
+      borderColor: colores[i % colores.length],
+      backgroundColor: colores[i % colores.length],
+      tension: 0.3, spanGaps: true, pointRadius: 3
+    };
+  });
+  avanceCharts.metricas = new Chart(ctx, {
+    type: 'line',
+    data: { labels: fechas.map(f => new Date(f).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })), datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom' } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
 }
 
 init();
