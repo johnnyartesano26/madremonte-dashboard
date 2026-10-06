@@ -311,6 +311,17 @@ const DATA_BASE = 'https://johnnyartesano26.github.io/dashboard-maestro/data';
 function fmt(n) { return (n||0).toLocaleString('es-CO', {maximumFractionDigits:0}); }
 function fmt$(n) { return '$' + fmt(n); }
 
+// Normaliza texto para agrupar duplicados (minúsculas, sin acentos, sin artículos/preposiciones)
+function normalizarTexto(s) {
+  return (s || '')
+    .toString()
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/\b(la|el|los|las|de|del|en|para|a|al|y|o|con)\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 async function fetchJSON(url) {
   try {
     const resp = await fetch(url);
@@ -702,7 +713,7 @@ async function renderSprintBoard() {
   try {
     const rows = await sbFetch('/rest/v1/sprint_tareas?select=*&order=creado_el.asc');
     const latest = {};
-    (rows || []).forEach(r => { if (r.tarea) latest[r.tarea] = r; });
+    (rows || []).forEach(r => { if (r.tarea) latest[normalizarTexto(r.tarea)] = r; });
     tasks = Object.values(latest).map(r => ({
       name: r.tarea, owner: r.responsable || '', status: r.estado || 'pendiente'
     }));
@@ -804,7 +815,7 @@ async function renderObjetivos(objetivosJson) {
   if (!rows || !rows.length) { renderObjetivosJson(objetivosJson); return; }
 
   const latest = {};
-  rows.forEach(r => { latest[r.trimestre + '|' + r.texto] = r; });
+  rows.forEach(r => { latest[r.trimestre + '|' + normalizarTexto(r.texto)] = r; });
 
   const porTrimestre = {};
   Object.values(latest).forEach(r => {
