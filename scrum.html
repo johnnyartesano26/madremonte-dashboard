@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scrum · Madre Monte · Q4 2026</title>
+<title>Scrum · Madre Monte</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
@@ -302,12 +302,10 @@ tr:hover td { background: rgba(200,138,61,.04); }
 
 </main>
 
-<footer class="footer" id="footer-text">Scrum Dashboard · Madre Monte · Q4 2026</footer>
+<footer class="footer" id="footer-text">Scrum Dashboard · Madre Monte</footer>
 
 <script>
 // ═══ CONFIG ═══
-const Q4_INICIO = new Date('2026-10-01');
-const TOTAL_SEMANAS = 13;
 const DATA_BASE = 'https://johnnyartesano26.github.io/dashboard-maestro/data';
 
 function fmt(n) { return (n||0).toLocaleString('es-CO', {maximumFractionDigits:0}); }
@@ -321,21 +319,33 @@ async function fetchJSON(url) {
   } catch(e) { console.warn('Fetch failed:', url, e); return null; }
 }
 
-function semanaActual() {
-  const diff = Math.floor((Date.now() - Q4_INICIO.getTime()) / (7 * 86400000)) + 1;
-  return Math.max(1, Math.min(TOTAL_SEMANAS, diff));
+// Cuartil actual (dinámico): Q1/Q2/Q3/Q4 según la fecha
+function trimestreActual() {
+  const now = new Date();
+  const q = Math.floor(now.getMonth() / 3);            // 0..3
+  const inicio = new Date(now.getFullYear(), q * 3, 1);
+  const fin = new Date(now.getFullYear(), q * 3 + 3, 0);
+  const totalSemanas = Math.ceil((fin - inicio + 1) / (7 * 86400000));
+  return { numero: q + 1, nombre: 'Q' + (q + 1) + ' ' + now.getFullYear(), inicio, fin, totalSemanas };
+}
+
+function semanaActual(trimestre) {
+  const diff = Math.floor((Date.now() - trimestre.inicio.getTime()) / (7 * 86400000)) + 1;
+  return Math.max(1, Math.min(trimestre.totalSemanas, diff));
 }
 
 // ═══ INIT ═══
 async function init() {
-  const semana = semanaActual();
-  document.getElementById('pill-semana').textContent = `Semana ${semana} · ${TOTAL_SEMANAS}`;
-  document.getElementById('pill-sprint').textContent = `Q4 2026 · ${new Date().toLocaleDateString('es-CO', {day:'numeric', month:'short'})}`;
-  document.getElementById('timeline-title').textContent = `⏳ Progreso Trimestral — Semana ${semana} de ${TOTAL_SEMANAS}`;
+  const trimestre = trimestreActual();
+  const semana = semanaActual(trimestre);
+  document.title = `Scrum · Madre Monte · ${trimestre.nombre}`;
+  document.getElementById('pill-semana').textContent = `Semana ${semana} · ${trimestre.totalSemanas}`;
+  document.getElementById('pill-sprint').textContent = `${trimestre.nombre} · ${new Date().toLocaleDateString('es-CO', {day:'numeric', month:'short'})}`;
+  document.getElementById('timeline-title').textContent = `⏳ Progreso Trimestral — Semana ${semana} de ${trimestre.totalSemanas}`;
   document.getElementById('fecha-actualizacion').textContent = `Actualizado: ${new Date().toLocaleDateString('es-CO', {weekday:'long', day:'numeric', month:'long', year:'numeric'})}`;
-  document.getElementById('footer-text').textContent = `Scrum Dashboard · Madre Monte · Q4 2026 · ${new Date().toLocaleDateString('es-CO')}`;
+  document.getElementById('footer-text').textContent = `Scrum Dashboard · Madre Monte · ${trimestre.nombre} · ${new Date().toLocaleDateString('es-CO')}`;
 
-  buildTimeline(semana);
+  buildTimeline(semana, trimestre.totalSemanas);
 
   const [ledger, invima, ventas, facturas, objetivos] = await Promise.all([
     fetchJSON('data/ledger_inventario.json'),
@@ -361,11 +371,11 @@ async function init() {
 }
 
 // ═══ TIMELINE ═══
-function buildTimeline(semana) {
+function buildTimeline(semana, totalSemanas) {
   const tl = document.getElementById('timeline');
-  const pct = Math.round(semana / TOTAL_SEMANAS * 100);
+  const pct = Math.round(semana / totalSemanas * 100);
   let dots = '';
-  for (let w = 1; w <= TOTAL_SEMANAS; w++) {
+  for (let w = 1; w <= totalSemanas; w++) {
     const cls = w < semana ? 'done' : (w === semana ? 'current' : 'future');
     dots += `<div class="tl-week"><div class="tl-dot ${cls}"></div><div class="tl-label">S${w}</div></div>`;
   }
@@ -876,7 +886,7 @@ async function sbFetch(path, options = {}) {
 
 const REGISTRO_TIPOS = {
   objetivo: { tabla: 'objetivos', label: '🎯 Objetivo', campos: [
-    { id: 'trimestre', label: 'Trimestre', tipo: 'text', req: true, valor: 'Q4 2026' },
+    { id: 'trimestre', label: 'Trimestre', tipo: 'text', req: true, valor: '@TRIMESTRE' },
     { id: 'texto', label: 'Objetivo', tipo: 'text', req: true },
     { id: 'estado', label: 'Estado', tipo: 'select', opciones: ['en_curso', 'completado'] },
     { id: 'progreso', label: 'Progreso %', tipo: 'number' },
@@ -886,7 +896,7 @@ const REGISTRO_TIPOS = {
     { id: 'tarea', label: 'Tarea', tipo: 'text', req: true },
     { id: 'responsable', label: 'Responsable', tipo: 'text' },
     { id: 'estado', label: 'Estado', tipo: 'select', opciones: ['pendiente', 'en_progreso', 'hecho', 'bloqueado'] },
-    { id: 'sprint', label: 'Sprint', tipo: 'text', valor: 'Q4 2026' }
+    { id: 'sprint', label: 'Sprint', tipo: 'text', valor: '@TRIMESTRE' }
   ]},
   invima: { tabla: 'invima_items', label: '🏥 Invima', campos: [
     { id: 'item', label: 'Item', tipo: 'text', req: true },
@@ -921,8 +931,9 @@ function renderRegistroForm() {
         c.opciones.map(o => '<option value="' + o + '"' + (o === c.valor ? ' selected' : '') + '>' + o + '</option>').join('') +
         '</select>';
     } else {
+      const val = (c.valor === '@TRIMESTRE') ? trimestreActual().nombre : c.valor;
       input = '<input id="rf_' + c.id + '" type="' + (c.tipo === 'number' ? 'number' : 'text') + '"' +
-        (c.valor ? ' value="' + esc(c.valor) + '"' : '') +
+        (val ? ' value="' + esc(val) + '"' : '') +
         ' placeholder="' + esc(c.label) + '" style="border:1px solid var(--line);background:#fff;padding:8px;border-radius:6px;width:100%;">';
     }
     return '<label style="display:block;font-size:12px;color:var(--dim);margin-top:6px;">' + esc(c.label) + (c.req ? ' *' : '') + '</label>' + input;
