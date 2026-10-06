@@ -324,12 +324,12 @@ async function init() {
   renderInventario(ledger);
   renderInvima(invima);
   renderAlertas(ledger);
-  renderSprintBoard();
+  await renderSprintBoard();
   renderEventos();
   renderKaizen();
   renderKPIs(ventas, facturas, ledger, invima);
   renderCartera(facturas);
-  renderObjetivos(objetivos);
+  await renderObjetivos(objetivos);
   renderRegistroForm();
   loadHistorial();
 }
@@ -645,27 +645,41 @@ function recargarInvima() {
 }
 
 // ═══ SPRINT BOARD ═══
-function renderSprintBoard() {
-  const tasks = [
-    { name: 'Llenar Forms inventario semanal', owner: 'Cervecero', status: 'done' },
-    { name: 'Pipeline async de facturación', owner: 'Z1 + Johnny', status: 'done' },
-    { name: 'Embotellar / embarrilar producción (botellas y barril en 0)', owner: 'Producción', status: 'ongoing' },
-    { name: 'Cerrar 35 facturas draft ($3.77M)', owner: 'Johnny', status: 'ongoing' },
-    { name: 'Módulo notas crédito automático', owner: 'Johnny', status: 'ongoing' },
-    { name: 'Preparar checklist Visitas Invima con el equipo', owner: 'Johnny + Equipo', status: 'ongoing' },
-    { name: 'Cocinar APA (0L — alerta roja)', owner: 'Maestro Cervecero', status: 'pending' },
-    { name: 'Cocinar Red IPA (0L)', owner: 'Maestro Cervecero', status: 'pending' },
-    { name: 'Pedir levadura US-05 (1kg)', owner: 'Producción', status: 'pending' },
-    { name: 'Comprar Malta Pale Ale (10kg)', owner: 'Producción', status: 'pending' },
-    { name: 'Verificar F3 Principito', owner: 'Producción', status: 'pending' },
-    { name: 'Activar Google Calendar OAuth', owner: 'Johnny', status: 'pending' },
-  ];
-  const iconos = { done: '✅', ongoing: '🔄', pending: '⬜', blocked: '🚫' };
-  document.getElementById('sprint-board').innerHTML = tasks.map(t =>
-    `<div class="sprint-task ${t.status}">
-      <span class="task-icon">${iconos[t.status]}</span>
-      <span class="task-name">${t.name}</span>
-      <span class="task-owner">${t.owner}</span>
+const SPRINT_FALLBACK = [
+  { name: 'Llenar Forms inventario semanal', owner: 'Cervecero', status: 'hecho' },
+  { name: 'Pipeline async de facturación', owner: 'Z1 + Johnny', status: 'hecho' },
+  { name: 'Embotellar / embarrilar producción (botellas y barril en 0)', owner: 'Producción', status: 'en_progreso' },
+  { name: 'Cerrar 35 facturas draft ($3.77M)', owner: 'Johnny', status: 'en_progreso' },
+  { name: 'Módulo notas crédito automático', owner: 'Johnny', status: 'en_progreso' },
+  { name: 'Preparar checklist Visitas Invima con el equipo', owner: 'Johnny + Equipo', status: 'en_progreso' },
+  { name: 'Cocinar APA (0L — alerta roja)', owner: 'Maestro Cervecero', status: 'pendiente' },
+  { name: 'Cocinar Red IPA (0L)', owner: 'Maestro Cervecero', status: 'pendiente' },
+  { name: 'Pedir levadura US-05 (1kg)', owner: 'Producción', status: 'pendiente' },
+  { name: 'Comprar Malta Pale Ale (10kg)', owner: 'Producción', status: 'pendiente' },
+  { name: 'Verificar F3 Principito', owner: 'Producción', status: 'pendiente' },
+  { name: 'Activar Google Calendar OAuth', owner: 'Johnny', status: 'pendiente' },
+];
+
+async function renderSprintBoard() {
+  const container = document.getElementById('sprint-board');
+  let tasks = [];
+  try {
+    const rows = await sbFetch('/rest/v1/sprint_tareas?select=*&order=creado_el.asc');
+    const latest = {};
+    (rows || []).forEach(r => { if (r.tarea) latest[r.tarea] = r; });
+    tasks = Object.values(latest).map(r => ({
+      name: r.tarea, owner: r.responsable || '', status: r.estado || 'pendiente'
+    }));
+  } catch (e) { console.error(e); }
+  if (!tasks.length) tasks = SPRINT_FALLBACK;
+
+  const iconos = { hecho: '✅', en_progreso: '🔄', pendiente: '⬜', bloqueado: '🚫' };
+  const cls = { hecho: 'done', en_progreso: 'ongoing', pendiente: 'pending', bloqueado: 'blocked' };
+  container.innerHTML = tasks.map(t =>
+    `<div class="sprint-task ${cls[t.status] || 'pending'}">
+      <span class="task-icon">${iconos[t.status] || '⬜'}</span>
+      <span class="task-name">${esc(t.name)}</span>
+      <span class="task-owner">${esc(t.owner)}</span>
     </div>`).join('');
 }
 
@@ -744,7 +758,43 @@ function renderKaizen() {
 }
 
 // ═══ OBJETIVOS ═══
-function renderObjetivos(objetivos) {
+async function renderObjetivos(objetivosJson) {
+  const container = document.getElementById('objetivos-list');
+  let rows = [];
+  try {
+    rows = await sbFetch('/rest/v1/objetivos?select=*&order=creado_el.asc');
+  } catch (e) { console.error(e); }
+
+  if (!rows || !rows.length) { renderObjetivosJson(objetivosJson); return; }
+
+  const latest = {};
+  rows.forEach(r => { latest[r.trimestre + '|' + r.texto] = r; });
+
+  const porTrimestre = {};
+  Object.values(latest).forEach(r => {
+    (porTrimestre[r.trimestre] = porTrimestre[r.trimestre] || []).push(r);
+  });
+
+  const orden = Object.keys(porTrimestre).sort().reverse();
+  container.innerHTML = orden.map(tri => {
+    const items = porTrimestre[tri];
+    const enCurso = items.some(i => i.estado === 'en_curso');
+    const icono = enCurso ? '🎯' : '✅';
+    const titulo = tri + (enCurso ? ' — En curso' : ' — Cumplido');
+    const objsHtml = items.map(i => {
+      const prog = (i.progreso != null && i.progreso > 0) ? ` <span class="badge progreso">${i.progreso}%</span>` : '';
+      const estado = i.estado === 'completado' ? ' <span class="badge listo">Cumplido</span>' : '';
+      const notas = i.notas ? `<br><span style="color:var(--dim)">${esc(i.notas)}</span>` : '';
+      return `<div style="margin-top:4px;">• <strong>${esc(i.texto)}</strong>${estado}${prog}${notas}</div>`;
+    }).join('');
+    return `<div class="kaizen-box" style="margin-bottom:10px;">
+      <div class="kaizen-icon">${icono}</div>
+      <div class="kaizen-text"><strong>${esc(titulo)}</strong>${objsHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderObjetivosJson(objetivos) {
   const container = document.getElementById('objetivos-list');
   if (!objetivos || !Array.isArray(objetivos.trimestres) || !objetivos.trimestres.length) {
     container.innerHTML = '<div class="loading">Sin objetivos definidos.</div>';
