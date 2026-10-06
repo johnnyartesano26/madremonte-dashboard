@@ -346,21 +346,55 @@ function semanaActual(trimestre) {
   return Math.max(1, Math.min(trimestre.totalSemanas, diff));
 }
 
+// ═══ NAVEGACIÓN DE CUARTILES ═══
+let cuartilSeleccionado = null;   // null = cuartil actual
+
+function datosCuartil(q) {
+  const now = new Date();
+  const anio = now.getFullYear();
+  const inicio = new Date(anio, (q - 1) * 3, 1);
+  const fin = new Date(anio, q * 3, 0);
+  return { numero: q, nombre: 'Q' + q + ' ' + anio, inicio, fin, totalSemanas: 13 };
+}
+
+function seleccionarCuartil(q) {
+  cuartilSeleccionado = q;
+  renderVistaCuartil(q);
+}
+
+function irAlCuartilActual() {
+  cuartilSeleccionado = null;
+  renderVistaCuartil(Math.floor(new Date().getMonth() / 3) + 1);
+}
+
+function renderVistaCuartil(q) {
+  const now = new Date();
+  const actualQ = Math.floor(now.getMonth() / 3) + 1;
+  const d = datosCuartil(q);
+
+  let semanaMostrada, semanaResaltar;
+  if (q === actualQ) { semanaMostrada = semanaActual(d); semanaResaltar = semanaMostrada; }
+  else if (q < actualQ) { semanaMostrada = 13; semanaResaltar = 14; }   // cuartil terminado
+  else { semanaMostrada = 0; semanaResaltar = 0; }                       // cuartil futuro
+
+  const semanaGlobal = (q - 1) * 13 + (semanaMostrada || 0);
+
+  document.title = `Scrum · Madre Monte · ${d.nombre}`;
+  document.getElementById('pill-semana').textContent = `Semana ${semanaMostrada || '—'} · ${d.totalSemanas}`;
+  document.getElementById('pill-sprint').textContent = `${d.nombre} · ${q === actualQ ? 'Semana ' + semanaGlobal + ' del año' : (q < actualQ ? 'completado' : 'por venir')} · ${now.toLocaleDateString('es-CO', {day:'numeric', month:'short'})}`;
+  document.getElementById('timeline-title').textContent = `⏳ Progreso Trimestral — ${d.nombre}`;
+  buildCuartiles(actualQ, q);
+  buildTimeline(semanaResaltar, d.totalSemanas);
+  renderCuartilMeta(d);
+}
+
 // ═══ INIT ═══
 async function init() {
   const trimestre = trimestreActual();
-  const semana = semanaActual(trimestre);
-  const semanaGlobal = (trimestre.numero - 1) * 13 + semana;
-  document.title = `Scrum · Madre Monte · ${trimestre.nombre}`;
-  document.getElementById('pill-semana').textContent = `Semana ${semana} · ${trimestre.totalSemanas}`;
-  document.getElementById('pill-sprint').textContent = `${trimestre.nombre} · Semana ${semanaGlobal} del año · ${new Date().toLocaleDateString('es-CO', {day:'numeric', month:'short'})}`;
-  document.getElementById('timeline-title').textContent = `⏳ Progreso Trimestral — Semana ${semana} de ${trimestre.totalSemanas}`;
   document.getElementById('fecha-actualizacion').textContent = `Actualizado: ${new Date().toLocaleDateString('es-CO', {weekday:'long', day:'numeric', month:'long', year:'numeric'})}`;
   document.getElementById('footer-text').textContent = `Scrum Dashboard · Madre Monte · ${trimestre.nombre} · ${new Date().toLocaleDateString('es-CO')}`;
 
-  buildCuartiles(trimestre);
-  buildTimeline(semana, trimestre.totalSemanas);
-  renderCuartilMeta(trimestre);
+  renderVistaCuartil(trimestre.numero);
 
   const [ledger, invima, ventas, facturas, objetivos] = await Promise.all([
     fetchJSON('data/ledger_inventario.json'),
@@ -385,8 +419,8 @@ async function init() {
   renderAvances();
 }
 
-// ═══ CUARTILES (desglose del año) ═══
-function buildCuartiles(trimestre) {
+// ═══ CUARTILES (desglose del año, clicable) ═══
+function buildCuartiles(actualQ, seleccionadoQ) {
   const el = document.getElementById('cuartiles-overview');
   if (!el) return;
   const rangos = [1, 14, 27, 40];   // semana global de inicio de cada cuartil
@@ -394,15 +428,17 @@ function buildCuartiles(trimestre) {
   for (let i = 0; i < 4; i++) {
     const q = i + 1;
     const ini = rangos[i], fin = rangos[i] + 12;
-    let bg, color;
-    if (q < trimestre.numero) { bg = 'rgba(76,175,80,.15)'; color = '#2e7d32'; }
-    else if (q === trimestre.numero) { bg = 'var(--gold)'; color = '#fff'; }
-    else { bg = '#f5efe6'; color = 'var(--dim)'; }
-    html += `<div style="flex:1;text-align:center;padding:8px 6px;border-radius:8px;background:${bg};color:${color};">
+    let bg, color, border;
+    if (q === seleccionadoQ) { bg = 'var(--gold)'; color = '#fff'; border = '1px solid var(--gold)'; }
+    else if (q < actualQ) { bg = 'rgba(76,175,80,.15)'; color = '#2e7d32'; border = '1px solid transparent'; }
+    else if (q === actualQ) { bg = 'rgba(200,138,61,.20)'; color = '#a06a20'; border = '1px solid var(--gold-l)'; }
+    else { bg = '#f5efe6'; color = 'var(--dim)'; border = '1px solid transparent'; }
+    html += `<div onclick="seleccionarCuartil(${q})" style="flex:1;text-align:center;padding:8px 6px;border-radius:8px;background:${bg};color:${color};cursor:pointer;border:${border};">
       <div style="font-size:13px;font-weight:700;">Q${q}</div>
       <div style="font-size:9px;opacity:.8;">sem ${ini}–${fin}</div>
     </div>`;
   }
+  html += `<div onclick="irAlCuartilActual()" title="Volver al cuartil actual" style="text-align:center;padding:8px;border-radius:8px;background:#f5efe6;color:var(--dim);cursor:pointer;font-size:11px;font-weight:600;align-self:center;">↺ Hoy</div>`;
   el.innerHTML = html;
 }
 
@@ -412,7 +448,7 @@ function renderCuartilMeta(trimestre) {
   const now = new Date();
   const diasRestantes = Math.max(0, Math.ceil((trimestre.fin.getTime() - now.getTime()) / 86400000));
   const totalDias = (trimestre.fin.getTime() - trimestre.inicio.getTime()) / 86400000;
-  const pct = Math.min(100, Math.round(((now.getTime() - trimestre.inicio.getTime()) / 86400000) / totalDias * 100));
+  const pct = Math.max(0, Math.min(100, Math.round(((now.getTime() - trimestre.inicio.getTime()) / 86400000) / totalDias * 100)));
   const fechaFin = trimestre.fin.toLocaleDateString('es-CO', { day: 'numeric', month: 'long' });
   el.textContent = `📅 ${trimestre.nombre} termina el ${fechaFin} · quedan ${diasRestantes} días · ${pct}% transcurrido`;
 }
