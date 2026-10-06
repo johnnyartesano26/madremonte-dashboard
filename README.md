@@ -129,7 +129,7 @@ with check (current_setting('request.headers', true)::json->>'x-write-key' = '70
 
 ## Nota de mantenimiento
 
-- El dashboard Q4 usa la fecha de inicio `Q4_INICIO = 2026-10-01` en `scrum.html`. Al cambiar de trimestre, actualizar esa fecha y los `SPRINT_FALLBACK`.
+- El cuartil y las semanas se calculan **automáticamente** en `scrum.html` (`trimestreActual()`): un año = 52 semanas → 4 trimestres de 13 semanas. No hay que cambiar fechas al pasar de trimestre; solo revisar `SPRINT_FALLBACK` (tareas de respaldo).
 - `data/objetivos.json` es el **respaldo local** de objetivos; la fuente principal es Supabase.
 
 ---

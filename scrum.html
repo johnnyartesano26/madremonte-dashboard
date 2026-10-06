@@ -330,14 +330,12 @@ async function fetchJSON(url) {
   } catch(e) { console.warn('Fetch failed:', url, e); return null; }
 }
 
-// Cuartil actual (dinámico): Q1/Q2/Q3/Q4 según la fecha
+// Cuartil actual (dinámico): Q1/Q2/Q3/Q4 según la fecha. Año = 52 semanas → 4 trimestres de 13 semanas.
 function trimestreActual() {
   const now = new Date();
   const q = Math.floor(now.getMonth() / 3);            // 0..3
   const inicio = new Date(now.getFullYear(), q * 3, 1);
-  const fin = new Date(now.getFullYear(), q * 3 + 3, 0);
-  const totalSemanas = Math.ceil((fin - inicio + 1) / (7 * 86400000));
-  return { numero: q + 1, nombre: 'Q' + (q + 1) + ' ' + now.getFullYear(), inicio, fin, totalSemanas };
+  return { numero: q + 1, nombre: 'Q' + (q + 1) + ' ' + now.getFullYear(), inicio, totalSemanas: 13 };
 }
 
 function semanaActual(trimestre) {
