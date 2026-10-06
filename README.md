@@ -43,9 +43,11 @@ const SUPABASE_KEY = 'sb_publishable_...';   // publishable key (pública, segur
 
 > ⚠️ La **`service_role` / `secret` key NUNCA debe ir en el repositorio** ni en el navegador.
 
-### Seguridad (Row Level Security)
+### Seguridad (clave de escritura + RLS)
 
-Las tablas tienen RLS habilitado con políticas abiertas al rol `anon` (lectura y escritura), necesario para un sitio estático sin login. Son datos no sensibles, pero **cualquiera con la URL podría escribir**. Para limitarlo, añadir una "clave de escritura" (header + política RLS) como siguiente paso.
+La **lectura** está abierta al rol `anon` (necesaria para el sitio estático). La **escritura** está protegida con una **clave de escritura**: el formulario pide la clave (la misma de los dashboards), la hashea (SHA-256) y la envía como header `x-write-key`. Las políticas RLS de `insert` verifican ese hash antes de permitir el guardado.
+
+> El hash se guarda en `scrum.html` (`CLAVE_HASH`) y en las políticas RLS. La clave en texto plano solo la escribe el usuario.
 
 ---
 
@@ -98,13 +100,20 @@ alter table public.invima_items enable row level security;
 alter table public.metricas enable row level security;
 
 create policy "lectura anon objetivos" on public.objetivos for select to anon using (true);
-create policy "escritura anon objetivos" on public.objetivos for insert to anon with check (true);
+create policy "escritura anon objetivos" on public.objetivos for insert to anon
+with check (current_setting('request.headers', true)::json->>'x-write-key' = '700686426580d0bb78aebaabf76399a10f806705c93c4e826f8c982f0028ab74');
+
 create policy "lectura anon sprint" on public.sprint_tareas for select to anon using (true);
-create policy "escritura anon sprint" on public.sprint_tareas for insert to anon with check (true);
+create policy "escritura anon sprint" on public.sprint_tareas for insert to anon
+with check (current_setting('request.headers', true)::json->>'x-write-key' = '700686426580d0bb78aebaabf76399a10f806705c93c4e826f8c982f0028ab74');
+
 create policy "lectura anon invima" on public.invima_items for select to anon using (true);
-create policy "escritura anon invima" on public.invima_items for insert to anon with check (true);
+create policy "escritura anon invima" on public.invima_items for insert to anon
+with check (current_setting('request.headers', true)::json->>'x-write-key' = '700686426580d0bb78aebaabf76399a10f806705c93c4e826f8c982f0028ab74');
+
 create policy "lectura anon metricas" on public.metricas for select to anon using (true);
-create policy "escritura anon metricas" on public.metricas for insert to anon with check (true);
+create policy "escritura anon metricas" on public.metricas for insert to anon
+with check (current_setting('request.headers', true)::json->>'x-write-key' = '700686426580d0bb78aebaabf76399a10f806705c93c4e826f8c982f0028ab74');
 ```
 
 ---

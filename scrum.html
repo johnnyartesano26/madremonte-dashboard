@@ -194,6 +194,11 @@ tr:hover td { background: rgba(200,138,61,.04); }
     <button class="filter-btn" onclick="switchRegistro('invima', this)">🏥 Invima</button>
     <button class="filter-btn" onclick="switchRegistro('metrica', this)">📊 Métrica</button>
   </div>
+  <div style="margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <label style="font-size:12px;color:var(--dim);">🔒 Clave de escritura:</label>
+    <input id="write-key" type="password" placeholder="clave" autocomplete="off" style="border:1px solid var(--line);background:#fff;padding:8px;border-radius:6px;min-width:180px;">
+    <span style="font-size:11px;color:var(--dim)">(la misma de los dashboards)</span>
+  </div>
   <div id="registro-form"></div>
 </div>
 
@@ -825,6 +830,14 @@ function renderObjetivosJson(objetivos) {
 const SUPABASE_URL = 'https://xrhuonbgjlocjusmniel.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_bBvT83l6Ak_7Z2DImE3Obg_DfH6z7eZ';
 
+// Clave de escritura compartida con los dashboards (SHA-256 de "MadreMonte2026")
+const CLAVE_HASH = '700686426580d0bb78aebaabf76399a10f806705c93c4e826f8c982f0028ab74';
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 async function sbFetch(path, options = {}) {
   const r = await fetch(SUPABASE_URL + path, {
     ...options,
@@ -900,6 +913,14 @@ function renderRegistroForm() {
 
 async function submitRegistro(btn) {
   const cfg = REGISTRO_TIPOS[registroTipo];
+
+  const claveInput = document.getElementById('write-key');
+  const clave = claveInput.value || sessionStorage.getItem('scrum_clave') || '';
+  if (!clave) { mostrarToast('🔒 Ingresa la clave de escritura'); return; }
+  const keyHash = await sha256(clave);
+  if (keyHash !== CLAVE_HASH) { mostrarToast('🔒 Clave incorrecta'); claveInput.value = ''; return; }
+  sessionStorage.setItem('scrum_clave', clave);
+
   const obj = {};
   let missing = false;
   cfg.campos.forEach(c => {
@@ -912,7 +933,7 @@ async function submitRegistro(btn) {
   if (missing) { mostrarToast('⚠️ Completa los campos marcados con *'); return; }
   btn.disabled = true;
   try {
-    await sbFetch('/rest/v1/' + cfg.tabla, { method: 'POST', body: JSON.stringify(obj), headers: { 'Prefer': 'return=minimal' } });
+    await sbFetch('/rest/v1/' + cfg.tabla, { method: 'POST', body: JSON.stringify(obj), headers: { 'Prefer': 'return=minimal', 'x-write-key': keyHash } });
     mostrarToast('✅ Guardado en ' + cfg.label);
     renderRegistroForm();
     loadHistorial();
