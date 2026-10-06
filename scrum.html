@@ -309,6 +309,7 @@ tr:hover td { background: rgba(200,138,61,.04); }
 <script>
 // ═══ CONFIG ═══
 const DATA_BASE = 'https://johnnyartesano26.github.io/dashboard-maestro/data';
+const ROOT_BASE = 'https://johnnyartesano26.github.io/dashboard-maestro';
 
 function fmt(n) { return (n||0).toLocaleString('es-CO', {maximumFractionDigits:0}); }
 function fmt$(n) { return '$' + fmt(n); }
@@ -447,7 +448,7 @@ async function init() {
     fetchJSON(DATA_BASE + '/ventas_mensuales.json'),
     fetchJSON(DATA_BASE + '/facturas_detalle.json'),
     fetchJSON('data/objetivos.json'),
-    fetchJSON(DATA_BASE + '/catalogo.json'),
+    fetchJSON(ROOT_BASE + '/catalogo.json'),
   ]);
 
   const carteraList = await fetchCarteraSheet();
