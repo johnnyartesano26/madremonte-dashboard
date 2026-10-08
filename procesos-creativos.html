@@ -76,14 +76,25 @@ td { padding:9px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
 <main>
 
 <div class="tabs" id="tabs">
-  <button class="tab active" data-p="f1">🏷 Fase 1 · Creación</button>
+  <button class="tab active" data-p="proyectos">📊 Proyectos</button>
+  <button class="tab" data-p="f1">🏷 Fase 1 · Creación</button>
   <button class="tab" data-p="f2">🗓 Fase 2 · Equipo & Timeline</button>
   <button class="tab" data-p="f3">🧭 Fase 3 · Dimensiones & Preguntas</button>
   <button class="tab" data-p="f4">📈 Fase 4 · Mediciones & Avance</button>
 </div>
 
+<!-- TABLERO DE PROYECTOS -->
+<div class="panel active" id="proyectos">
+  <div class="card">
+    <h2>📊 Tablero de proyectos</h2>
+    <p style="font-size:13px;color:var(--dim);margin-bottom:16px;">Todos los proyectos creativos. Haz clic en uno para seleccionarlo.</p>
+    <div id="proyectos-list"></div>
+    <button class="btn" onclick="nuevoProyecto()">➕ Nuevo proyecto</button>
+  </div>
+</div>
+
 <!-- FASE 1 -->
-<div class="panel active" id="f1">
+<div class="panel" id="f1">
   <div class="card" style="max-width:640px;">
     <h2>🏷 Creación del proyecto</h2>
     <p style="font-size:13px;color:var(--dim);margin-bottom:18px;">Solo administradores (Madre Monte). El aliado y el equipo se suman en la Fase 2.</p>
@@ -277,12 +288,15 @@ function semaforo(avance) {
 }
 
 // ═══ PESTAÑAS ═══
+function goTab(p) { const b = document.querySelector('.tab[data-p="' + p + '"]'); if (b) b.click(); }
+
 document.querySelectorAll('.tab').forEach(b => {
   b.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
     b.classList.add('active');
     document.getElementById(b.dataset.p).classList.add('active');
+    if (b.dataset.p === 'proyectos') cargarProyectos();
     if (b.dataset.p === 'f2') cargarParticipantes();
     if (b.dataset.p === 'f4') renderFase4();
   });
@@ -578,9 +592,63 @@ async function agregarParticipante() {
   }
 }
 
+// ═══ TABLERO DE PROYECTOS ═══
+async function cargarProyectos() {
+  const list = document.getElementById('proyectos-list');
+  try {
+    const rows = await sbFetch('/rest/v1/proyectos_creativos?select=id,nombre_aliado,tipo,estado,responsable_mm,responsable_aliado,creado_el&order=creado_el.desc');
+    renderProyectos(rows || []);
+  } catch (e) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--red);">Error cargando proyectos: ' + e.message + '</div>';
+  }
+}
+
+function renderProyectos(rows) {
+  const list = document.getElementById('proyectos-list');
+  const activo = proyectoActualId();
+  if (!rows.length) {
+    list.innerHTML = '<div style="font-size:13px;color:var(--dim);padding:24px;text-align:center;border:1px dashed var(--line);border-radius:10px;margin-bottom:16px;">Aún no hay proyectos. Crea el primero con el botón de abajo.</div>';
+    return;
+  }
+  list.innerHTML = '<div class="grid2">' + rows.map(p => {
+    const esActivo = p.id === activo;
+    return `
+    <div style="border:1px solid ${esActivo ? 'var(--gold)' : 'var(--line)'};border-radius:12px;padding:16px;cursor:pointer;background:${esActivo ? '#fdf6ec' : '#fff'};box-shadow:var(--shadow);" onclick="seleccionarProyecto('${p.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;">
+        <strong style="font-size:14px;">${p.nombre_aliado}</strong>
+        ${esActivo ? '<span class="badge green">● activo</span>' : ''}
+      </div>
+      <div style="font-size:12px;color:var(--dim);">${p.tipo}</div>
+      <div style="font-size:11px;color:var(--dim);margin-top:4px;">${p.responsable_mm || '—'} · ${p.responsable_aliado || '—'}</div>
+      <div style="margin-top:10px;"><span class="badge ${p.estado === 'activo' ? 'green' : 'gray'}">${p.estado}</span></div>
+    </div>`;
+  }).join('') + '</div>';
+}
+
+function seleccionarProyecto(id) {
+  localStorage.setItem('pc_proyecto_id', id);
+  cargarProyectos();
+  showToast('Proyecto seleccionado. Ve a las Fases para trabajar en él.');
+}
+
+function nuevoProyecto() {
+  ['f1_aliado','f1_mm','f1_aliado_r'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f1_status').textContent = '';
+  goTab('f1');
+}
+
+function showToast(msg) {
+  let t = document.getElementById('toast');
+  if (!t) { t = document.createElement('div'); t.id = 'toast'; t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#3d2a1d;color:#fff;padding:12px 20px;border-radius:999px;font-size:13px;z-index:9999;transition:opacity .3s;'; document.body.appendChild(t); }
+  t.textContent = msg; t.style.opacity = 1;
+  clearTimeout(t._tm);
+  t._tm = setTimeout(() => t.style.opacity = 0, 3000);
+}
+
 // ═══ INIT ═══
 renderGantt();
 cargarCatalogo();
+cargarProyectos();
 </script>
 </body>
 </html>
