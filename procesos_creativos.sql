@@ -222,3 +222,26 @@ create policy "del_encuentros" on public.encuentros for delete to anon
   using (current_setting('request.headers', true)::json->>'x-write-key' = '700686426580d0bb78aebaabf76399a10f806705c93c4e826f8c982f0028ab74');
 
 create index if not exists idx_encuentros_fase on public.encuentros(fase_id);
+
+-- ═══ 9. SUBTEMAS (sub-ítems de avance dentro de cada fase) ═══
+create table if not exists public.subtemas (
+  id bigint generated always as identity primary key,
+  fase_id bigint not null references public.fases(id) on delete cascade,
+  nombre text not null,
+  avance_pct int not null default 0,
+  estado text not null default 'pendiente',
+  creado_el timestamptz not null default now()
+);
+
+alter table public.subtemas enable row level security;
+
+create policy "sel_subtemas" on public.subtemas for select to anon using (true);
+create policy "ins_subtemas" on public.subtemas for insert to anon
+  with check (current_setting('request.headers', true)::json->>'x-write-key' = '700686426580d0bb78aebaabf76399a10f806705c93c4e826f8c982f0028ab74');
+create policy "upd_subtemas" on public.subtemas for update to anon
+  using (current_setting('request.headers', true)::json->>'x-write-key' = '700686426580d0bb78aebaabf76399a10f806705c93c4e826f8c982f0028ab74')
+  with check (current_setting('request.headers', true)::json->>'x-write-key' = '700686426580d0bb78aebaabf76399a10f806705c93c4e826f8c982f0028ab74');
+create policy "del_subtemas" on public.subtemas for delete to anon
+  using (current_setting('request.headers', true)::json->>'x-write-key' = '700686426580d0bb78aebaabf76399a10f806705c93c4e826f8c982f0028ab74');
+
+create index if not exists idx_subtemas_fase on public.subtemas(fase_id);

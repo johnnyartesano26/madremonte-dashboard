@@ -138,8 +138,9 @@ td { padding:9px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
       <div id="part_status" style="font-size:12px;color:var(--dim);margin-top:10px;"></div>
     </div>
     <div class="card">
-      <h2>🗓 Línea de tiempo (fases)</h2>
-      <p style="font-size:12px;color:var(--dim);margin-bottom:14px;">Define las fases con fechas independientes. Edita y guarda cada una.</p>
+      <h2>🗓 Línea de tiempo (Gantt + fases)</h2>
+      <p style="font-size:12px;color:var(--dim);margin-bottom:14px;">El diagrama Gantt se genera solo con el nombre y los tiempos (inicio + semanas) de cada fase. Cada fase puede tener subtemas de avance y encuentros.</p>
+      <div id="gantt-chart" style="height:260px;margin-bottom:16px;border:1px solid var(--line);border-radius:10px;"></div>
       <div id="gantt"></div>
       <button class="btn ghost" onclick="agregarFase()" style="margin-top:10px;">➕ Agregar fase</button>
     </div>
@@ -309,17 +310,68 @@ document.querySelectorAll('.tab').forEach(b => {
   });
 });
 
-// ═══ FASE 2: FASES EDITABLES (línea de tiempo) ═══
+// ═══ FASE 2: FASES EDITABLES + GANTT + SUBTEMAS + ENCUENTROS ═══
 async function cargarFases() {
   const cont = document.getElementById('gantt');
   const pid = proyectoActualId();
   if (!pid) { cont.innerHTML = '<div style="font-size:12px;color:var(--dim);padding:10px;">Crea o selecciona un proyecto para definir su línea de tiempo.</div>'; return; }
   try {
     const rows = await sbFetch('/rest/v1/fases?proyecto_id=eq.' + pid + '&select=id,nombre,fecha_inicio,duracion_semanas,avance_pct,es_hito,estado&order=id');
+    renderGantt(rows || []);
     renderFases(rows || []);
   } catch (e) {
     cont.innerHTML = '<div style="font-size:12px;color:var(--red);">Error cargando fases: ' + e.message + '</div>';
   }
+}
+
+function renderGantt(fases) {
+  const el = document.getElementById('gantt-chart');
+  if (!el || typeof echarts === 'undefined' || !fases.length) return;
+  const chart = echarts.getInstanceByDom(el) || echarts.init(el);
+
+  const items = [];
+  fases.forEach(f => {
+    const ini = f.fecha_inicio ? new Date(f.fecha_inicio) : null;
+    const fin = (ini && f.duracion_semanas) ? new Date(ini.getTime() + f.duracion_semanas * 7 * 86400000) : null;
+    if (ini && fin) items.push({ nombre: f.nombre, ini, fin, avance: f.avance_pct || 0 });
+  });
+
+  if (!items.length) { chart.clear(); return; }
+
+  const min = new Date(Math.min(...items.map(i => i.ini.getTime())));
+  const max = new Date(Math.max(...items.map(i => i.fin.getTime())));
+  const pad = 3 * 86400000;
+  min.setTime(min.getTime() - pad);
+  max.setTime(max.getTime() + pad);
+
+  chart.setOption({
+    tooltip: { formatter: p => { const it = items[p.dataIndex]; return '<b>' + it.nombre + '</b><br>' + it.ini.toLocaleDateString('es-CO') + ' → ' + it.fin.toLocaleDateString('es-CO') + '<br>Avance: ' + it.avance + '%'; } },
+    grid: { left: 8, right: 24, top: 10, bottom: 30, containLabel: true },
+    xAxis: { type: 'time', min: min, max: max, axisLabel: { color: '#8c7b6b', formatter: v => { const d = new Date(v); return (d.getMonth()+1) + '/' + d.getDate(); } }, splitLine: { show: false } },
+    yAxis: { type: 'category', data: items.map(i => i.nombre), axisLabel: { color: '#6b5a4a', fontSize: 12 }, axisLine: { show: false }, axisTick: { show: false } },
+    series: [{
+      type: 'custom',
+      renderItem: (params, api) => {
+        const idx = api.value(0);
+        const it = items[idx];
+        const start = api.coord([it.ini, idx]);
+        const end = api.coord([it.fin, idx]);
+        const h = api.size([0, 1])[1] * 0.5;
+        const x = start[0], y = start[1] - h / 2, w = Math.max(end[0] - start[0], 2);
+        const children = [{
+          type: 'rect', shape: { x: x, y: y, width: w, height: h, r: 4 }, style: { fill: '#f0e6d8' }
+        }];
+        const aw = Math.max(2, w * Math.min(1, it.avance / 100));
+        children.push({
+          type: 'rect', shape: { x: x, y: y, width: aw, height: h, r: 4 },
+          style: { fill: it.avance >= 100 ? '#4caf50' : (it.avance >= 70 ? '#ffc107' : '#c88a3d') }
+        });
+        return { type: 'group', children };
+      },
+      data: items.map((it, i) => [i, it.ini, it.fin, it.avance]),
+      encode: { x: [1, 2], y: 0 }
+    }]
+  });
 }
 
 function renderFases(rows) {
@@ -335,7 +387,9 @@ function renderFases(rows) {
         <button onclick="guardarFase(${f.id})" class="btn" style="padding:8px 12px;" title="Guardar">💾</button>
         <button onclick="eliminarFase(${f.id})" style="border:none;background:transparent;cursor:pointer;font-size:16px;color:var(--red);" title="Eliminar">🗑</button>
       </div>
-      <button onclick="toggleEncuentros(${f.id})" class="btn ghost" style="margin-top:10px;padding:6px 14px;">📅 Encuentros ▾</button>
+      <button onclick="toggleSubtemas(${f.id})" class="btn ghost" style="margin-top:10px;padding:6px 14px;">📋 Subtemas de avance ▾</button>
+      <div id="sub_${f.id}" style="display:none;margin-top:12px;border-top:1px solid var(--line);padding-top:12px;"></div>
+      <button onclick="toggleEncuentros(${f.id})" class="btn ghost" style="margin-top:6px;padding:6px 14px;">📅 Encuentros ▾</button>
       <div id="enc_${f.id}" style="display:none;margin-top:12px;border-top:1px solid var(--line);padding-top:12px;"></div>
     </div>`).join('');
 }
@@ -375,6 +429,98 @@ async function eliminarFase(id) {
     await sbFetch('/rest/v1/fases?id=eq.' + id, { method: 'DELETE', headers: { 'x-write-key': key } });
     showToast('✅ Fase eliminada');
     cargarFases();
+  } catch (e) { showToast('❌ Error: ' + e.message); }
+}
+
+// ═══ SUBTEMAS DE AVANCE ═══
+async function toggleSubtemas(faseId) {
+  const div = document.getElementById('sub_' + faseId);
+  if (!div) return;
+  if (div.style.display === 'none' || div.style.display === '') {
+    await cargarSubtemas(faseId, div);
+    div.style.display = 'block';
+  } else {
+    div.style.display = 'none';
+  }
+}
+
+async function cargarSubtemas(faseId, div) {
+  try {
+    const rows = await sbFetch('/rest/v1/subtemas?fase_id=eq.' + faseId + '&select=id,nombre,avance_pct,estado&order=id');
+    renderSubtemas(faseId, div, rows || []);
+  } catch (e) {
+    div.innerHTML = '<div style="font-size:12px;color:var(--red);">Error cargando subtemas: ' + e.message + '</div>';
+  }
+}
+
+function renderSubtemas(faseId, div, rows) {
+  let html = '';
+  if (!rows.length) {
+    html += '<div style="font-size:12px;color:var(--dim);margin-bottom:10px;">Sin subtemas. Agrega el primero (actividad, entregable, tarea…).</div>';
+  } else {
+    rows.forEach(s => {
+      const badge = s.avance_pct >= 100 ? 'green' : (s.avance_pct >= 70 ? 'yellow' : (s.avance_pct > 0 ? 'progreso' : 'gray'));
+      html += `<div style="display:flex;gap:8px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;">
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;">${s.nombre}</div>
+          <div style="height:6px;background:#efe9df;border-radius:3px;margin-top:6px;overflow:hidden;">
+            <div style="height:100%;width:${s.avance_pct}%;background:${s.avance_pct >= 100 ? '#4caf50' : (s.avance_pct >= 70 ? '#ffc107' : '#c88a3d')};border-radius:3px;"></div>
+          </div>
+        </div>
+        <input type="number" min="0" max="100" id="st_av_${s.id}" value="${s.avance_pct}" style="width:70px;border:1px solid var(--line);background:#fff;padding:6px 8px;border-radius:8px;font:inherit;">
+        <button onclick="guardarSubtema(${s.id})" class="btn" style="padding:6px 10px;">💾</button>
+        <button onclick="eliminarSubtema(${s.id}, ${faseId})" style="border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--red);">🗑</button>
+      </div>`;
+    });
+  }
+  html += `
+    <div style="border-top:1px dashed var(--line);padding-top:10px;margin-top:4px;">
+      <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:8px;">➕ Nuevo subtema</div>
+      <div style="display:flex;gap:8px;">
+        <input id="st_nombre_${faseId}" placeholder="Nombre del subtema" style="flex:1;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;">
+        <input type="number" min="0" max="100" id="st_av_nuevo_${faseId}" placeholder="%" style="width:80px;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;">
+        <button onclick="agregarSubtema(${faseId})" class="btn">➕</button>
+      </div>
+    </div>`;
+  div.innerHTML = html;
+}
+
+async function agregarSubtema(faseId) {
+  const nombre = document.getElementById('st_nombre_' + faseId).value.trim();
+  if (!nombre) { showToast('⚠️ Escribe el nombre del subtema.'); return; }
+  if (!claveInput()) { showToast('⚠️ Ingresa la clave de escritura (arriba).'); return; }
+  try {
+    const key = await sha256(claveInput());
+    const avance = parseInt(document.getElementById('st_av_nuevo_' + faseId).value) || 0;
+    await sbFetch('/rest/v1/subtemas', {
+      method: 'POST', headers: { 'x-write-key': key },
+      body: JSON.stringify({ fase_id: faseId, nombre: nombre, avance_pct: avance })
+    });
+    showToast('✅ Subtema agregado');
+    const div = document.getElementById('sub_' + faseId);
+    if (div) cargarSubtemas(faseId, div);
+  } catch (e) { showToast('❌ Error: ' + e.message); }
+}
+
+async function guardarSubtema(id) {
+  if (!claveInput()) { showToast('⚠️ Ingresa la clave de escritura (arriba).'); return; }
+  try {
+    const key = await sha256(claveInput());
+    const avance = parseInt(document.getElementById('st_av_' + id).value) || 0;
+    await sbFetch('/rest/v1/subtemas?id=eq.' + id, { method: 'PATCH', headers: { 'x-write-key': key }, body: JSON.stringify({ avance_pct: avance }) });
+    showToast('✅ % guardado');
+  } catch (e) { showToast('❌ Error: ' + e.message); }
+}
+
+async function eliminarSubtema(id, faseId) {
+  if (!claveInput()) { showToast('⚠️ Ingresa la clave de escritura (arriba).'); return; }
+  if (!confirm('¿Eliminar este subtema?')) return;
+  try {
+    const key = await sha256(claveInput());
+    await sbFetch('/rest/v1/subtemas?id=eq.' + id, { method: 'DELETE', headers: { 'x-write-key': key } });
+    showToast('✅ Subtema eliminado');
+    const div = document.getElementById('sub_' + faseId);
+    if (div) cargarSubtemas(faseId, div);
   } catch (e) { showToast('❌ Error: ' + e.message); }
 }
 
