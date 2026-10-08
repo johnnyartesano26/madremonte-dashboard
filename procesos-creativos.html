@@ -138,9 +138,10 @@ td { padding:9px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
       <div id="part_status" style="font-size:12px;color:var(--dim);margin-top:10px;"></div>
     </div>
     <div class="card">
-      <h2>🗓 Línea de tiempo (Gantt)</h2>
-      <p style="font-size:12px;color:var(--dim);margin-bottom:14px;">Duración en semanas — cada barra es una fase.</p>
+      <h2>🗓 Línea de tiempo (fases)</h2>
+      <p style="font-size:12px;color:var(--dim);margin-bottom:14px;">Define las fases con fechas independientes. Edita y guarda cada una.</p>
       <div id="gantt"></div>
+      <button class="btn ghost" onclick="agregarFase()" style="margin-top:10px;">➕ Agregar fase</button>
     </div>
   </div>
 </div>
@@ -302,32 +303,75 @@ document.querySelectorAll('.tab').forEach(b => {
     b.classList.add('active');
     document.getElementById(b.dataset.p).classList.add('active');
     if (b.dataset.p === 'proyectos') cargarProyectos();
-    if (b.dataset.p === 'f2') cargarParticipantes();
+    if (b.dataset.p === 'f2') { cargarParticipantes(); cargarFases(); }
     if (b.dataset.p === 'f3') cargarFase3();
     if (b.dataset.p === 'f4') cargarFase4();
   });
 });
 
-// ═══ FASE 2: GANTT (barras simples) ═══
-function renderGantt() {
-  const fases = [
-    { nombre:'F1 · Creación', sem:1, avance:100, hito:true },
-    { nombre:'F2 · Equipo & Brief', sem:2, avance:50 },
-    { nombre:'F3 · Producción', sem:4, avance:0 },
-    { nombre:'F4 · Lanzamiento', sem:1, avance:0 },
-  ];
-  let html = '';
-  let semana = 1;
-  fases.forEach(f => {
-    const ancho = Math.min(100, (f.sem / 6) * 100);
-    html += `<div class="gantt-row">
-      <div class="gantt-label">${f.nombre}</div>
-      <div class="gantt-track"><div class="gantt-bar ${f.hito?'hito':''}" style="width:${ancho}%;${f.avance>0?'opacity:'+(0.5+f.avance/200):''}"></div></div>
-      <div class="gantt-week">S${semana}-S${semana+f.sem-1} · ${f.avance}%</div>
-    </div>`;
-    semana += f.sem;
-  });
-  document.getElementById('gantt').innerHTML = html + '<p style="font-size:11px;color:var(--dim);margin-top:8px;">Duración total: 8 semanas (≈2 meses)</p>';
+// ═══ FASE 2: FASES EDITABLES (línea de tiempo) ═══
+async function cargarFases() {
+  const cont = document.getElementById('gantt');
+  const pid = proyectoActualId();
+  if (!pid) { cont.innerHTML = '<div style="font-size:12px;color:var(--dim);padding:10px;">Crea o selecciona un proyecto para definir su línea de tiempo.</div>'; return; }
+  try {
+    const rows = await sbFetch('/rest/v1/fases?proyecto_id=eq.' + pid + '&select=id,nombre,fecha_inicio,duracion_semanas,avance_pct,es_hito,estado&order=id');
+    renderFases(rows || []);
+  } catch (e) {
+    cont.innerHTML = '<div style="font-size:12px;color:var(--red);">Error cargando fases: ' + e.message + '</div>';
+  }
+}
+
+function renderFases(rows) {
+  const cont = document.getElementById('gantt');
+  if (!rows.length) { cont.innerHTML = '<div style="font-size:12px;color:var(--dim);padding:10px;">Sin fases todavía. Agrega la primera con el botón de abajo.</div>'; return; }
+  cont.innerHTML = rows.map(f => `
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;">
+      <input id="f_nombre_${f.id}" value="${f.nombre}" placeholder="Nombre de la fase" style="flex:1;min-width:140px;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;">
+      <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Inicio</span><input type="date" id="f_ini_${f.id}" value="${f.fecha_inicio ? f.fecha_inicio.slice(0,10) : ''}" style="border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
+      <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Semanas</span><input type="number" min="1" id="f_sem_${f.id}" value="${f.duracion_semanas}" style="width:72px;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
+      <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Avance %</span><input type="number" min="0" max="100" id="f_av_${f.id}" value="${f.avance_pct}" style="width:72px;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
+      <button onclick="guardarFase(${f.id})" class="btn" style="padding:8px 12px;" title="Guardar">💾</button>
+      <button onclick="eliminarFase(${f.id})" style="border:none;background:transparent;cursor:pointer;font-size:16px;color:var(--red);" title="Eliminar">🗑</button>
+    </div>`).join('');
+}
+
+async function guardarFase(id) {
+  if (!claveInput()) { showToast('⚠️ Ingresa la clave de escritura (arriba).'); return; }
+  const body = {
+    nombre: document.getElementById('f_nombre_' + id).value.trim(),
+    fecha_inicio: document.getElementById('f_ini_' + id).value || null,
+    duracion_semanas: parseInt(document.getElementById('f_sem_' + id).value) || 1,
+    avance_pct: parseInt(document.getElementById('f_av_' + id).value) || 0
+  };
+  try {
+    const key = await sha256(claveInput());
+    await sbFetch('/rest/v1/fases?id=eq.' + id, { method: 'PATCH', headers: { 'x-write-key': key }, body: JSON.stringify(body) });
+    showToast('✅ Fase guardada');
+    cargarFases();
+  } catch (e) { showToast('❌ Error: ' + e.message); }
+}
+
+async function agregarFase() {
+  const pid = proyectoActualId();
+  if (!pid) { showToast('⚠️ Primero crea o selecciona un proyecto.'); return; }
+  if (!claveInput()) { showToast('⚠️ Ingresa la clave de escritura (arriba).'); return; }
+  try {
+    const key = await sha256(claveInput());
+    await sbFetch('/rest/v1/fases', { method: 'POST', headers: { 'x-write-key': key }, body: JSON.stringify({ proyecto_id: pid, nombre: 'Nueva fase', duracion_semanas: 1, avance_pct: 0 }) });
+    cargarFases();
+  } catch (e) { showToast('❌ Error: ' + e.message); }
+}
+
+async function eliminarFase(id) {
+  if (!claveInput()) { showToast('⚠️ Ingresa la clave de escritura (arriba).'); return; }
+  if (!confirm('¿Eliminar esta fase?')) return;
+  try {
+    const key = await sha256(claveInput());
+    await sbFetch('/rest/v1/fases?id=eq.' + id, { method: 'DELETE', headers: { 'x-write-key': key } });
+    showToast('✅ Fase eliminada');
+    cargarFases();
+  } catch (e) { showToast('❌ Error: ' + e.message); }
 }
 
 // ═══ FASE 3: DIMENSIONES ═══
@@ -595,8 +639,21 @@ async function crearProyecto() {
       });
     }
 
+    const fasesDefault = [
+      { nombre:'Creación', duracion:1, avance:100 },
+      { nombre:'Equipo & Brief', duracion:2, avance:50 },
+      { nombre:'Producción', duracion:4, avance:0 },
+      { nombre:'Lanzamiento', duracion:1, avance:0 }
+    ];
+    for (const fd of fasesDefault) {
+      await sbFetch('/rest/v1/fases', {
+        method: 'POST', headers: wh,
+        body: JSON.stringify({ proyecto_id: proyectoId, nombre: fd.nombre, duracion_semanas: fd.duracion, avance_pct: fd.avance, estado: fd.avance >= 100 ? 'completada' : (fd.avance > 0 ? 'en_curso' : 'pendiente') })
+      });
+    }
+
     localStorage.setItem('pc_proyecto_id', proyectoId);
-    st.innerHTML = '✅ Proyecto creado (id <b>' + proyectoId.slice(0, 8) + '</b>) con 5 dimensiones y ' + CATALOGO.length + ' preguntas.';
+    st.innerHTML = '✅ Proyecto creado (id <b>' + proyectoId.slice(0, 8) + '</b>) con 5 dimensiones, ' + CATALOGO.length + ' preguntas y 4 fases.';
   } catch (e) {
     st.textContent = '❌ Error: ' + e.message;
   } finally {
@@ -807,7 +864,6 @@ function renderFasesExplicacion() {
 }
 
 // ═══ INIT ═══
-renderGantt();
 renderFasesExplicacion();
 cargarCatalogo();
 cargarProyectos();
