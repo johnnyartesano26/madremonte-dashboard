@@ -151,7 +151,7 @@ td { padding:9px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
 <div class="panel" id="f3">
   <div class="card">
     <h2>🧭 Dimensiones & preguntas base</h2>
-    <p style="font-size:13px;color:var(--dim);margin-bottom:14px;">Catálogo de 40 preguntas base (8 por dimensión). Puedes añadir preguntas propias; nunca quitar las base.</p>
+    <p style="font-size:13px;color:var(--dim);margin-bottom:14px;">Preguntas base sugeridas (8 por dimensión). Son una guía, no una camisa de fuerza: puedes editar la pregunta, el indicador y la meta, y añadir las propias.</p>
     <div id="dimensiones"></div>
   </div>
 </div>
@@ -279,6 +279,13 @@ const MEDICIONES = [
 ];
 
 const TIPO_LABEL = { numero:'N°', porcentaje:'%', escala:'1-5', cualitativo:'Cualitativo' };
+
+function indicadorLabel(tipo, unidad) {
+  if (tipo === 'porcentaje') return '%';
+  if (tipo === 'escala') return '1-5';
+  if (tipo === 'cualitativo') return 'Cualitativo' + (unidad ? ' ' + unidad : '');
+  return 'N°' + (unidad ? ' ' + unidad : '');
+}
 
 // Historial de muestra (semana a semana) para el indicador "asistentes" (D1.q0)
 const HISTORIAL = [
@@ -644,7 +651,7 @@ function renderFase3() {
       <h3 style="color:var(--gold);font-size:15px;">${d.id}. ${d.nombre} <span style="color:var(--dim);font-weight:400;">— ${d.q}</span></h3>
       <table><thead><tr><th>Pregunta base</th><th>Indicador</th><th>Meta</th></tr></thead><tbody>`;
     qs.forEach(c => {
-      html += `<tr><td>${c.t}</td><td><span class="tipo-tag">${TIPO_LABEL[c.tipo]}</span> ${c.unidad}</td><td>${c.meta}</td></tr>`;
+      html += `<tr><td>${c.t}</td><td><span class="tipo-tag">${indicadorLabel(c.tipo, c.unidad)}</span></td><td>${c.meta}</td></tr>`;
     });
     html += `</tbody></table></div>`;
   });
@@ -701,14 +708,39 @@ function renderFase3Proyecto() {
     const qs = datosProyecto.preguntas.filter(p => p.dimension_id === d.id);
     html += `<div style="margin-bottom:18px;">
       <h3 style="color:var(--gold);font-size:15px;">${d.nombre} <span style="color:var(--dim);font-weight:400;">— ${qs.length} preguntas</span></h3>
-      <table><thead><tr><th>Pregunta</th><th>Indicador</th><th>Meta</th></tr></thead><tbody>`;
+      <table><thead><tr><th>Pregunta</th><th>Tipo</th><th>Unidad</th><th>Meta</th><th></th></tr></thead><tbody>`;
     qs.forEach(p => {
-      const meta = p.meta_descripcion || (p.meta_valor != null ? p.meta_valor : '—');
-      html += `<tr><td>${p.texto}</td><td><span class="tipo-tag">${TIPO_LABEL[p.tipo_indicador] || p.tipo_indicador}</span> ${p.unidad || ''}</td><td>${meta}</td></tr>`;
+      const meta = p.meta_descripcion || (p.meta_valor != null ? p.meta_valor : '');
+      html += `<tr>
+        <td><input id="q_texto_${p.id}" value="${p.texto}" style="width:100%;min-width:240px;border:1px solid var(--line);background:#fff;padding:6px 8px;border-radius:6px;font:inherit;"></td>
+        <td><select id="q_tipo_${p.id}" style="border:1px solid var(--line);background:#fff;padding:6px 8px;border-radius:6px;font:inherit;">
+          ${['numero','porcentaje','escala','cualitativo'].map(t => `<option ${p.tipo_indicador === t ? 'selected' : ''} value="${t}">${TIPO_LABEL[t]}</option>`).join('')}
+        </select></td>
+        <td><input id="q_unidad_${p.id}" value="${p.unidad || ''}" style="width:100px;border:1px solid var(--line);background:#fff;padding:6px 8px;border-radius:6px;font:inherit;"></td>
+        <td><input id="q_meta_${p.id}" value="${meta}" placeholder="Meta" style="width:130px;border:1px solid var(--line);background:#fff;padding:6px 8px;border-radius:6px;font:inherit;"></td>
+        <td><button onclick="guardarPregunta(${p.id})" class="btn" style="padding:6px 10px;" title="Guardar">💾</button></td>
+      </tr>`;
     });
     html += `</tbody></table></div>`;
   });
   cont.innerHTML = html;
+}
+
+async function guardarPregunta(id) {
+  if (!claveInput()) { showToast('⚠️ Ingresa la clave de escritura (arriba).'); return; }
+  try {
+    const key = await sha256(claveInput());
+    await sbFetch('/rest/v1/preguntas?id=eq.' + id, {
+      method: 'PATCH', headers: { 'x-write-key': key },
+      body: JSON.stringify({
+        texto: document.getElementById('q_texto_' + id).value.trim(),
+        tipo_indicador: document.getElementById('q_tipo_' + id).value,
+        unidad: document.getElementById('q_unidad_' + id).value.trim(),
+        meta_descripcion: document.getElementById('q_meta_' + id).value.trim()
+      })
+    });
+    showToast('✅ Pregunta guardada');
+  } catch (e) { showToast('❌ Error: ' + e.message); }
 }
 function avancePorDimension() {
   if (!datosProyecto || !datosProyecto.dims) return [];
@@ -827,7 +859,7 @@ function renderFase4() {
         <td style="color:var(--dim)">${d.orden || ''}.${i+1}</td>
         <td style="white-space:nowrap;">${d.nombre}</td>
         <td>${p.texto}</td>
-        <td><span class="tipo-tag">${TIPO_LABEL[p.tipo_indicador] || p.tipo_indicador}</span> ${p.unidad || ''}</td>
+        <td><span class="tipo-tag">${indicadorLabel(p.tipo_indicador, p.unidad)}</span></td>
         <td>${meta}</td>
         <td>${av === null ? '—' : av + '%'}</td>
         <td><span class="badge ${s.cls}">${s.cls==='green'?'🟢':s.cls==='yellow'?'🟡':s.cls==='red'?'🔴':'⚪'} ${s.label}</span></td>
