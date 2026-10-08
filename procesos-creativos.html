@@ -326,13 +326,17 @@ function renderFases(rows) {
   const cont = document.getElementById('gantt');
   if (!rows.length) { cont.innerHTML = '<div style="font-size:12px;color:var(--dim);padding:10px;">Sin fases todavía. Agrega la primera con el botón de abajo.</div>'; return; }
   cont.innerHTML = rows.map(f => `
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;">
-      <input id="f_nombre_${f.id}" value="${f.nombre}" placeholder="Nombre de la fase" style="flex:1;min-width:140px;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;">
-      <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Inicio</span><input type="date" id="f_ini_${f.id}" value="${f.fecha_inicio ? f.fecha_inicio.slice(0,10) : ''}" style="border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
-      <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Semanas</span><input type="number" min="1" id="f_sem_${f.id}" value="${f.duracion_semanas}" style="width:72px;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
-      <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Avance %</span><input type="number" min="0" max="100" id="f_av_${f.id}" value="${f.avance_pct}" style="width:72px;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
-      <button onclick="guardarFase(${f.id})" class="btn" style="padding:8px 12px;" title="Guardar">💾</button>
-      <button onclick="eliminarFase(${f.id})" style="border:none;background:transparent;cursor:pointer;font-size:16px;color:var(--red);" title="Eliminar">🗑</button>
+    <div style="border:1px solid var(--line);border-radius:10px;margin-bottom:12px;padding:12px;background:#fff;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input id="f_nombre_${f.id}" value="${f.nombre}" placeholder="Nombre de la fase" style="flex:1;min-width:140px;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;">
+        <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Inicio</span><input type="date" id="f_ini_${f.id}" value="${f.fecha_inicio ? f.fecha_inicio.slice(0,10) : ''}" style="border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
+        <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Semanas</span><input type="number" min="1" id="f_sem_${f.id}" value="${f.duracion_semanas}" style="width:72px;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
+        <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Avance %</span><input type="number" min="0" max="100" id="f_av_${f.id}" value="${f.avance_pct}" style="width:72px;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
+        <button onclick="guardarFase(${f.id})" class="btn" style="padding:8px 12px;" title="Guardar">💾</button>
+        <button onclick="eliminarFase(${f.id})" style="border:none;background:transparent;cursor:pointer;font-size:16px;color:var(--red);" title="Eliminar">🗑</button>
+      </div>
+      <button onclick="toggleEncuentros(${f.id})" class="btn ghost" style="margin-top:10px;padding:6px 14px;">📅 Encuentros ▾</button>
+      <div id="enc_${f.id}" style="display:none;margin-top:12px;border-top:1px solid var(--line);padding-top:12px;"></div>
     </div>`).join('');
 }
 
@@ -371,6 +375,91 @@ async function eliminarFase(id) {
     await sbFetch('/rest/v1/fases?id=eq.' + id, { method: 'DELETE', headers: { 'x-write-key': key } });
     showToast('✅ Fase eliminada');
     cargarFases();
+  } catch (e) { showToast('❌ Error: ' + e.message); }
+}
+
+// ═══ ENCUENTROS (reuniones donde se construye) ═══
+async function toggleEncuentros(faseId) {
+  const div = document.getElementById('enc_' + faseId);
+  if (!div) return;
+  if (div.style.display === 'none' || div.style.display === '') {
+    await cargarEncuentros(faseId, div);
+    div.style.display = 'block';
+  } else {
+    div.style.display = 'none';
+  }
+}
+
+async function cargarEncuentros(faseId, div) {
+  try {
+    const rows = await sbFetch('/rest/v1/encuentros?fase_id=eq.' + faseId + '&select=id,fecha,titulo,contenido,creado_por,creado_el&order=fecha.desc,id.desc');
+    renderEncuentros(faseId, div, rows || []);
+  } catch (e) {
+    div.innerHTML = '<div style="font-size:12px;color:var(--red);">Error cargando encuentros: ' + e.message + '</div>';
+  }
+}
+
+function renderEncuentros(faseId, div, rows) {
+  let html = '';
+  if (!rows.length) {
+    html += '<div style="font-size:12px;color:var(--dim);margin-bottom:10px;">Sin encuentros. Registra el primero.</div>';
+  } else {
+    rows.forEach(e => {
+      html += `<div style="border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;">
+          <strong style="font-size:13px;">${e.titulo}</strong>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span style="font-size:11px;color:var(--dim);">${e.fecha || '—'}</span>
+            <button onclick="eliminarEncuentro(${e.id}, ${faseId})" style="border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--red);">🗑</button>
+          </div>
+        </div>
+        ${e.contenido ? '<div style="font-size:12px;color:var(--body);margin-top:4px;white-space:pre-wrap;">' + e.contenido + '</div>' : ''}
+        ${e.creado_por ? '<div style="font-size:10px;color:var(--dim);margin-top:4px;">por ' + e.creado_por + '</div>' : ''}
+      </div>`;
+    });
+  }
+  html += `
+    <div style="border-top:1px dashed var(--line);padding-top:10px;">
+      <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:8px;">➕ Nuevo encuentro</div>
+      <input id="enc_titulo_${faseId}" placeholder="Título del encuentro" style="width:100%;box-sizing:border-box;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;margin-bottom:8px;">
+      <input type="date" id="enc_fecha_${faseId}" style="border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;margin-bottom:8px;">
+      <textarea id="enc_contenido_${faseId}" rows="3" placeholder="Información del encuentro (acuerdos, decisiones, avances…)" style="width:100%;box-sizing:border-box;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;margin-bottom:8px;resize:vertical;"></textarea>
+      <button onclick="agregarEncuentro(${faseId})" class="btn">💾 Guardar encuentro</button>
+    </div>`;
+  div.innerHTML = html;
+}
+
+async function agregarEncuentro(faseId) {
+  const titulo = document.getElementById('enc_titulo_' + faseId).value.trim();
+  if (!titulo) { showToast('⚠️ Escribe el título del encuentro.'); return; }
+  if (!claveInput()) { showToast('⚠️ Ingresa la clave de escritura (arriba).'); return; }
+  try {
+    const key = await sha256(claveInput());
+    await sbFetch('/rest/v1/encuentros', {
+      method: 'POST', headers: { 'x-write-key': key },
+      body: JSON.stringify({
+        fase_id: faseId,
+        titulo: titulo,
+        fecha: document.getElementById('enc_fecha_' + faseId).value || null,
+        contenido: document.getElementById('enc_contenido_' + faseId).value.trim(),
+        creado_por: 'Madre Monte'
+      })
+    });
+    showToast('✅ Encuentro guardado');
+    const div = document.getElementById('enc_' + faseId);
+    if (div) cargarEncuentros(faseId, div);
+  } catch (e) { showToast('❌ Error: ' + e.message); }
+}
+
+async function eliminarEncuentro(id, faseId) {
+  if (!claveInput()) { showToast('⚠️ Ingresa la clave de escritura (arriba).'); return; }
+  if (!confirm('¿Eliminar este encuentro?')) return;
+  try {
+    const key = await sha256(claveInput());
+    await sbFetch('/rest/v1/encuentros?id=eq.' + id, { method: 'DELETE', headers: { 'x-write-key': key } });
+    showToast('✅ Encuentro eliminado');
+    const div = document.getElementById('enc_' + faseId);
+    if (div) cargarEncuentros(faseId, div);
   } catch (e) { showToast('❌ Error: ' + e.message); }
 }
 

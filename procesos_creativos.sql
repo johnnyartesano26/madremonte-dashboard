@@ -198,3 +198,27 @@ insert into public.catalogo_preguntas (dimension, texto, tipo_indicador, unidad,
 ('Relación y Alianza', '¿La alianza se visibilizará externamente?', 'numero', 'menciones', '5+'),
 ('Relación y Alianza', '¿Atraeremos nuevos aliados gracias a esta colaboración?', 'numero', 'aliados', '2+'),
 ('Relación y Alianza', '¿La alianza tendrá nombre o identidad propia?', 'cualitativo', 'sí/no', 'Sí/No');
+
+-- ═══ 8. ENCUENTROS (reuniones donde se construye el proyecto) ═══
+create table if not exists public.encuentros (
+  id bigint generated always as identity primary key,
+  fase_id bigint not null references public.fases(id) on delete cascade,
+  fecha date,
+  titulo text not null,
+  contenido text,
+  creado_por text,
+  creado_el timestamptz not null default now()
+);
+
+alter table public.encuentros enable row level security;
+
+create policy "sel_encuentros" on public.encuentros for select to anon using (true);
+create policy "ins_encuentros" on public.encuentros for insert to anon
+  with check (current_setting('request.headers', true)::json->>'x-write-key' = '700686426580d0bb78aebaabf76399a10f806705c93c4e826f8c982f0028ab74');
+create policy "upd_encuentros" on public.encuentros for update to anon
+  using (current_setting('request.headers', true)::json->>'x-write-key' = '700686426580d0bb78aebaabf76399a10f806705c93c4e826f8c982f0028ab74')
+  with check (current_setting('request.headers', true)::json->>'x-write-key' = '700686426580d0bb78aebaabf76399a10f806705c93c4e826f8c982f0028ab74');
+create policy "del_encuentros" on public.encuentros for delete to anon
+  using (current_setting('request.headers', true)::json->>'x-write-key' = '700686426580d0bb78aebaabf76399a10f806705c93c4e826f8c982f0028ab74');
+
+create index if not exists idx_encuentros_fase on public.encuentros(fase_id);
