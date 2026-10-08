@@ -111,6 +111,11 @@ td { padding:9px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
 
 <!-- FASE 2 -->
 <div class="panel" id="f2">
+  <div class="card" style="margin-bottom:20px;">
+    <h2>📖 Explicación de las fases del proyecto</h2>
+    <p style="font-size:12px;color:var(--dim);margin-bottom:12px;">Duración total: 8 semanas (≈2 meses). Haz clic en cada fase para profundizar.</p>
+    <div id="fases-explicacion"></div>
+  </div>
   <div class="grid2">
     <div class="card">
       <h2>🖼 Marcas participantes</h2>
@@ -738,8 +743,72 @@ function showToast(msg) {
   t._tm = setTimeout(() => t.style.opacity = 0, 3000);
 }
 
+// ═══ EXPLICACIÓN DE FASES (ciclo de vida) ═══
+const FASES_EXPLICACION = [
+  {
+    id:'F1', nombre:'Creación', semana:'Semana 1', duracion:'1 semana', avance:100,
+    resumen:'Momento fundacional: nace la idea, se define el propósito y las bases conceptuales.',
+    queEs:'Es el momento fundacional. Aquí nace la idea, se define el propósito y se establecen las bases conceptuales del proyecto. Es la fase de ideación y visión.',
+    queHace:['Se responden las 12 Preguntas Iniciales de Ideación','Se define el concepto creativo central','Se identifica el público objetivo y la emoción a activar','Se esboza el formato y el tono narrativo','Se establece el propósito compartido entre las partes'],
+    queProduce:['Documento de Visión Compartida','Ficha de Ideación Inicial completa','Concepto creativo en borrador'],
+    porQue:'Porque esta fase ya se completó. La idea ya existe, el propósito está claro y el concepto está definido.',
+    pregunta:'¿Qué vamos a crear, por qué y para quién?'
+  },
+  {
+    id:'F2', nombre:'Equipo & Brief', semana:'Semanas 2-3', duracion:'2 semanas', avance:50,
+    resumen:'Fase de estructuración: equipo, roles, brief creativo y planificación de la producción.',
+    queEs:'Es la fase de estructuración. Se conforma el equipo, se definen roles, se elabora el brief creativo y se planifica la producción. Es el puente entre la idea y la ejecución.',
+    queHace:['Se conforma el equipo de trabajo','Se define el brief creativo','Se establecen roles y responsabilidades','Se define el presupuesto y los recursos','Se planifica el calendario de producción','Se identifican aliados y colaboradores','Se establecen los indicadores generales (5 dimensiones)','Se documenta la gobernanza del proyecto'],
+    queProduce:['Brief creativo completo','Matriz de roles y responsabilidades','Presupuesto estimado','Calendario de producción','Ficha de indicadores con metas','Acuerdos de gobernanza'],
+    porQue:'Porque está en proceso. Parte del equipo ya está definido, el brief está en elaboración, pero aún faltan acuerdos, presupuesto y planificación detallada.',
+    pregunta:'¿Quién lo hará, cómo, con qué recursos y bajo qué acuerdos?'
+  },
+  {
+    id:'F3', nombre:'Producción', semana:'Semanas 4-7', duracion:'4 semanas', avance:0,
+    resumen:'Fase de ejecución: se materializa lo planeado (grabación, diseño, ensayos, construcción).',
+    queEs:'Es la fase de ejecución. Aquí se materializa todo lo planeado: se graba, se escribe, se diseña, se ensaya, se construye. Es el corazón del proyecto.',
+    queHace:['Se ejecuta el plan de producción','Se realizan rodajes, registros y grabaciones','Se producen los contenidos audiovisuales','Se diseñan las piezas gráficas y digitales','Se preparan los eventos o experiencias','Se documenta el proceso de producción','Se aplican los controles de calidad','Se generan contenidos derivados (detrás de cámaras, avances)'],
+    queProduce:['Versión alfa del producto cultural','Piezas audiovisuales','Material gráfico y digital','Registro del proceso','Contenidos derivados'],
+    porQue:'Porque aún no ha comenzado. Esta fase iniciará cuando la Fase 2 esté completa y el brief esté aprobado.',
+    pregunta:'¿Cómo convertimos la idea en algo real, tangible y de calidad?'
+  },
+  {
+    id:'F4', nombre:'Lanzamiento', semana:'Semana 8', duracion:'1 semana', avance:0,
+    resumen:'Fase de cierre y presentación pública: lanzamiento, medición de impacto y continuidad.',
+    queEs:'Es la fase de cierre y presentación pública. El proyecto se lanza, se comparte con la comunidad, se mide su impacto y se decide su continuidad.',
+    queHace:['Se realiza el evento de lanzamiento','Se presenta el producto al público','Se activa la difusión y prensa','Se integra la experiencia de marca (cata, edición especial, maridaje)','Se miden los indicadores generales','Se recoge retroalimentación de la audiencia','Se documenta la memoria del proyecto','Se realiza la retrospectiva y se decide continuidad'],
+    queProduce:['Producto lanzado al público','Informe de validación con indicadores','Memoria del proyecto','Roadmap siguiente semestre','Decisión estratégica (escalar, pivotar o cerrar)'],
+    porQue:'Porque depende de que la Fase 3 se complete. Es el cierre del ciclo y aún no ha comenzado.',
+    pregunta:'¿Cómo lo compartimos, qué impacto tuvo y qué sigue?'
+  }
+];
+
+function renderFasesExplicacion() {
+  const cont = document.getElementById('fases-explicacion');
+  if (!cont) return;
+  cont.innerHTML = FASES_EXPLICACION.map(f => `
+    <details style="border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin-bottom:10px;background:#fff;">
+      <summary style="cursor:pointer;font-size:14px;font-weight:600;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span style="color:var(--gold);">${f.id} · ${f.nombre}</span>
+        <span style="font-size:12px;color:var(--dim);font-weight:400;">${f.semana} · ${f.duracion}</span>
+        <span class="badge ${f.avance >= 100 ? 'green' : (f.avance > 0 ? 'yellow' : 'gray')}">${f.avance}%</span>
+      </summary>
+      <div style="margin-top:12px;font-size:13px;color:var(--body);line-height:1.6;">
+        <p style="margin-bottom:8px;color:var(--dim);font-style:italic;">${f.resumen}</p>
+        <p style="margin-bottom:4px;"><strong>¿Qué es?</strong> ${f.queEs}</p>
+        <p style="margin-bottom:4px;"><strong>¿Qué se hace?</strong></p>
+        <ul style="margin:0 0 10px 20px;">${f.queHace.map(x => '<li>'+x+'</li>').join('')}</ul>
+        <p style="margin-bottom:4px;"><strong>¿Qué se produce?</strong></p>
+        <ul style="margin:0 0 10px 20px;">${f.queProduce.map(x => '<li>'+x+'</li>').join('')}</ul>
+        <p style="margin-bottom:4px;"><strong>¿Por qué está al ${f.avance}%?</strong> ${f.porQue}</p>
+        <p style="margin-top:8px;color:var(--gold);"><strong>Pregunta clave:</strong> ${f.pregunta}</p>
+      </div>
+    </details>`).join('');
+}
+
 // ═══ INIT ═══
 renderGantt();
+renderFasesExplicacion();
 cargarCatalogo();
 cargarProyectos();
 </script>
