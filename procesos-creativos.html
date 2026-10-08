@@ -580,6 +580,8 @@ async function cargarEncuentros(faseId, div) {
   }
 }
 
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
 function renderEncuentros(faseId, div, rows) {
   let html = '';
   if (!rows.length) {
@@ -587,12 +589,14 @@ function renderEncuentros(faseId, div, rows) {
   } else {
     rows.forEach(e => {
       html += `<div style="border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px;">
-        <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;">
-          <strong style="font-size:13px;">${e.titulo}</strong>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <input id="enc_e_titulo_${e.id}" value="${esc(e.titulo)}" placeholder="Título" style="flex:1;min-width:140px;border:1px solid var(--line);background:#fff;padding:6px 8px;border-radius:6px;font:inherit;">
+          <input type="date" id="enc_e_fecha_${e.id}" value="${e.fecha ? e.fecha.slice(0,10) : ''}" style="border:1px solid var(--line);background:#fff;padding:6px 8px;border-radius:6px;font:inherit;">
+          <button onclick="guardarEncuentro(${e.id}, ${faseId})" class="btn" style="padding:6px 10px;" title="Guardar">💾</button>
           <button onclick="eliminarEncuentro(${e.id}, ${faseId})" style="border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--red);">🗑</button>
         </div>
-        ${e.contenido ? '<div style="font-size:12px;color:var(--body);margin-top:4px;white-space:pre-wrap;">' + e.contenido + '</div>' : ''}
-        ${e.creado_por ? '<div style="font-size:10px;color:var(--dim);margin-top:4px;">por ' + e.creado_por + '</div>' : ''}
+        <textarea id="enc_e_contenido_${e.id}" rows="2" placeholder="Información" style="width:100%;box-sizing:border-box;border:1px solid var(--line);background:#fff;padding:6px 8px;border-radius:6px;font:inherit;margin-top:6px;resize:vertical;">${esc(e.contenido)}</textarea>
+        ${e.creado_por ? '<div style="font-size:10px;color:var(--dim);margin-top:4px;">por ' + esc(e.creado_por) + '</div>' : ''}
       </div>`;
     });
   }
@@ -600,6 +604,7 @@ function renderEncuentros(faseId, div, rows) {
     <div style="border-top:1px dashed var(--line);padding-top:10px;">
       <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:8px;">➕ Nuevo encuentro</div>
       <input id="enc_titulo_${faseId}" placeholder="Título del encuentro" style="width:100%;box-sizing:border-box;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;margin-bottom:8px;">
+      <input type="date" id="enc_fecha_${faseId}" title="Fecha (opcional)" style="border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;margin-bottom:8px;">
       <textarea id="enc_contenido_${faseId}" rows="3" placeholder="Información del encuentro (acuerdos, decisiones, avances…)" style="width:100%;box-sizing:border-box;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;margin-bottom:8px;resize:vertical;"></textarea>
       <button onclick="agregarEncuentro(${faseId})" class="btn">💾 Guardar encuentro</button>
     </div>`;
@@ -617,11 +622,30 @@ async function agregarEncuentro(faseId) {
       body: JSON.stringify({
         fase_id: faseId,
         titulo: titulo,
+        fecha: document.getElementById('enc_fecha_' + faseId).value || null,
         contenido: document.getElementById('enc_contenido_' + faseId).value.trim(),
         creado_por: 'Madre Monte'
       })
     });
     showToast('✅ Encuentro guardado');
+    const div = document.getElementById('enc_' + faseId);
+    if (div) cargarEncuentros(faseId, div);
+  } catch (e) { showToast('❌ Error: ' + e.message); }
+}
+
+async function guardarEncuentro(id, faseId) {
+  if (!claveInput()) { showToast('⚠️ Ingresa la clave de escritura (arriba).'); return; }
+  try {
+    const key = CLAVE_HASH;
+    await sbFetch('/rest/v1/encuentros?id=eq.' + id, {
+      method: 'PATCH', headers: { 'x-write-key': key },
+      body: JSON.stringify({
+        titulo: document.getElementById('enc_e_titulo_' + id).value.trim(),
+        fecha: document.getElementById('enc_e_fecha_' + id).value || null,
+        contenido: document.getElementById('enc_e_contenido_' + id).value.trim()
+      })
+    });
+    showToast('✅ Encuentro actualizado');
     const div = document.getElementById('enc_' + faseId);
     if (div) cargarEncuentros(faseId, div);
   } catch (e) { showToast('❌ Error: ' + e.message); }
