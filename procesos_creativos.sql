@@ -245,3 +245,6 @@ create policy "del_subtemas" on public.subtemas for delete to anon
   using (current_setting('request.headers', true)::json->>'x-write-key' = '700686426580d0bb78aebaabf76399a10f806705c93c4e826f8c982f0028ab74');
 
 create index if not exists idx_subtemas_fase on public.subtemas(fase_id);
+
+-- ═══ 10. Añadir fecha de terminación a fases ═══
+alter table public.fases add column if not exists fecha_fin date;

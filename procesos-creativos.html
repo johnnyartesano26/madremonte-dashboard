@@ -316,7 +316,7 @@ async function cargarFases() {
   const pid = proyectoActualId();
   if (!pid) { cont.innerHTML = '<div style="font-size:12px;color:var(--dim);padding:10px;">Crea o selecciona un proyecto para definir su línea de tiempo.</div>'; return; }
   try {
-    const rows = await sbFetch('/rest/v1/fases?proyecto_id=eq.' + pid + '&select=id,nombre,fecha_inicio,duracion_semanas,avance_pct,es_hito,estado&order=id');
+    const rows = await sbFetch('/rest/v1/fases?proyecto_id=eq.' + pid + '&select=id,nombre,fecha_inicio,fecha_fin,duracion_semanas,avance_pct,es_hito,estado&order=id');
     renderGantt(rows || []);
     renderFases(rows || []);
   } catch (e) {
@@ -332,7 +332,8 @@ function renderGantt(fases) {
   const items = [];
   fases.forEach(f => {
     const ini = f.fecha_inicio ? new Date(f.fecha_inicio) : null;
-    const fin = (ini && f.duracion_semanas) ? new Date(ini.getTime() + f.duracion_semanas * 7 * 86400000) : null;
+    let fin = f.fecha_fin ? new Date(f.fecha_fin) : null;
+    if (!fin && ini && f.duracion_semanas) fin = new Date(ini.getTime() + f.duracion_semanas * 7 * 86400000);
     if (ini && fin) items.push({ nombre: f.nombre, ini, fin, avance: f.avance_pct || 0 });
   });
 
@@ -382,6 +383,7 @@ function renderFases(rows) {
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <input id="f_nombre_${f.id}" value="${f.nombre}" placeholder="Nombre de la fase" style="flex:1;min-width:140px;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;">
         <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Inicio</span><input type="date" id="f_ini_${f.id}" value="${f.fecha_inicio ? f.fecha_inicio.slice(0,10) : ''}" style="border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
+        <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Terminación</span><input type="date" id="f_fin_${f.id}" value="${f.fecha_fin ? f.fecha_fin.slice(0,10) : ''}" style="border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
         <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Semanas</span><input type="number" min="1" id="f_sem_${f.id}" value="${f.duracion_semanas}" style="width:72px;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
         <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Avance %</span><input type="number" min="0" max="100" id="f_av_${f.id}" value="${f.avance_pct}" style="width:72px;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
         <button onclick="guardarFase(${f.id})" class="btn" style="padding:8px 12px;" title="Guardar">💾</button>
@@ -396,10 +398,18 @@ function renderFases(rows) {
 
 async function guardarFase(id) {
   if (!claveInput()) { showToast('⚠️ Ingresa la clave de escritura (arriba).'); return; }
+  const ini = document.getElementById('f_ini_' + id).value || null;
+  const fin = document.getElementById('f_fin_' + id).value || null;
+  let semanas = parseInt(document.getElementById('f_sem_' + id).value) || 1;
+  if (ini && fin) {
+    const d = Math.round((new Date(fin) - new Date(ini)) / (7 * 86400000));
+    if (d > 0) semanas = d;
+  }
   const body = {
     nombre: document.getElementById('f_nombre_' + id).value.trim(),
-    fecha_inicio: document.getElementById('f_ini_' + id).value || null,
-    duracion_semanas: parseInt(document.getElementById('f_sem_' + id).value) || 1,
+    fecha_inicio: ini,
+    fecha_fin: fin,
+    duracion_semanas: semanas,
     avance_pct: parseInt(document.getElementById('f_av_' + id).value) || 0
   };
   try {
