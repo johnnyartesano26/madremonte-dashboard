@@ -298,7 +298,8 @@ document.querySelectorAll('.tab').forEach(b => {
     document.getElementById(b.dataset.p).classList.add('active');
     if (b.dataset.p === 'proyectos') cargarProyectos();
     if (b.dataset.p === 'f2') cargarParticipantes();
-    if (b.dataset.p === 'f4') renderFase4();
+    if (b.dataset.p === 'f3') cargarFase3();
+    if (b.dataset.p === 'f4') cargarFase4();
   });
 });
 
@@ -340,16 +341,91 @@ function renderFase3() {
   document.getElementById('dimensiones').innerHTML = html;
 }
 
-// ═══ FASE 4: ECHARTS ═══
+// ═══ DATOS DEL PROYECTO ACTIVO (dimensiones + preguntas + mediciones) ═══
+let datosProyecto = null;
+
+async function cargarDatosProyecto() {
+  const pid = proyectoActualId();
+  if (!pid) { datosProyecto = null; return; }
+  try {
+    const dims = await sbFetch('/rest/v1/dimensiones?proyecto_id=eq.' + pid + '&select=id,nombre,orden,estado&order=orden');
+    const dimIds = (dims || []).map(d => d.id);
+    let preguntas = [], mediciones = [];
+    if (dimIds.length) {
+      preguntas = await sbFetch('/rest/v1/preguntas?dimension_id=in.(' + dimIds.join(',') + ')&select=id,dimension_id,texto,tipo_indicador,unidad,meta_valor,meta_descripcion,responsable,origen&order=id');
+      const pIds = (preguntas || []).map(p => p.id);
+      if (pIds.length) {
+        mediciones = await sbFetch('/rest/v1/mediciones?pregunta_id=in.(' + pIds.join(',') + ')&select=id,pregunta_id,valor,valor_pct,creado_por,creado_el&order=creado_el.desc');
+      }
+    }
+    datosProyecto = { dims: dims || [], preguntas: preguntas || [], mediciones: mediciones || [] };
+  } catch (e) {
+    datosProyecto = { dims: [], preguntas: [], mediciones: [], error: e.message };
+  }
+}
+
+function avanceDePregunta(pid) {
+  if (!datosProyecto) return null;
+  const m = datosProyecto.mediciones.find(x => x.pregunta_id === pid);
+  return m ? m.valor_pct : null;
+}
+
+async function cargarFase3() {
+  if (proyectoActualId()) { await cargarDatosProyecto(); renderFase3Proyecto(); }
+  else { renderFase3(); }
+}
+
+async function cargarFase4() {
+  if (proyectoActualId()) { await cargarDatosProyecto(); }
+  renderFase4();
+}
+
+function renderFase3Proyecto() {
+  const cont = document.getElementById('dimensiones');
+  if (!datosProyecto || !datosProyecto.dims.length) {
+    cont.innerHTML = '<div style="color:var(--dim);padding:10px;">Crea o selecciona un proyecto para ver sus dimensiones y preguntas.</div>';
+    return;
+  }
+  let html = '';
+  datosProyecto.dims.forEach(d => {
+    const qs = datosProyecto.preguntas.filter(p => p.dimension_id === d.id);
+    html += `<div style="margin-bottom:18px;">
+      <h3 style="color:var(--gold);font-size:15px;">${d.nombre} <span style="color:var(--dim);font-weight:400;">— ${qs.length} preguntas</span></h3>
+      <table><thead><tr><th>Pregunta</th><th>Indicador</th><th>Meta</th></tr></thead><tbody>`;
+    qs.forEach(p => {
+      const meta = p.meta_descripcion || (p.meta_valor != null ? p.meta_valor : '—');
+      html += `<tr><td>${p.texto}</td><td><span class="tipo-tag">${TIPO_LABEL[p.tipo_indicador] || p.tipo_indicador}</span> ${p.unidad || ''}</td><td>${meta}</td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+  });
+  cont.innerHTML = html;
+}
 function avancePorDimension() {
-  return DIMENSIONES.map(d => {
-    const m = MEDICIONES.filter(x => x.dim === d.id && x.avance !== null);
-    const av = m.length ? Math.round(m.reduce((s,x)=>s+x.avance,0)/m.length) : null;
-    return { ...d, avance: av, n: m.length };
+  if (!datosProyecto || !datosProyecto.dims) return [];
+  return datosProyecto.dims.map(d => {
+    const qs = datosProyecto.preguntas.filter(p => p.dimension_id === d.id);
+    const avs = qs.map(q => avanceDePregunta(q.id)).filter(a => a !== null);
+    const av = avs.length ? Math.round(avs.reduce((s,x)=>s+x,0)/avs.length) : null;
+    return { nombre: d.nombre, avance: av, n: avs.length };
   });
 }
 
+function historialSerie() {
+  if (!datosProyecto || !datosProyecto.mediciones.length) return { labels: [], data: [] };
+  const byPreg = {};
+  datosProyecto.mediciones.forEach(m => { (byPreg[m.pregunta_id] = byPreg[m.pregunta_id] || []).push(m); });
+  const keys = Object.keys(byPreg);
+  if (!keys.length) return { labels: [], data: [] };
+  const serie = byPreg[keys[0]].slice().reverse();
+  return { labels: serie.map(m => (m.creado_el || '').slice(0,10)), data: serie.map(m => m.valor_pct) };
+}
+
 function renderFase4() {
+  if (!datosProyecto || !datosProyecto.dims.length) {
+    document.getElementById('legend').innerHTML = '';
+    document.getElementById('tabla-sema').innerHTML = '<div style="padding:24px;color:var(--dim);text-align:center;">Selecciona un proyecto en 📊 Proyectos para ver su avance.</div>';
+    return;
+  }
   const porDim = avancePorDimension();
 
   // Legend
@@ -415,14 +491,15 @@ function renderFase4() {
   });
 
   // Historial (línea)
+  const hs = historialSerie();
   const hist = echarts.init(document.getElementById('historial'));
   hist.setOption({
     grid:{ left:10, right:40, top:20, bottom:20, containLabel:true },
     tooltip:{ trigger:'axis', formatter:p => p[0].name+': '+(p[0].value>100?'120% (meta superada)':p[0].value+'%') },
-    xAxis:{ type:'category', data:HISTORIAL.map(h=>h.semana), axisLabel:{ color:'#8c7b6b' }, boundaryGap:false },
+    xAxis:{ type:'category', data:hs.labels, axisLabel:{ color:'#8c7b6b' }, boundaryGap:false },
     yAxis:{ type:'value', max:120, axisLabel:{ color:'#8c7b6b', formatter:v=>v+'%' }, splitLine:{ lineStyle:{ color:'#efe9df' } } },
     series:[{
-      type:'line', data:HISTORIAL.map(h=>h.avance), smooth:true,
+      type:'line', data:hs.data, smooth:true,
       lineStyle:{ width:3, color:'#c88a3d' }, itemStyle:{ color:'#c88a3d' }, areaStyle:{ opacity:.12, color:'#c88a3d' },
       markLine:{ silent:true, symbol:'none', label:{ formatter:'Meta 100%', position:'insideEndTop', color:'#4caf50' }, lineStyle:{ color:'#4caf50', type:'dashed' }, data:[{ yAxis:100 }] }
     }]
@@ -430,23 +507,22 @@ function renderFase4() {
 
   // Tabla semáforo
   let html = '<thead><tr><th>#</th><th>Dimensión</th><th>Pregunta</th><th>Indicador</th><th>Meta</th><th>Avance</th><th>Estado</th></tr></thead><tbody>';
-  const idxPorDim = {};
-  CATALOGO.forEach(c => { if (!idxPorDim[c.dim]) idxPorDim[c.dim] = []; idxPorDim[c.dim].push(c); });
-  CATALOGO.forEach(c => {
-    const d = DIMENSIONES.find(x => x.id === c.dim);
-    const qIdx = idxPorDim[c.dim].indexOf(c);
-    const med = MEDICIONES.find(x => x.dim === c.dim && x.q === qIdx);
-    const av = med ? med.avance : null;
-    const s = semaforo(av);
-    html += `<tr>
-      <td style="color:var(--dim)">${d.id}.${qIdx+1}</td>
-      <td style="white-space:nowrap;">${d.nombre}</td>
-      <td>${c.t}</td>
-      <td><span class="tipo-tag">${TIPO_LABEL[c.tipo]}</span> ${c.unidad}</td>
-      <td>${c.meta}</td>
-      <td>${av === null ? '—' : av + '%'}</td>
-      <td><span class="badge ${s.cls}">${s.cls==='green'?'🟢':s.cls==='yellow'?'🟡':s.cls==='red'?'🔴':'⚪'} ${s.label}</span></td>
-    </tr>`;
+  datosProyecto.dims.forEach(d => {
+    const qs = datosProyecto.preguntas.filter(p => p.dimension_id === d.id);
+    qs.forEach((p, i) => {
+      const av = avanceDePregunta(p.id);
+      const s = semaforo(av);
+      const meta = p.meta_descripcion || (p.meta_valor != null ? p.meta_valor : '—');
+      html += `<tr>
+        <td style="color:var(--dim)">${d.orden || ''}.${i+1}</td>
+        <td style="white-space:nowrap;">${d.nombre}</td>
+        <td>${p.texto}</td>
+        <td><span class="tipo-tag">${TIPO_LABEL[p.tipo_indicador] || p.tipo_indicador}</span> ${p.unidad || ''}</td>
+        <td>${meta}</td>
+        <td>${av === null ? '—' : av + '%'}</td>
+        <td><span class="badge ${s.cls}">${s.cls==='green'?'🟢':s.cls==='yellow'?'🟡':s.cls==='red'?'🔴':'⚪'} ${s.label}</span></td>
+      </tr>`;
+    });
   });
   html += '</tbody>';
   document.getElementById('tabla-sema').innerHTML = html;
