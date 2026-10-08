@@ -93,6 +93,7 @@ Cada pregunta base tiene: `texto`, `tipo_indicador`, `unidad`, `meta (ejemplo)`.
 - **Admin (Madre Monte)** crea proyectos y configura fases/dimensiones/preguntas.
 - **Aliado** ve su proyecto y puede ingresar mediciones, con **auditoría** (`creado_por` + `creado_el`).
 - Vista de portafolio solo para admin; el aliado ve solo su proyecto.
+- Por ahora **sin clave de acceso** (la clave de escritura se aplica automáticamente). Futuro: asignar una **clave por proyecto** para que cada aliado acceda solo al suyo.
 
 ---
 
