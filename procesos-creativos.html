@@ -378,22 +378,43 @@ function renderGantt(fases) {
 function renderFases(rows) {
   const cont = document.getElementById('gantt');
   if (!rows.length) { cont.innerHTML = '<div style="font-size:12px;color:var(--dim);padding:10px;">Sin fases todavía. Agrega la primera con el botón de abajo.</div>'; return; }
-  cont.innerHTML = rows.map(f => `
-    <div style="border:1px solid var(--line);border-radius:10px;margin-bottom:12px;padding:12px;background:#fff;">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <input id="f_nombre_${f.id}" value="${f.nombre}" placeholder="Nombre de la fase" style="flex:1;min-width:140px;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;">
-        <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Inicio</span><input type="date" id="f_ini_${f.id}" value="${f.fecha_inicio ? f.fecha_inicio.slice(0,10) : ''}" style="border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
-        <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Terminación</span><input type="date" id="f_fin_${f.id}" value="${f.fecha_fin ? f.fecha_fin.slice(0,10) : ''}" style="border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
-        <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Semanas</span><input type="number" min="1" id="f_sem_${f.id}" value="${f.duracion_semanas}" style="width:72px;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
-        <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Avance %</span><input type="number" min="0" max="100" id="f_av_${f.id}" value="${f.avance_pct}" style="width:72px;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
-        <button onclick="guardarFase(${f.id})" class="btn" style="padding:8px 12px;" title="Guardar">💾</button>
-        <button onclick="eliminarFase(${f.id})" style="border:none;background:transparent;cursor:pointer;font-size:16px;color:var(--red);" title="Eliminar">🗑</button>
+  cont.innerHTML = rows.map(f => {
+    const ini = f.fecha_inicio ? f.fecha_inicio.slice(0,10) : '—';
+    const fin = f.fecha_fin ? f.fecha_fin.slice(0,10) : '—';
+    return `
+    <div style="border:1px solid var(--line);border-radius:10px;margin-bottom:10px;background:#fff;overflow:hidden;">
+      <div onclick="toggleFaseBody(${f.id})" style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;background:#fdfaf5;">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-width:0;">
+          <strong style="font-size:14px;">${f.nombre}</strong>
+          <span style="font-size:11px;color:var(--dim);">${ini} → ${fin} · ${f.duracion_semanas} sem · ${f.avance_pct}%</span>
+        </div>
+        <span id="fasearr_${f.id}" style="font-size:12px;color:var(--dim);">▾</span>
       </div>
-      <button onclick="toggleSubtemas(${f.id})" class="btn ghost" style="margin-top:10px;padding:6px 14px;">📋 Subtemas de avance ▾</button>
-      <div id="sub_${f.id}" style="display:none;margin-top:12px;border-top:1px solid var(--line);padding-top:12px;"></div>
-      <button onclick="toggleEncuentros(${f.id})" class="btn ghost" style="margin-top:6px;padding:6px 14px;">📅 Encuentros ▾</button>
-      <div id="enc_${f.id}" style="display:none;margin-top:12px;border-top:1px solid var(--line);padding-top:12px;"></div>
-    </div>`).join('');
+      <div id="fasebody_${f.id}" style="display:none;border-top:1px solid var(--line);padding:12px;">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+          <input id="f_nombre_${f.id}" value="${f.nombre}" placeholder="Nombre de la fase" style="flex:1;min-width:140px;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;">
+          <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Inicio</span><input type="date" id="f_ini_${f.id}" value="${f.fecha_inicio ? f.fecha_inicio.slice(0,10) : ''}" style="border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
+          <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Terminación</span><input type="date" id="f_fin_${f.id}" value="${f.fecha_fin ? f.fecha_fin.slice(0,10) : ''}" style="border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
+          <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Semanas</span><input type="number" min="1" id="f_sem_${f.id}" value="${f.duracion_semanas}" style="width:72px;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
+          <div style="display:flex;flex-direction:column;font-size:10px;color:var(--dim);"><span>Avance %</span><input type="number" min="0" max="100" id="f_av_${f.id}" value="${f.avance_pct}" style="width:72px;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;"></div>
+          <button onclick="guardarFase(${f.id})" class="btn" style="padding:8px 12px;" title="Guardar">💾</button>
+          <button onclick="eliminarFase(${f.id})" style="border:none;background:transparent;cursor:pointer;font-size:16px;color:var(--red);" title="Eliminar">🗑</button>
+        </div>
+        <button onclick="toggleSubtemas(${f.id})" class="btn ghost" style="padding:6px 14px;">📋 Subtemas de avance ▾</button>
+        <div id="sub_${f.id}" style="display:none;margin-top:12px;border-top:1px solid var(--line);padding-top:12px;"></div>
+        <button onclick="toggleEncuentros(${f.id})" class="btn ghost" style="margin-top:6px;padding:6px 14px;">📅 Encuentros ▾</button>
+        <div id="enc_${f.id}" style="display:none;margin-top:12px;border-top:1px solid var(--line);padding-top:12px;"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleFaseBody(id) {
+  const body = document.getElementById('fasebody_' + id);
+  const arrow = document.getElementById('fasearr_' + id);
+  if (!body) return;
+  if (body.style.display === 'none' || body.style.display === '') { body.style.display = 'block'; if (arrow) arrow.textContent = '▴'; }
+  else { body.style.display = 'none'; if (arrow) arrow.textContent = '▾'; }
 }
 
 async function guardarFase(id) {
