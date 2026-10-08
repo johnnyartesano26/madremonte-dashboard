@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Procesos Creativos · Madre Monte</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+:root {
+  --bg:#faf7f0; --card:#fff; --text:#3d2a1d; --body:#6b5a4a; --dim:#8c7b6b;
+  --gold:#c88a3d; --gold-l:#e8a84c; --green:#4caf50; --amber:#ffc107; --red:#e57373; --gray:#c9c2b8;
+  --line:#e0d6c8; --shadow:0 3px 14px rgba(60,40,20,.06); --radius:14px;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:40px; }
+.topbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; padding:16px 28px; background:rgba(255,255,255,.94); border-bottom:1px solid var(--line); position:sticky; top:0; z-index:100; box-shadow:0 1px 10px rgba(60,40,20,.04); }
+.brand h1 { font-family:'Playfair Display',serif; font-size:24px; font-weight:700; }
+.brand h1 span { color:var(--gold); }
+.brand p { color:var(--dim); font-size:11px; text-transform:uppercase; letter-spacing:.5px; }
+.pill { background:#f5efe6; padding:7px 16px; border-radius:999px; font-size:12px; color:var(--dim); border:1px solid var(--line); }
+.pill a { color:var(--gold); text-decoration:none; font-weight:500; }
+main { max-width:1300px; margin:0 auto; padding:28px 20px; }
+.tabs { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:24px; border-bottom:2px solid var(--line); padding-bottom:0; }
+.tab { padding:12px 20px; cursor:pointer; border:none; background:none; font:inherit; color:var(--dim); font-size:14px; font-weight:500; border-bottom:3px solid transparent; transition:all .2s; }
+.tab:hover { color:var(--gold); }
+.tab.active { color:var(--gold); border-bottom-color:var(--gold); font-weight:600; }
+.panel { display:none; }
+.panel.active { display:block; }
+.card { background:var(--card); border-radius:var(--radius); padding:22px 20px; box-shadow:var(--shadow); margin-bottom:22px; }
+.card h2 { font-family:'Playfair Display',serif; font-size:18px; margin-bottom:16px; padding-bottom:8px; border-bottom:2px solid var(--gold); display:inline-block; }
+.card h3 { font-size:14px; color:var(--body); margin-bottom:10px; }
+.row { display:flex; gap:20px; flex-wrap:wrap; }
+.row > .card { flex:1; min-width:340px; }
+.grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:20px; }
+.field { margin-bottom:14px; }
+.field label { display:block; font-size:12px; color:var(--dim); margin-bottom:5px; font-weight:600; }
+.field input, .field select { width:100%; border:1px solid var(--line); background:#fff; padding:10px 12px; border-radius:8px; font:inherit; color:var(--text); }
+.field input:focus, .field select:focus { outline:none; border-color:var(--gold); }
+.btn { cursor:pointer; border:none; background:var(--gold); color:#fff; padding:11px 24px; border-radius:8px; font:inherit; font-weight:600; }
+.btn.ghost { background:#f5efe6; color:var(--body); border:1px solid var(--line); }
+.chart { width:100%; height:340px; }
+.chart.tall { height:420px; }
+table { width:100%; border-collapse:collapse; font-size:12.5px; }
+th { text-align:left; padding:9px 8px; border-bottom:2px solid var(--line); color:var(--dim); font-weight:600; font-size:11px; text-transform:uppercase; }
+td { padding:9px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+.dot { display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:6px; }
+.dot.green { background:var(--green); } .dot.yellow { background:var(--amber); } .dot.red { background:var(--red); } .dot.gray { background:var(--gray); }
+.badge { font-size:11px; padding:3px 10px; border-radius:999px; font-weight:600; white-space:nowrap; }
+.badge.green { background:rgba(76,175,80,.15); color:#2e7d32; }
+.badge.yellow { background:rgba(255,193,7,.18); color:#a08000; }
+.badge.red { background:rgba(229,115,115,.15); color:#c62828; }
+.badge.gray { background:rgba(140,123,107,.14); color:#6b5a4a; }
+.tipo-tag { font-size:10.5px; padding:2px 8px; border-radius:6px; background:#f5efe6; color:var(--dim); }
+.gantt-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.gantt-label { width:160px; font-size:12px; flex-shrink:0; }
+.gantt-track { flex:1; height:22px; background:#efe9df; border-radius:6px; position:relative; overflow:hidden; }
+.gantt-bar { height:100%; border-radius:6px; background:linear-gradient(90deg,var(--gold),var(--gold-l)); }
+.gantt-bar.hito { background:var(--green); }
+.gantt-week { font-size:11px; color:var(--dim); width:120px; text-align:right; flex-shrink:0; }
+.footer { text-align:center; padding:20px; color:var(--dim); font-size:11px; border-top:1px solid var(--line); margin-top:20px; }
+.sema-legend { display:flex; gap:18px; flex-wrap:wrap; font-size:12px; color:var(--dim); margin-bottom:16px; align-items:center; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><h1>Procesos Creativos <span>Madre Monte</span></h1><p id="sub">Proyecto de prueba — Cine + Cata</p></div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <input id="clave" type="password" placeholder="🔒 clave de escritura" autocomplete="off" style="border:1px solid var(--line);background:#fff;padding:7px 12px;border-radius:999px;font-size:12px;min-width:160px;">
+    <span class="pill"><a href="scrum.html">← Scrum</a></span>
+    <span class="pill"><a href="https://johnnyartesano26.github.io/dashboard-maestro/" target="_blank">Dashboard Maestro ↗</a></span>
+  </div>
+</header>
+
+<main>
+
+<div class="tabs" id="tabs">
+  <button class="tab active" data-p="f1">🏷 Fase 1 · Creación</button>
+  <button class="tab" data-p="f2">🗓 Fase 2 · Equipo & Timeline</button>
+  <button class="tab" data-p="f3">🧭 Fase 3 · Dimensiones & Preguntas</button>
+  <button class="tab" data-p="f4">📈 Fase 4 · Mediciones & Avance</button>
+</div>
+
+<!-- FASE 1 -->
+<div class="panel active" id="f1">
+  <div class="card" style="max-width:640px;">
+    <h2>🏷 Creación del proyecto</h2>
+    <p style="font-size:13px;color:var(--dim);margin-bottom:18px;">Solo administradores (Madre Monte). El aliado y el equipo se suman en la Fase 2.</p>
+    <div class="field"><label>Nombre del aliado</label><input id="f1_aliado" value="Comfama — Cine + Cata"></div>
+    <div class="field"><label>Tipo de proyecto</label>
+      <select id="f1_tipo"><option>Cultural</option><option>Económico</option><option>Medio ambiental</option><option>Otro</option></select>
+    </div>
+    <div class="field"><label>Responsable Madre Monte</label><input id="f1_mm" value="Ana (MM)"></div>
+    <div class="field"><label>Responsable del aliado</label><input id="f1_aliado_r" value="Luis (Comfama)"></div>
+    <div id="f1_status" style="font-size:12px;color:var(--dim);margin-bottom:12px;"></div>
+    <button class="btn" id="f1_btn" onclick="crearProyecto()">💾 Crear proyecto</button>
+  </div>
+</div>
+
+<!-- FASE 2 -->
+<div class="panel" id="f2">
+  <div class="grid2">
+    <div class="card">
+      <h2>🖼 Marcas participantes</h2>
+      <p style="font-size:12px;color:var(--dim);margin-bottom:14px;">Sube el logo de cada marca (opcional).</p>
+      <div class="row" style="margin-bottom:14px;">
+        <div style="flex:1;text-align:center;padding:14px;border:1px dashed var(--line);border-radius:10px;">
+          <div style="font-size:30px;">🍺</div>
+          <div style="font-size:12px;font-weight:600;margin-top:6px;">Madre Monte</div>
+          <div style="font-size:11px;color:var(--dim);">logo pendiente</div>
+        </div>
+        <div style="flex:1;text-align:center;padding:14px;border:1px dashed var(--line);border-radius:10px;">
+          <div style="font-size:30px;">🎬</div>
+          <div style="font-size:12px;font-weight:600;margin-top:6px;">Comfama</div>
+          <div style="font-size:11px;color:var(--dim);">logo pendiente</div>
+        </div>
+      </div>
+      <button class="btn ghost">➕ Agregar marca</button>
+    </div>
+    <div class="card">
+      <h2>🗓 Línea de tiempo (Gantt)</h2>
+      <p style="font-size:12px;color:var(--dim);margin-bottom:14px;">Duración en semanas — cada barra es una fase.</p>
+      <div id="gantt"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FASE 3 -->
+<div class="panel" id="f3">
+  <div class="card">
+    <h2>🧭 Dimensiones & preguntas base</h2>
+    <p style="font-size:13px;color:var(--dim);margin-bottom:14px;">Catálogo de 40 preguntas base (8 por dimensión). Puedes añadir preguntas propias; nunca quitar las base.</p>
+    <div id="dimensiones"></div>
+  </div>
+</div>
+
+<!-- FASE 4 -->
+<div class="panel" id="f4">
+  <div class="card">
+    <h2>📈 Avance por dimensión</h2>
+    <div class="sema-legend" id="legend"></div>
+    <div class="grid2">
+      <div><h3>Radar de dimensiones</h3><div class="chart tall" id="radar"></div></div>
+      <div><h3>Avance global del proyecto</h3><div class="chart tall" id="gauge"></div></div>
+    </div>
+    <div class="grid2" style="margin-top:10px;">
+      <div><h3>Avance por dimensión</h3><div class="chart" id="barras"></div></div>
+      <div><h3>Historial de un indicador (ej. asistentes)</h3><div class="chart" id="historial"></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>🎯 Indicadores (semáforo)</h2>
+    <div style="overflow-x:auto;"><table id="tabla-sema"></table></div>
+  </div>
+</div>
+
+</main>
+
+<footer class="footer">Procesos Creativos · Madre Monte — prototipo de prueba</footer>
+
+<script>
+// ═══ SUPABASE ═══
+const SUPABASE_URL = 'https://xrhuonbgjlocjusmniel.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_bBvT83l6Ak_7Z2DImE3Obg_DfH6z7eZ';
+const CLAVE_HASH = '700686426580d0bb78aebaabf76399a10f806705c93c4e826f8c982f0028ab74';
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function claveInput() { return document.getElementById('clave').value.trim(); }
+
+async function sbFetch(path, options = {}) {
+  const headers = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_KEY,
+    'Content-Type': 'application/json',
+    ...(options.headers || {})
+  };
+  const r = await fetch(SUPABASE_URL + path, { ...options, headers });
+  if (!r.ok) { const t = await r.text(); throw new Error('HTTP ' + r.status + ' ' + t); }
+  const txt = await r.text();
+  return txt ? JSON.parse(txt) : null;
+}
+
+// ═══ DATOS ═══
+const DIMENSIONES = [
+  { id:1, nombre:'Impacto Cultural', q:'¿Transformará algo?' },
+  { id:2, nombre:'Alcance y Comunidad', q:'¿A quién llegará?' },
+  { id:3, nombre:'Proceso y Equipo', q:'¿Cómo trabajaremos?' },
+  { id:4, nombre:'Sostenibilidad', q:'¿Se mantendrá?' },
+  { id:5, nombre:'Relación y Alianza', q:'¿Nos fortalecerá?' },
+];
+
+const CATALOGO = [
+  // D1
+  { dim:1, t:'¿Cuántas personas experimentarán el proyecto?', tipo:'numero', unidad:'asistentes', meta:'80+' },
+  { dim:1, t:'¿La experiencia generará conversación o reflexión?', tipo:'numero', unidad:'menciones', meta:'10+' },
+  { dim:1, t:'¿Visibilizará un tema que no esté en la agenda?', tipo:'numero', unidad:'temas', meta:'1+' },
+  { dim:1, t:'¿Generará emoción o cambio de percepción?', tipo:'escala', unidad:'1-5', meta:'4/5' },
+  { dim:1, t:'¿Dejará una obra o experiencia que perdurará?', tipo:'numero', unidad:'activos', meta:'1+' },
+  { dim:1, t:'¿Inspirará a otros a hacer algo similar?', tipo:'numero', unidad:'réplicas', meta:'1+' },
+  { dim:1, t:'¿Fortalecerá la identidad cultural local?', tipo:'cualitativo', unidad:'percepción', meta:'Positivo' },
+  { dim:1, t:'¿Conectará con temas relevantes del contexto?', tipo:'numero', unidad:'temas', meta:'1+' },
+  // D2
+  { dim:2, t:'¿Cuántas personas alcanzaremos en total?', tipo:'numero', unidad:'personas', meta:'500+' },
+  { dim:2, t:'¿Llegaremos a públicos nuevos?', tipo:'porcentaje', unidad:'%', meta:'30%' },
+  { dim:2, t:'¿La comunidad participará activamente?', tipo:'numero', unidad:'co-creadores', meta:'5+' },
+  { dim:2, t:'¿Se involucrarán aliados externos?', tipo:'numero', unidad:'aliados', meta:'2+' },
+  { dim:2, t:'¿Habrá diversidad en la audiencia?', tipo:'cualitativo', unidad:'perfil', meta:'Diverso' },
+  { dim:2, t:'¿Se generará contenido espontáneo (UGC)?', tipo:'numero', unidad:'publicaciones', meta:'10+' },
+  { dim:2, t:'¿Llegará a territorios o comunidades específicas?', tipo:'numero', unidad:'municipios', meta:'1+' },
+  { dim:2, t:'¿Se activará una red de colaboración?', tipo:'numero', unidad:'conexiones', meta:'3+' },
+  // D3
+  { dim:3, t:'¿Cumpliremos los plazos definidos?', tipo:'porcentaje', unidad:'%', meta:'80%' },
+  { dim:3, t:'¿Respetaremos el presupuesto?', tipo:'porcentaje', unidad:'%', meta:'±10%' },
+  { dim:3, t:'¿El equipo se sentirá motivado y valorado?', tipo:'escala', unidad:'1-5', meta:'4+' },
+  { dim:3, t:'¿Habrá claridad en roles y responsabilidades?', tipo:'porcentaje', unidad:'%', meta:'80%' },
+  { dim:3, t:'¿Documentaremos el proceso?', tipo:'numero', unidad:'documentos', meta:'5+' },
+  { dim:3, t:'¿Aprenderemos algo nuevo como equipo?', tipo:'numero', unidad:'aprendizajes', meta:'3+' },
+  { dim:3, t:'¿Habrá conflictos y se resolverán?', tipo:'porcentaje', unidad:'%', meta:'100%' },
+  { dim:3, t:'¿El ritmo de trabajo será sostenible?', tipo:'cualitativo', unidad:'percepción', meta:'Equilibrado' },
+  // D4
+  { dim:4, t:'¿Se podrá repetir sin empezar de cero?', tipo:'numero', unidad:'procesos', meta:'3+' },
+  { dim:4, t:'¿Generará ingresos o ahorros?', tipo:'porcentaje', unidad:'%', meta:'30%' },
+  { dim:4, t:'¿Dependerá de personas específicas?', tipo:'numero', unidad:'personas', meta:'≤2' },
+  { dim:4, t:'¿Habrá demanda para repetirlo o ampliarlo?', tipo:'numero', unidad:'solicitudes', meta:'5+' },
+  { dim:4, t:'¿Se documentará para que otros lo repliquen?', tipo:'numero', unidad:'manuales', meta:'1+' },
+  { dim:4, t:'¿Dejará capacidad instalada?', tipo:'numero', unidad:'habilidades', meta:'3+' },
+  { dim:4, t:'¿Será viable en el próximo semestre?', tipo:'cualitativo', unidad:'sí/no', meta:'Sí' },
+  { dim:4, t:'¿Tendrá aliados o patrocinadores potenciales?', tipo:'numero', unidad:'contactos', meta:'2+' },
+  // D5
+  { dim:5, t:'¿La alianza se fortalecerá?', tipo:'escala', unidad:'1-5', meta:'4+' },
+  { dim:5, t:'¿Aprenderemos a trabajar juntos?', tipo:'numero', unidad:'acuerdos', meta:'3+' },
+  { dim:5, t:'¿Generaremos confianza mutua?', tipo:'cualitativo', unidad:'percepción', meta:'Alta' },
+  { dim:5, t:'¿Beneficiará a ambas partes por igual?', tipo:'cualitativo', unidad:'balance', meta:'Equilibrado' },
+  { dim:5, t:'¿Querremos seguir trabajando juntos?', tipo:'cualitativo', unidad:'sí/no', meta:'Sí' },
+  { dim:5, t:'¿La alianza se visibilizará externamente?', tipo:'numero', unidad:'menciones', meta:'5+' },
+  { dim:5, t:'¿Atraeremos nuevos aliados?', tipo:'numero', unidad:'aliados', meta:'2+' },
+  { dim:5, t:'¿La alianza tendrá nombre o identidad propia?', tipo:'cualitativo', unidad:'sí/no', meta:'Sí/No' },
+];
+
+// Mediciones de muestra (avance % por pregunta). null = sin medir (gris).
+const MEDICIONES = [
+  { dim:1, q:0, avance:120 },   // personas (verde, superó meta)
+  { dim:1, q:1, avance:60 },    // menciones (rojo)
+  { dim:1, q:3, avance:85 },    // satisfacción (amarillo)
+  { dim:2, q:0, avance:95 },    // alcance (amarillo)
+  { dim:2, q:1, avance:40 },    // nuevos públicos (rojo)
+  { dim:2, q:3, avance:100 },   // aliados (verde)
+  { dim:3, q:0, avance:75 },    // hitos (amarillo)
+  { dim:3, q:2, avance:110 },   // clima (verde)
+  { dim:4, q:1, avance:25 },    // autofinanciación (rojo)
+  { dim:4, q:6, avance:100 },   // viabilidad (verde)
+  // D5 sin mediciones aún (gris)
+];
+
+const TIPO_LABEL = { numero:'N°', porcentaje:'%', escala:'1-5', cualitativo:'Cualitativo' };
+
+// Historial de muestra (semana a semana) para el indicador "asistentes" (D1.q0)
+const HISTORIAL = [
+  { semana:'S1', avance:20 }, { semana:'S2', avance:45 }, { semana:'S3', avance:70 },
+  { semana:'S4', avance:95 }, { semana:'S5', avance:120 },
+];
+
+// ═══ SEMÁFORO ═══
+function semaforo(avance) {
+  if (avance === null || avance === undefined) return { cls:'gray', label:'Sin medir', color:'#c9c2b8' };
+  if (avance >= 100) return { cls:'green', label:'Meta (100%)', color:'#4caf50' };
+  if (avance >= 70) return { cls:'yellow', label:'70-99%', color:'#ffc107' };
+  return { cls:'red', label:'< 70%', color:'#e57373' };
+}
+
+// ═══ PESTAÑAS ═══
+document.querySelectorAll('.tab').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById(b.dataset.p).classList.add('active');
+    if (b.dataset.p === 'f4') renderFase4();
+  });
+});
+
+// ═══ FASE 2: GANTT (barras simples) ═══
+function renderGantt() {
+  const fases = [
+    { nombre:'F1 · Creación', sem:1, avance:100, hito:true },
+    { nombre:'F2 · Equipo & Brief', sem:2, avance:50 },
+    { nombre:'F3 · Producción', sem:4, avance:0 },
+    { nombre:'F4 · Lanzamiento', sem:1, avance:0 },
+  ];
+  let html = '';
+  let semana = 1;
+  fases.forEach(f => {
+    const ancho = Math.min(100, (f.sem / 6) * 100);
+    html += `<div class="gantt-row">
+      <div class="gantt-label">${f.nombre}</div>
+      <div class="gantt-track"><div class="gantt-bar ${f.hito?'hito':''}" style="width:${ancho}%;${f.avance>0?'opacity:'+(0.5+f.avance/200):''}"></div></div>
+      <div class="gantt-week">S${semana}-S${semana+f.sem-1} · ${f.avance}%</div>
+    </div>`;
+    semana += f.sem;
+  });
+  document.getElementById('gantt').innerHTML = html + '<p style="font-size:11px;color:var(--dim);margin-top:8px;">Duración total: 8 semanas (≈2 meses)</p>';
+}
+
+// ═══ FASE 3: DIMENSIONES ═══
+function renderFase3() {
+  let html = '';
+  DIMENSIONES.forEach(d => {
+    const qs = CATALOGO.filter(c => c.dim === d.id);
+    html += `<div style="margin-bottom:18px;">
+      <h3 style="color:var(--gold);font-size:15px;">${d.id}. ${d.nombre} <span style="color:var(--dim);font-weight:400;">— ${d.q}</span></h3>
+      <table><thead><tr><th>Pregunta base</th><th>Indicador</th><th>Meta</th></tr></thead><tbody>`;
+    qs.forEach(c => {
+      html += `<tr><td>${c.t}</td><td><span class="tipo-tag">${TIPO_LABEL[c.tipo]}</span> ${c.unidad}</td><td>${c.meta}</td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+  });
+  document.getElementById('dimensiones').innerHTML = html;
+}
+
+// ═══ FASE 4: ECHARTS ═══
+function avancePorDimension() {
+  return DIMENSIONES.map(d => {
+    const m = MEDICIONES.filter(x => x.dim === d.id && x.avance !== null);
+    const av = m.length ? Math.round(m.reduce((s,x)=>s+x.avance,0)/m.length) : null;
+    return { ...d, avance: av, n: m.length };
+  });
+}
+
+function renderFase4() {
+  const porDim = avancePorDimension();
+
+  // Legend
+  document.getElementById('legend').innerHTML = `
+    <span><span class="dot green"></span>🟢 Meta ≥100%</span>
+    <span><span class="dot yellow"></span>🟡 70-99%</span>
+    <span><span class="dot red"></span>🔴 &lt;70%</span>
+    <span><span class="dot gray"></span>⚪ Sin medir</span>`;
+
+  // Radar
+  const radar = echarts.init(document.getElementById('radar'));
+  const radarVal = porDim.map(d => d.avance === null ? 0 : Math.min(100, d.avance));
+  radar.setOption({
+    color:['#c88a3d'],
+    tooltip:{},
+    radar:{
+      indicator: porDim.map(d => ({ name:d.nombre, max:100 })),
+      radius:'62%',
+      axisName:{ color:'#6b5a4a', fontSize:12 },
+      splitArea:{ areaStyle:{ color:['#faf7f0','#f5efe6'] } },
+      splitLine:{ lineStyle:{ color:'#e0d6c8' } },
+      axisLine:{ lineStyle:{ color:'#e0d6c8' } }
+    },
+    series:[{
+      type:'radar',
+      data:[{ value:radarVal, name:'Avance', areaStyle:{ opacity:.25 } }],
+      symbol:'circle', symbolSize:6,
+      lineStyle:{ width:2 }, itemStyle:{ color:'#c88a3d' }
+    }]
+  });
+
+  // Gauge (avance global)
+  const medidos = porDim.filter(d => d.avance !== null);
+  const global = medidos.length ? Math.round(medidos.reduce((s,d)=>s+d.avance,0)/medidos.length) : 0;
+  const gauge = echarts.init(document.getElementById('gauge'));
+  gauge.setOption({
+    series:[{
+      type:'gauge', min:0, max:100, radius:'85%', center:['50%','58%'],
+      startAngle:220, endAngle:-40,
+      progress:{ show:true, width:18, itemStyle:{ color: global>=100?'#4caf50':(global>=70?'#ffc107':'#e57373') } },
+      axisLine:{ lineStyle:{ width:18, color:[[1,'#efe9df']] } },
+      axisTick:{ show:false }, splitLine:{ show:false }, axisLabel:{ show:false }, pointer:{ show:false },
+      detail:{ valueAnimation:true, formatter:'{value}%', fontSize:34, fontWeight:700, color:'#3d2a1d', offsetCenter:[0,'0%'] },
+      title:{ offsetCenter:[0,'32%'], fontSize:12, color:'#8c7b6b' },
+      data:[{ value:global, name:'Avance global' }]
+    }]
+  });
+
+  // Barras por dimensión
+  const barras = echarts.init(document.getElementById('barras'));
+  const rev = porDim.slice().reverse();
+  barras.setOption({
+    grid:{ left:10, right:40, top:10, bottom:20, containLabel:true },
+    tooltip:{ trigger:'axis', formatter:p => p[0].name+'<br>Avance: '+(p[0].value===0?'sin medir':p[0].value+'%') },
+    xAxis:{ type:'value', max:100, axisLabel:{ color:'#8c7b6b' }, splitLine:{ lineStyle:{ color:'#efe9df' } } },
+    yAxis:{ type:'category', data:rev.map(d=>d.nombre), axisLabel:{ color:'#6b5a4a', fontSize:12 } },
+    series:[{
+      type:'bar', barWidth:18, borderRadius:6,
+      data: rev.map(d => d.avance === null ? 0 : Math.min(100, d.avance)),
+      label:{ show:true, position:'right', color:'#3d2a1d', formatter:p => rev[p.dataIndex].avance === null ? '—' : rev[p.dataIndex].avance + '%' },
+      itemStyle:{ color:p => { const a = rev[p.dataIndex].avance; return a===null?'#c9c2b8':(a>=100?'#4caf50':(a>=70?'#ffc107':'#e57373')); } }
+    }]
+  });
+
+  // Historial (línea)
+  const hist = echarts.init(document.getElementById('historial'));
+  hist.setOption({
+    grid:{ left:10, right:40, top:20, bottom:20, containLabel:true },
+    tooltip:{ trigger:'axis', formatter:p => p[0].name+': '+(p[0].value>100?'120% (meta superada)':p[0].value+'%') },
+    xAxis:{ type:'category', data:HISTORIAL.map(h=>h.semana), axisLabel:{ color:'#8c7b6b' }, boundaryGap:false },
+    yAxis:{ type:'value', max:120, axisLabel:{ color:'#8c7b6b', formatter:v=>v+'%' }, splitLine:{ lineStyle:{ color:'#efe9df' } } },
+    series:[{
+      type:'line', data:HISTORIAL.map(h=>h.avance), smooth:true,
+      lineStyle:{ width:3, color:'#c88a3d' }, itemStyle:{ color:'#c88a3d' }, areaStyle:{ opacity:.12, color:'#c88a3d' },
+      markLine:{ silent:true, symbol:'none', label:{ formatter:'Meta 100%', position:'insideEndTop', color:'#4caf50' }, lineStyle:{ color:'#4caf50', type:'dashed' }, data:[{ yAxis:100 }] }
+    }]
+  });
+
+  // Tabla semáforo
+  let html = '<thead><tr><th>#</th><th>Dimensión</th><th>Pregunta</th><th>Indicador</th><th>Meta</th><th>Avance</th><th>Estado</th></tr></thead><tbody>';
+  const idxPorDim = {};
+  CATALOGO.forEach(c => { if (!idxPorDim[c.dim]) idxPorDim[c.dim] = []; idxPorDim[c.dim].push(c); });
+  CATALOGO.forEach(c => {
+    const d = DIMENSIONES.find(x => x.id === c.dim);
+    const qIdx = idxPorDim[c.dim].indexOf(c);
+    const med = MEDICIONES.find(x => x.dim === c.dim && x.q === qIdx);
+    const av = med ? med.avance : null;
+    const s = semaforo(av);
+    html += `<tr>
+      <td style="color:var(--dim)">${d.id}.${qIdx+1}</td>
+      <td style="white-space:nowrap;">${d.nombre}</td>
+      <td>${c.t}</td>
+      <td><span class="tipo-tag">${TIPO_LABEL[c.tipo]}</span> ${c.unidad}</td>
+      <td>${c.meta}</td>
+      <td>${av === null ? '—' : av + '%'}</td>
+      <td><span class="badge ${s.cls}">${s.cls==='green'?'🟢':s.cls==='yellow'?'🟡':s.cls==='red'?'🔴':'⚪'} ${s.label}</span></td>
+    </tr>`;
+  });
+  html += '</tbody>';
+  document.getElementById('tabla-sema').innerHTML = html;
+
+  window.addEventListener('resize', () => { radar.resize(); gauge.resize(); barras.resize(); hist.resize(); });
+}
+
+// ═══ SUPABASE: catálogo + creación de proyecto ═══
+async function cargarCatalogo() {
+  try {
+    const rows = await sbFetch('/rest/v1/catalogo_preguntas?select=dimension,texto,tipo_indicador,unidad,sugerencia_meta&order=id');
+    if (rows && rows.length) {
+      CATALOGO.length = 0;
+      rows.forEach(r => {
+        const dim = DIMENSIONES.find(d => d.nombre === r.dimension);
+        if (dim) CATALOGO.push({ dim: dim.id, t: r.texto, tipo: r.tipo_indicador, unidad: r.unidad, meta: r.sugerencia_meta });
+      });
+      console.log('Catálogo cargado desde Supabase:', CATALOGO.length, 'preguntas');
+    }
+  } catch (e) { console.warn('Catálogo (fallback local):', e.message); }
+  renderFase3();
+}
+
+async function crearProyecto() {
+  const btn = document.getElementById('f1_btn');
+  const st = document.getElementById('f1_status');
+  if (!claveInput()) { st.textContent = '⚠️ Ingresa la clave de escritura (arriba).'; return; }
+  btn.disabled = true; st.textContent = 'Creando proyecto...';
+  try {
+    const key = await sha256(claveInput());
+    const wh = { 'x-write-key': key };
+    const rep = { 'Prefer': 'return=representation' };
+
+    const proy = await sbFetch('/rest/v1/proyectos_creativos', {
+      method: 'POST', headers: { ...wh, ...rep },
+      body: JSON.stringify({
+        nombre_aliado: document.getElementById('f1_aliado').value.trim(),
+        tipo: document.getElementById('f1_tipo').value,
+        responsable_mm: document.getElementById('f1_mm').value.trim(),
+        responsable_aliado: document.getElementById('f1_aliado_r').value.trim(),
+        creado_por: 'Madre Monte'
+      })
+    });
+    const proyectoId = proy[0].id;
+
+    const dimIds = {};
+    for (let i = 0; i < DIMENSIONES.length; i++) {
+      const d = DIMENSIONES[i];
+      const res = await sbFetch('/rest/v1/dimensiones', {
+        method: 'POST', headers: { ...wh, ...rep },
+        body: JSON.stringify({ proyecto_id: proyectoId, nombre: d.nombre, orden: i + 1, estado: 'no_iniciada' })
+      });
+      dimIds[d.nombre] = res[0].id;
+    }
+
+    for (const c of CATALOGO) {
+      const dimNombre = DIMENSIONES.find(d => d.id === c.dim).nombre;
+      await sbFetch('/rest/v1/preguntas', {
+        method: 'POST', headers: wh,
+        body: JSON.stringify({
+          dimension_id: dimIds[dimNombre],
+          texto: c.t, tipo_indicador: c.tipo, unidad: c.unidad,
+          meta_descripcion: c.meta, origen: 'catalogo'
+        })
+      });
+    }
+
+    localStorage.setItem('pc_proyecto_id', proyectoId);
+    st.innerHTML = '✅ Proyecto creado (id <b>' + proyectoId.slice(0, 8) + '</b>) con 5 dimensiones y ' + CATALOGO.length + ' preguntas.';
+  } catch (e) {
+    st.textContent = '❌ Error: ' + e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ═══ INIT ═══
+renderGantt();
+cargarCatalogo();
+</script>
+</body>
+</html>
