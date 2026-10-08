@@ -1165,8 +1165,6 @@ function renderFasesExplicacion() {
     <details style="border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin-bottom:10px;background:#fff;">
       <summary style="cursor:pointer;font-size:14px;font-weight:600;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
         <span style="color:var(--gold);">${f.id} · ${f.nombre}</span>
-        <span style="font-size:12px;color:var(--dim);font-weight:400;">${f.semana} · ${f.duracion}</span>
-        <span class="badge ${f.avance >= 100 ? 'green' : (f.avance > 0 ? 'yellow' : 'gray')}">${f.avance}%</span>
       </summary>
       <div style="margin-top:12px;font-size:13px;color:var(--body);line-height:1.6;">
         <p style="margin-bottom:6px;"><strong>Propósito:</strong> <span style="color:var(--gold);font-weight:600;">${f.proposito}</span></p>
