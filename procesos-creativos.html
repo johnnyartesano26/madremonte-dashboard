@@ -103,16 +103,23 @@ td { padding:9px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
   <div class="grid2">
     <div class="card">
       <h2>🖼 Marcas participantes</h2>
-      <p style="font-size:12px;color:var(--dim);margin-bottom:14px;">Agrega cada marca participante (logo opcional).</p>
-      <div id="participantes-list" style="margin-bottom:14px;"><div style="font-size:12px;color:var(--dim);">Crea el proyecto en Fase 1 para agregar participantes.</div></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <input id="part_nombre" placeholder="Nombre de la marca" style="flex:1;min-width:160px;border:1px solid var(--line);background:#fff;padding:9px 12px;border-radius:8px;font:inherit;">
-        <select id="part_rol" style="border:1px solid var(--line);background:#fff;padding:9px 12px;border-radius:8px;font:inherit;">
-          <option>Madre Monte</option><option>Aliado</option><option>Otro</option>
-        </select>
-        <button class="btn" onclick="agregarParticipante()">➕ Agregar</button>
+      <p style="font-size:12px;color:var(--dim);margin-bottom:14px;">Agrega cada marca participante: nombre, rol y logo (opcional).</p>
+      <div id="participantes-list" style="margin-bottom:16px;"><div style="font-size:12px;color:var(--dim);">Crea el proyecto en Fase 1 para agregar participantes.</div></div>
+      <div style="border:1px solid var(--line);border-radius:10px;padding:16px;background:#faf7f0;">
+        <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:12px;">➕ Nueva marca participante</div>
+        <div class="field"><label>Nombre de la marca</label><input id="part_nombre" placeholder="Ej: Comfama"></div>
+        <div class="field"><label>Rol</label>
+          <select id="part_rol"><option>Madre Monte</option><option>Aliado</option><option>Otro</option></select>
+        </div>
+        <div class="field">
+          <label>Logo (opcional)</label>
+          <label for="part_logo" style="cursor:pointer;display:inline-block;border:1px dashed var(--line);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--dim);background:#fff;">📷 Buscar archivo en el equipo…</label>
+          <input type="file" id="part_logo" accept="image/*" style="display:none;" onchange="previewLogo(event)">
+          <div id="part_logo_preview" style="margin-top:10px;"></div>
+        </div>
+        <button class="btn" onclick="agregarParticipante()">💾 Guardar marca</button>
       </div>
-      <div id="part_status" style="font-size:12px;color:var(--dim);margin-top:8px;"></div>
+      <div id="part_status" style="font-size:12px;color:var(--dim);margin-top:10px;"></div>
     </div>
     <div class="card">
       <h2>🗓 Línea de tiempo (Gantt)</h2>
@@ -532,6 +539,21 @@ function renderParticipantes(rows) {
     </div>`).join('');
 }
 
+let logoData = null;
+
+function previewLogo(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    logoData = ev.target.result;
+    document.getElementById('part_logo_preview').innerHTML =
+      '<img src="' + logoData + '" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--line);">' +
+      ' <span style="font-size:11px;color:var(--dim);">' + file.name + '</span>';
+  };
+  reader.readAsDataURL(file);
+}
+
 async function agregarParticipante() {
   const st = document.getElementById('part_status');
   const pid = proyectoActualId();
@@ -543,9 +565,12 @@ async function agregarParticipante() {
     const key = await sha256(claveInput());
     await sbFetch('/rest/v1/participantes', {
       method: 'POST', headers: { 'x-write-key': key },
-      body: JSON.stringify({ proyecto_id: pid, nombre, rol: document.getElementById('part_rol').value })
+      body: JSON.stringify({ proyecto_id: pid, nombre, rol: document.getElementById('part_rol').value, logo_url: logoData || null })
     });
     document.getElementById('part_nombre').value = '';
+    document.getElementById('part_logo').value = '';
+    document.getElementById('part_logo_preview').innerHTML = '';
+    logoData = null;
     st.textContent = '';
     cargarParticipantes();
   } catch (e) {
