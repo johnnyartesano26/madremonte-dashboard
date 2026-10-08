@@ -585,10 +585,7 @@ function renderEncuentros(faseId, div, rows) {
       html += `<div style="border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px;">
         <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;">
           <strong style="font-size:13px;">${e.titulo}</strong>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <span style="font-size:11px;color:var(--dim);">${e.fecha || '—'}</span>
-            <button onclick="eliminarEncuentro(${e.id}, ${faseId})" style="border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--red);">🗑</button>
-          </div>
+          <button onclick="eliminarEncuentro(${e.id}, ${faseId})" style="border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--red);">🗑</button>
         </div>
         ${e.contenido ? '<div style="font-size:12px;color:var(--body);margin-top:4px;white-space:pre-wrap;">' + e.contenido + '</div>' : ''}
         ${e.creado_por ? '<div style="font-size:10px;color:var(--dim);margin-top:4px;">por ' + e.creado_por + '</div>' : ''}
@@ -599,7 +596,6 @@ function renderEncuentros(faseId, div, rows) {
     <div style="border-top:1px dashed var(--line);padding-top:10px;">
       <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:8px;">➕ Nuevo encuentro</div>
       <input id="enc_titulo_${faseId}" placeholder="Título del encuentro" style="width:100%;box-sizing:border-box;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;margin-bottom:8px;">
-      <input type="date" id="enc_fecha_${faseId}" style="border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;margin-bottom:8px;">
       <textarea id="enc_contenido_${faseId}" rows="3" placeholder="Información del encuentro (acuerdos, decisiones, avances…)" style="width:100%;box-sizing:border-box;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font:inherit;margin-bottom:8px;resize:vertical;"></textarea>
       <button onclick="agregarEncuentro(${faseId})" class="btn">💾 Guardar encuentro</button>
     </div>`;
@@ -617,7 +613,6 @@ async function agregarEncuentro(faseId) {
       body: JSON.stringify({
         fase_id: faseId,
         titulo: titulo,
-        fecha: document.getElementById('enc_fecha_' + faseId).value || null,
         contenido: document.getElementById('enc_contenido_' + faseId).value.trim(),
         creado_por: 'Madre Monte'
       })
