@@ -1070,38 +1070,90 @@ function showToast(msg) {
 const FASES_EXPLICACION = [
   {
     id:'F1', nombre:'Creación', semana:'Semana 1', duracion:'1 semana', avance:100,
-    resumen:'Momento fundacional: nace la idea, se define el propósito y las bases conceptuales.',
+    proposito:'Definir el qué y el por qué',
     queEs:'Es el momento fundacional. Aquí nace la idea, se define el propósito y se establecen las bases conceptuales del proyecto. Es la fase de ideación y visión.',
-    queHace:['Se responden las 12 Preguntas Iniciales de Ideación','Se define el concepto creativo central','Se identifica el público objetivo y la emoción a activar','Se esboza el formato y el tono narrativo','Se establece el propósito compartido entre las partes'],
-    queProduce:['Documento de Visión Compartida','Ficha de Ideación Inicial completa','Concepto creativo en borrador'],
-    porQue:'Porque esta fase ya se completó. La idea ya existe, el propósito está claro y el concepto está definido.',
+    col:'Qué se define',
+    topicos:[
+      ['Origen e inspiración','Qué motiva la idea y por qué surge'],
+      ['Problema o deseo','Qué necesidad busca resolver o satisfacer'],
+      ['Pertinencia y timing','Por qué ahora es el momento correcto'],
+      ['Esencia en una frase','Cómo se sintetiza la idea'],
+      ['Diferenciación','Qué tiene de único frente a lo existente'],
+      ['Emoción a activar','Qué se quiere que sienta la gente'],
+      ['Alianza estratégica','Por qué juntos y no solos'],
+      ['Aporte de cada parte','Qué pone cada uno que el otro no tiene'],
+      ['Impacto esperado','A quién le cambia algo y cómo'],
+      ['Legado','Qué queda cuando el proyecto termina'],
+      ['Criterios de éxito','Cómo se sabrá que valió la pena'],
+      ['Decisión de avanzar','Si se pasa a diseño o se reformula']
+    ],
+    resultado:['Documento de Visión Compartida','Ficha de Ideación Inicial completa','Concepto creativo en borrador'],
     pregunta:'¿Qué vamos a crear, por qué y para quién?'
   },
   {
     id:'F2', nombre:'Equipo & Brief', semana:'Semanas 2-3', duracion:'2 semanas', avance:50,
-    resumen:'Fase de estructuración: equipo, roles, brief creativo y planificación de la producción.',
+    proposito:'Definir el quién, el cómo y las metas',
     queEs:'Es la fase de estructuración. Se conforma el equipo, se definen roles, se elabora el brief creativo y se planifica la producción. Es el puente entre la idea y la ejecución.',
-    queHace:['Se conforma el equipo de trabajo','Se define el brief creativo','Se establecen roles y responsabilidades','Se define el presupuesto y los recursos','Se planifica el calendario de producción','Se identifican aliados y colaboradores','Se establecen los indicadores generales (5 dimensiones)','Se documenta la gobernanza del proyecto'],
-    queProduce:['Brief creativo completo','Matriz de roles y responsabilidades','Presupuesto estimado','Calendario de producción','Ficha de indicadores con metas','Acuerdos de gobernanza'],
-    porQue:'Porque está en proceso. Parte del equipo ya está definido, el brief está en elaboración, pero aún faltan acuerdos, presupuesto y planificación detallada.',
+    col:'Qué se define',
+    topicos:[
+      ['Conformación del equipo','Quiénes participan y desde qué rol'],
+      ['Roles y responsabilidades','Quién hace qué y quién decide'],
+      ['Brief creativo','Documento que guía toda la producción'],
+      ['Público objetivo','A quién le hablamos específicamente'],
+      ['Formato y tono','Cómo se materializa la idea'],
+      ['Presupuesto y recursos','Cuánto cuesta y quién aporta qué'],
+      ['Calendario de producción','Cuándo se hace cada cosa'],
+      ['Aliados y colaboradores','Quiénes se suman externamente'],
+      ['Indicadores generales','Qué se medirá en las 5 dimensiones'],
+      ['Metas por indicador','A dónde queremos llegar'],
+      ['Gobernanza y acuerdos','Cómo se toman decisiones y se resuelven conflictos'],
+      ['Documentación','Dónde queda registrado todo']
+    ],
+    resultado:['Brief creativo completo','Matriz de roles y responsabilidades','Presupuesto estimado','Calendario de producción','Ficha de indicadores con metas','Acuerdos de gobernanza'],
     pregunta:'¿Quién lo hará, cómo, con qué recursos y bajo qué acuerdos?'
   },
   {
     id:'F3', nombre:'Producción', semana:'Semanas 4-7', duracion:'4 semanas', avance:0,
-    resumen:'Fase de ejecución: se materializa lo planeado (grabación, diseño, ensayos, construcción).',
+    proposito:'Materializar la idea',
     queEs:'Es la fase de ejecución. Aquí se materializa todo lo planeado: se graba, se escribe, se diseña, se ensaya, se construye. Es el corazón del proyecto.',
-    queHace:['Se ejecuta el plan de producción','Se realizan rodajes, registros y grabaciones','Se producen los contenidos audiovisuales','Se diseñan las piezas gráficas y digitales','Se preparan los eventos o experiencias','Se documenta el proceso de producción','Se aplican los controles de calidad','Se generan contenidos derivados (detrás de cámaras, avances)'],
-    queProduce:['Versión alfa del producto cultural','Piezas audiovisuales','Material gráfico y digital','Registro del proceso','Contenidos derivados'],
-    porQue:'Porque aún no ha comenzado. Esta fase iniciará cuando la Fase 2 esté completa y el brief esté aprobado.',
+    col:'Qué se hace',
+    topicos:[
+      ['Plan de producción','Organizar el trabajo por etapas'],
+      ['Rodaje / registro','Capturar el material audiovisual'],
+      ['Diseño y gráfica','Crear las piezas visuales'],
+      ['Edición y postproducción','Dar forma final al contenido'],
+      ['Producción de eventos','Preparar experiencias presenciales'],
+      ['Contenidos derivados','Generar material paralelo (detrás de cámaras)'],
+      ['Control de calidad','Revisar y aprobar cada entregable'],
+      ['Documentación del proceso','Registrar cómo se hizo'],
+      ['Gestión de permisos','Resolver derechos y autorizaciones'],
+      ['Versión alfa','Primer montaje o prototipo'],
+      ['Retroalimentación temprana','Mostrar a personas clave antes del lanzamiento'],
+      ['Ajustes finales','Corregir y pulir']
+    ],
+    resultado:['Versión alfa del producto cultural','Piezas audiovisuales','Material gráfico y digital','Registro del proceso','Contenidos derivados'],
     pregunta:'¿Cómo convertimos la idea en algo real, tangible y de calidad?'
   },
   {
     id:'F4', nombre:'Lanzamiento', semana:'Semana 8', duracion:'1 semana', avance:0,
-    resumen:'Fase de cierre y presentación pública: lanzamiento, medición de impacto y continuidad.',
+    proposito:'Compartir, medir y decidir',
     queEs:'Es la fase de cierre y presentación pública. El proyecto se lanza, se comparte con la comunidad, se mide su impacto y se decide su continuidad.',
-    queHace:['Se realiza el evento de lanzamiento','Se presenta el producto al público','Se activa la difusión y prensa','Se integra la experiencia de marca (cata, edición especial, maridaje)','Se miden los indicadores generales','Se recoge retroalimentación de la audiencia','Se documenta la memoria del proyecto','Se realiza la retrospectiva y se decide continuidad'],
-    queProduce:['Producto lanzado al público','Informe de validación con indicadores','Memoria del proyecto','Roadmap siguiente semestre','Decisión estratégica (escalar, pivotar o cerrar)'],
-    porQue:'Porque depende de que la Fase 3 se complete. Es el cierre del ciclo y aún no ha comenzado.',
+    col:'Qué se hace',
+    topicos:[
+      ['Evento de lanzamiento','Diseñar y ejecutar la presentación pública'],
+      ['Difusión y prensa','Comunicar el proyecto'],
+      ['Experiencia de marca','Integrar la vivencia sensorial (cata, maridaje)'],
+      ['Medición de indicadores','Recoger datos de las 5 dimensiones'],
+      ['Retroalimentación','Escuchar a la audiencia'],
+      ['Documentación final','Cerrar la memoria del proyecto'],
+      ['Retrospectiva','Analizar qué funcionó y qué no'],
+      ['Decisión estratégica','Escalar, pivotar o cerrar'],
+      ['Roadmap siguiente','Definir qué sigue'],
+      ['Celebración','Reconocer el trabajo hecho'],
+      ['Transferencia','Compartir aprendizajes con otros'],
+      ['Archivo','Guardar todo para memoria institucional']
+    ],
+    resultado:['Producto lanzado al público','Informe de validación con indicadores','Memoria del proyecto','Roadmap siguiente semestre','Decisión estratégica'],
     pregunta:'¿Cómo lo compartimos, qué impacto tuvo y qué sigue?'
   }
 ];
@@ -1117,13 +1169,15 @@ function renderFasesExplicacion() {
         <span class="badge ${f.avance >= 100 ? 'green' : (f.avance > 0 ? 'yellow' : 'gray')}">${f.avance}%</span>
       </summary>
       <div style="margin-top:12px;font-size:13px;color:var(--body);line-height:1.6;">
-        <p style="margin-bottom:8px;color:var(--dim);font-style:italic;">${f.resumen}</p>
-        <p style="margin-bottom:4px;"><strong>¿Qué es?</strong> ${f.queEs}</p>
-        <p style="margin-bottom:4px;"><strong>¿Qué se hace?</strong></p>
-        <ul style="margin:0 0 10px 20px;">${f.queHace.map(x => '<li>'+x+'</li>').join('')}</ul>
-        <p style="margin-bottom:4px;"><strong>¿Qué se produce?</strong></p>
-        <ul style="margin:0 0 10px 20px;">${f.queProduce.map(x => '<li>'+x+'</li>').join('')}</ul>
-        <p style="margin-bottom:4px;"><strong>¿Por qué está al ${f.avance}%?</strong> ${f.porQue}</p>
+        <p style="margin-bottom:6px;"><strong>Propósito:</strong> <span style="color:var(--gold);font-weight:600;">${f.proposito}</span></p>
+        <p style="margin-bottom:6px;"><strong>¿Qué es?</strong> ${f.queEs}</p>
+        <p style="margin-bottom:4px;"><strong>Tópicos que se trabajan:</strong></p>
+        <table style="margin:0 0 12px;width:100%;">
+          <thead><tr><th style="width:30px;">#</th><th>Tópico</th><th>${f.col}</th></tr></thead>
+          <tbody>${f.topicos.map((t, i) => `<tr><td style="color:var(--dim);">${i+1}</td><td><strong>${t[0]}</strong></td><td>${t[1]}</td></tr>`).join('')}</tbody>
+        </table>
+        <p style="margin-bottom:4px;"><strong>Resultado esperado:</strong></p>
+        <ul style="margin:0 0 10px 20px;">${f.resultado.map(x => '<li>'+x+'</li>').join('')}</ul>
         <p style="margin-top:8px;color:var(--gold);"><strong>Pregunta clave:</strong> ${f.pregunta}</p>
       </div>
     </details>`).join('');
