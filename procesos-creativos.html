@@ -67,7 +67,7 @@ td { padding:9px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
 <header class="topbar">
   <div class="brand"><h1>Procesos Creativos <span>Madre Monte</span></h1><p id="sub">Proyecto de prueba — Cine + Cata</p></div>
   <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-    <input id="clave" type="password" placeholder="🔒 clave de escritura" autocomplete="off" style="border:1px solid var(--line);background:#fff;padding:7px 12px;border-radius:999px;font-size:12px;min-width:160px;">
+    <input id="clave" type="password" placeholder="🔒 clave de escritura" autocomplete="off" oninput="sessionStorage.setItem('pc_clave', this.value)" style="border:1px solid var(--line);background:#fff;padding:7px 12px;border-radius:999px;font-size:12px;min-width:160px;">
     <span class="pill"><a href="scrum.html">← Scrum</a></span>
     <span class="pill"><a href="https://johnnyartesano26.github.io/dashboard-maestro/" target="_blank">Dashboard Maestro ↗</a></span>
   </div>
@@ -1182,6 +1182,7 @@ function renderFasesExplicacion() {
 }
 
 // ═══ INIT ═══
+document.getElementById('clave').value = sessionStorage.getItem('pc_clave') || '';
 renderFasesExplicacion();
 cargarCatalogo();
 cargarProyectos();
