@@ -103,20 +103,16 @@ td { padding:9px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
   <div class="grid2">
     <div class="card">
       <h2>🖼 Marcas participantes</h2>
-      <p style="font-size:12px;color:var(--dim);margin-bottom:14px;">Sube el logo de cada marca (opcional).</p>
-      <div class="row" style="margin-bottom:14px;">
-        <div style="flex:1;text-align:center;padding:14px;border:1px dashed var(--line);border-radius:10px;">
-          <div style="font-size:30px;">🍺</div>
-          <div style="font-size:12px;font-weight:600;margin-top:6px;">Madre Monte</div>
-          <div style="font-size:11px;color:var(--dim);">logo pendiente</div>
-        </div>
-        <div style="flex:1;text-align:center;padding:14px;border:1px dashed var(--line);border-radius:10px;">
-          <div style="font-size:30px;">🎬</div>
-          <div style="font-size:12px;font-weight:600;margin-top:6px;">Comfama</div>
-          <div style="font-size:11px;color:var(--dim);">logo pendiente</div>
-        </div>
+      <p style="font-size:12px;color:var(--dim);margin-bottom:14px;">Agrega cada marca participante (logo opcional).</p>
+      <div id="participantes-list" style="margin-bottom:14px;"><div style="font-size:12px;color:var(--dim);">Crea el proyecto en Fase 1 para agregar participantes.</div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <input id="part_nombre" placeholder="Nombre de la marca" style="flex:1;min-width:160px;border:1px solid var(--line);background:#fff;padding:9px 12px;border-radius:8px;font:inherit;">
+        <select id="part_rol" style="border:1px solid var(--line);background:#fff;padding:9px 12px;border-radius:8px;font:inherit;">
+          <option>Madre Monte</option><option>Aliado</option><option>Otro</option>
+        </select>
+        <button class="btn" onclick="agregarParticipante()">➕ Agregar</button>
       </div>
-      <button class="btn ghost">➕ Agregar marca</button>
+      <div id="part_status" style="font-size:12px;color:var(--dim);margin-top:8px;"></div>
     </div>
     <div class="card">
       <h2>🗓 Línea de tiempo (Gantt)</h2>
@@ -280,6 +276,7 @@ document.querySelectorAll('.tab').forEach(b => {
     document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
     b.classList.add('active');
     document.getElementById(b.dataset.p).classList.add('active');
+    if (b.dataset.p === 'f2') cargarParticipantes();
     if (b.dataset.p === 'f4') renderFase4();
   });
 });
@@ -502,6 +499,57 @@ async function crearProyecto() {
     st.textContent = '❌ Error: ' + e.message;
   } finally {
     btn.disabled = false;
+  }
+}
+
+// ═══ PARTICIPANTES (Fase 2) ═══
+function proyectoActualId() { return localStorage.getItem('pc_proyecto_id'); }
+
+async function cargarParticipantes() {
+  const list = document.getElementById('participantes-list');
+  const pid = proyectoActualId();
+  if (!pid) { list.innerHTML = '<div style="font-size:12px;color:var(--dim);">Crea el proyecto en Fase 1 para agregar participantes.</div>'; return; }
+  try {
+    const rows = await sbFetch('/rest/v1/participantes?proyecto_id=eq.' + pid + '&select=id,nombre,rol,logo_url&order=id');
+    renderParticipantes(rows || []);
+  } catch (e) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--red);">Error cargando participantes.</div>';
+  }
+}
+
+function renderParticipantes(rows) {
+  const list = document.getElementById('participantes-list');
+  if (!rows.length) { list.innerHTML = '<div style="font-size:12px;color:var(--dim);">Aún no hay marcas. Agrega la primera abajo.</div>'; return; }
+  list.innerHTML = rows.map(p => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;">
+      <div style="width:38px;height:38px;border-radius:8px;background:var(--gold);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0;overflow:hidden;">
+        ${p.logo_url ? '<img src="' + p.logo_url + '" style="width:100%;height:100%;object-fit:cover;">' : (p.nombre || '?').charAt(0).toUpperCase()}
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:600;">${p.nombre}</div>
+        <div style="font-size:11px;color:var(--dim);">${p.rol || '—'}</div>
+      </div>
+    </div>`).join('');
+}
+
+async function agregarParticipante() {
+  const st = document.getElementById('part_status');
+  const pid = proyectoActualId();
+  if (!pid) { st.textContent = '⚠️ Primero crea el proyecto en Fase 1.'; return; }
+  const nombre = document.getElementById('part_nombre').value.trim();
+  if (!nombre) { st.textContent = '⚠️ Escribe el nombre de la marca.'; return; }
+  if (!claveInput()) { st.textContent = '⚠️ Ingresa la clave de escritura (arriba).'; return; }
+  try {
+    const key = await sha256(claveInput());
+    await sbFetch('/rest/v1/participantes', {
+      method: 'POST', headers: { 'x-write-key': key },
+      body: JSON.stringify({ proyecto_id: pid, nombre, rol: document.getElementById('part_rol').value })
+    });
+    document.getElementById('part_nombre').value = '';
+    st.textContent = '';
+    cargarParticipantes();
+  } catch (e) {
+    st.textContent = '❌ Error: ' + e.message;
   }
 }
 
