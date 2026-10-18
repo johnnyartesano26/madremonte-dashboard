@@ -267,6 +267,19 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
   transform: perspective(650px) rotateX(4deg) rotateY(-5deg);
 }
 
+/* ── Tanque: sombra proyectada en el suelo (se mueve opuesta al tilt) ── */
+.tanque-wrap::after {
+  content: ''; position: absolute; bottom: 2px; left: 50%;
+  width: 64px; height: 10px; transform: translateX(-50%);
+  background: radial-gradient(ellipse, rgba(60,40,20,.22) 0%, rgba(60,40,20,0) 70%);
+  transition: transform .5s cubic-bezier(.25,.8,.25,1), opacity .5s ease;
+  pointer-events: none;
+}
+.ferm:hover .tanque-wrap::after {
+  transform: translateX(-40%) scaleX(.78);
+  opacity: .6;
+}
+
 /* ── Tanque crítico: escala de grises ── */
 .ferm.critico .tanque { filter: grayscale(.92) contrast(.92); opacity: .5; }
 .ferm.critico .pct-label { color: #8c7b6b !important; }
@@ -845,16 +858,17 @@ function tanqueSVG(f, idx) {
   const innerTop = 24, innerBot = 130, H = innerBot - innerTop;
   const fillY = innerBot - H * pct / 100;
   const clipId = "ci" + idx;
+  const capId = "cap-t" + idx;
   const interior = "M30," + innerTop + " L90," + innerTop + " L90,96 L60," + innerBot + " L30,96 Z";
   const bgLabel = (pct >= 44) ? fill : EMPTY_FERM;
   const txt = textoContraste(bgLabel);
-  return '<div class="tanque-wrap"><svg class="tanque" width="120" height="168" viewBox="0 0 120 168"><defs><clipPath id="' + clipId + '"><path d="' + interior + '"/></clipPath></defs><g clip-path="url(#' + clipId + ')"><rect x="28" y="20" width="64" height="118" fill="' + EMPTY_FERM + '"/><rect class="liquido" x="28" y="' + fillY + '" width="64" height="' + (innerBot - fillY) + '" fill="' + fill + '"/><ellipse class="liquido-superficie" cx="60" cy="' + fillY + '" rx="30" ry="3.5" fill="' + fill + '"/></g><path d="' + interior + '" fill="none" stroke="#8a9299" stroke-width="2"/><ellipse cx="60" cy="' + innerTop + '" rx="30" ry="7" fill="#f0ece6" stroke="#8a9299" stroke-width="2"/><circle cx="60" cy="' + (innerTop - 6) + '" r="3" fill="#8a9299"/><rect x="57" y="130" width="6" height="9" rx="1" fill="#8a9299"/><line x1="42" y1="96" x2="34" y2="152" stroke="#8a9299" stroke-width="3"/><line x1="78" y1="96" x2="86" y2="152" stroke="#8a9299" stroke-width="3"/></svg><span class="pct-label" style="color:' + txt + ';text-shadow:none;">' + pct + '%</span></div>';
+  return '<div class="tanque-wrap"><svg class="tanque" width="120" height="168" viewBox="0 0 120 168"><defs><radialGradient id="' + capId + '" cx="0.38" cy="0.3" r="0.9"><stop offset="0%" stop-color="#fdfdfa"/><stop offset="42%" stop-color="#e3e8ec"/><stop offset="100%" stop-color="#9aa4ad"/></radialGradient><clipPath id="' + clipId + '"><path d="' + interior + '"/></clipPath></defs><g clip-path="url(#' + clipId + ')"><rect x="28" y="20" width="64" height="118" fill="' + EMPTY_FERM + '"/><rect x="31" y="22" width="5" height="112" fill="#ffffff" opacity="0.45"/><rect class="liquido" x="28" y="' + fillY + '" width="64" height="' + (innerBot - fillY) + '" fill="' + fill + '"/><ellipse class="liquido-superficie" cx="60" cy="' + fillY + '" rx="30" ry="3.5" fill="' + fill + '"/></g><path d="' + interior + '" fill="none" stroke="#8a9299" stroke-width="2"/><ellipse cx="60" cy="' + innerTop + '" rx="30" ry="7" fill="url(#' + capId + ')" stroke="#8a9299" stroke-width="2"/><circle cx="60" cy="' + (innerTop - 6) + '" r="3" fill="#8a9299"/><rect x="57" y="130" width="6" height="9" rx="1" fill="#8a9299"/><line x1="42" y1="96" x2="34" y2="152" stroke="#8a9299" stroke-width="3"/><line x1="78" y1="96" x2="86" y2="152" stroke="#8a9299" stroke-width="3"/></svg><span class="pct-label" style="color:' + txt + ';text-shadow:none;">' + pct + '%</span></div>';
 }
 
 function barrilSVG(estilo) {
   const color = colorEstilo(estilo);
   const uid = estilo.replace(/\s/g, "");
-  return '<div class="barril-svg-wrap"><svg class="barril-svg" width="100" height="130" viewBox="0 0 100 130"><defs><linearGradient id="steel' + uid + '" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#8a97a3"/><stop offset="18%" stop-color="#e5ebf0"/><stop offset="45%" stop-color="#c2ccd4"/><stop offset="70%" stop-color="#eef2f5"/><stop offset="100%" stop-color="#7f8b96"/></linearGradient><linearGradient id="cap' + uid + '" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="' + color + '" stop-opacity="0.7"/><stop offset="50%" stop-color="' + color + '"/><stop offset="100%" stop-color="' + color + '" stop-opacity="0.7"/></linearGradient></defs><ellipse cx="50" cy="14" rx="26" ry="6" fill="url(#cap' + uid + ')" stroke="#5b6670" stroke-width="1.5"/><rect x="24" y="14" width="52" height="8" fill="url(#cap' + uid + ')"/><rect x="46" y="4" width="8" height="8" rx="2" fill="#5b6670"/><path d="M24,22 L24,26 Q16,30 16,40 L16,92 Q16,102 24,106 L24,110 L76,110 L76,106 Q84,102 84,92 L84,40 Q84,30 76,26 L76,22 Z" fill="url(#steel' + uid + ')" stroke="#5b6670" stroke-width="1.5"/><rect x="14" y="40" width="72" height="6" rx="3" fill="#aab4bd" opacity="0.7"/><rect x="14" y="86" width="72" height="6" rx="3" fill="#aab4bd" opacity="0.7"/><rect x="30" y="30" width="5" height="76" rx="2" fill="#ffffff" opacity="0.35"/><ellipse cx="50" cy="110" rx="26" ry="6" fill="#8a97a3" stroke="#5b6670" stroke-width="1.5"/></svg></div>';
+  return '<div class="barril-svg-wrap"><svg class="barril-svg" width="100" height="130" viewBox="0 0 100 130"><defs><linearGradient id="steel' + uid + '" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#8a97a3"/><stop offset="18%" stop-color="#e5ebf0"/><stop offset="45%" stop-color="#c2ccd4"/><stop offset="70%" stop-color="#eef2f5"/><stop offset="100%" stop-color="#7f8b96"/></linearGradient><radialGradient id="cap' + uid + '" cx="0.38" cy="0.3" r="0.95"><stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/><stop offset="38%" stop-color="' + color + '"/><stop offset="100%" stop-color="' + color + '" stop-opacity="0.72"/></radialGradient></defs><ellipse cx="50" cy="14" rx="26" ry="6" fill="url(#cap' + uid + ')" stroke="#5b6670" stroke-width="1.5"/><rect x="24" y="14" width="52" height="8" fill="url(#cap' + uid + ')"/><rect x="46" y="4" width="8" height="8" rx="2" fill="#5b6670"/><path d="M24,22 L24,26 Q16,30 16,40 L16,92 Q16,102 24,106 L24,110 L76,110 L76,106 Q84,102 84,92 L84,40 Q84,30 76,26 L76,22 Z" fill="url(#steel' + uid + ')" stroke="#5b6670" stroke-width="1.5"/><rect x="14" y="40" width="72" height="6" rx="3" fill="#aab4bd" opacity="0.7"/><rect x="14" y="86" width="72" height="6" rx="3" fill="#aab4bd" opacity="0.7"/><rect x="30" y="30" width="5" height="76" rx="2" fill="#ffffff" opacity="0.35"/><ellipse cx="50" cy="110" rx="26" ry="6" fill="#8a97a3" stroke="#5b6670" stroke-width="1.5"/></svg></div>';
 }
 
 function botellaSVG(estilo) {
