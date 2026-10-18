@@ -283,6 +283,38 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
 /* ── Tanque crítico: escala de grises ── */
 .ferm.critico .tanque { filter: grayscale(.92) contrast(.92); opacity: .5; }
 .ferm.critico .pct-label { color: #8c7b6b !important; }
+.ferm.critico .tanque-foto { filter: grayscale(.92) contrast(.92); opacity: .5; }
+
+/* ── Tanque fotorrealista: imagen + medidor de nivel (varilla de vidrio) ── */
+.tanque-foto-wrap {
+  position: relative; display: inline-block; width: 120px;
+  transition: transform .5s cubic-bezier(.25,.8,.25,1);
+  transform-style: preserve-3d;
+}
+.ferm:hover .tanque-foto-wrap { transform: perspective(700px) rotateY(6deg) scale(1.03); }
+.tanque-foto {
+  width: 100%; height: auto; display: block;
+  filter: drop-shadow(0 6px 12px rgba(60,40,20,.15));
+}
+.medidor-nivel {
+  position: absolute; left: 40%; top: 14%; width: 8%; height: 58%;
+  background: rgba(255,255,255,.30);
+  border: 1.5px solid #7a828b; border-radius: 6px;
+  overflow: hidden; pointer-events: none;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,.28), inset -2px 0 4px rgba(255,255,255,.45);
+}
+.medidor-fill {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: var(--nivel, 0%);
+  background: var(--color-nivel, #F0C419);
+  opacity: .8; transform-origin: bottom center;
+  animation: onda-medidor 3.2s ease-in-out infinite;
+  transition: height .9s cubic-bezier(.4,0,.2,1);
+}
+@keyframes onda-medidor {
+  0%, 100% { transform: scaleX(1); opacity: .78; }
+  50%      { transform: scaleX(1.08); opacity: .95; }
+}
 
 /* ── Icono de alerta 3D: triángulo con volumen + pulso + tilt ── */
 @keyframes pulso-alerta-3d {
@@ -865,6 +897,16 @@ function tanqueSVG(f, idx) {
   return '<div class="tanque-wrap"><svg class="tanque" width="120" height="168" viewBox="0 0 120 168"><defs><radialGradient id="' + capId + '" cx="0.38" cy="0.3" r="0.9"><stop offset="0%" stop-color="#fdfdfa"/><stop offset="42%" stop-color="#e3e8ec"/><stop offset="100%" stop-color="#9aa4ad"/></radialGradient><clipPath id="' + clipId + '"><path d="' + interior + '"/></clipPath></defs><g clip-path="url(#' + clipId + ')"><rect x="28" y="20" width="64" height="118" fill="' + EMPTY_FERM + '"/><rect x="31" y="22" width="5" height="112" fill="#ffffff" opacity="0.45"/><rect class="liquido" x="28" y="' + fillY + '" width="64" height="' + (innerBot - fillY) + '" fill="' + fill + '"/><ellipse class="liquido-superficie" cx="60" cy="' + fillY + '" rx="30" ry="3.5" fill="' + fill + '"/></g><path d="' + interior + '" fill="none" stroke="#8a9299" stroke-width="2"/><ellipse cx="60" cy="' + innerTop + '" rx="30" ry="7" fill="url(#' + capId + ')" stroke="#8a9299" stroke-width="2"/><circle cx="60" cy="' + (innerTop - 6) + '" r="3" fill="#8a9299"/><rect x="57" y="130" width="6" height="9" rx="1" fill="#8a9299"/><line x1="42" y1="96" x2="34" y2="152" stroke="#8a9299" stroke-width="3"/><line x1="78" y1="96" x2="86" y2="152" stroke="#8a9299" stroke-width="3"/></svg><span class="pct-label" style="color:' + txt + ';text-shadow:none;">' + pct + '%</span></div>';
 }
 
+// ═══ Tanque fotorrealista (imagen + medidor de nivel superpuesto) ═══
+function tanqueFoto(f) {
+  const pct = Math.max(0, Math.min(100, f.porcentaje || 0));
+  const color = FILL_FERM[f.estilo] || "#F0C419";
+  const medidor = pct > 0
+    ? '<div class="medidor-nivel"><div class="medidor-fill" style="--nivel:' + pct + '%;--color-nivel:' + color + '"></div></div>'
+    : '';
+  return '<div class="tanque-foto-wrap"><img class="tanque-foto" src="tanque-3d.jpg" alt="Tanque ' + (f.estilo || '') + '" loading="lazy" />' + medidor + '</div>';
+}
+
 function barrilSVG(estilo) {
   const color = colorEstilo(estilo);
   const uid = estilo.replace(/\s/g, "");
@@ -1106,7 +1148,7 @@ function renderProduccion(data) {
     const aviso = critico
       ? '<span class="aviso-ferm">' + iconoAlerta3D() + '</span>'
       : '';
-    return '<div class="ferm ' + borderCls + (critico ? ' critico' : '') + '">' + aviso + '<div class="nombre">' + f.nombre + '</div><div class="estilo">' + (f.estilo || '—') + '</div>' + tanqueSVG(f, i) + '<div class="litros"><b>' + f.litros + '</b> L <span class="cap">/ ' + f.capacidad + ' L</span></div><span class="badge ' + badge + '">' + badgeTxt + '</span></div>';
+    return '<div class="ferm ' + borderCls + (critico ? ' critico' : '') + '">' + aviso + '<div class="nombre">' + f.nombre + '</div><div class="estilo">' + (f.estilo || '—') + '</div>' + tanqueFoto(f) + '<div class="litros"><b>' + f.litros + '</b> L <span class="cap">/ ' + f.capacidad + ' L</span></div><span class="badge ' + badge + '">' + badgeTxt + '</span></div>';
   }).join("");
   document.getElementById("resumen-ferm").textContent = data.fermentadores.length + ' tanques · ' + totLit + ' / ' + totCap + ' L (' + (totCap ? Math.round(totLit / totCap * 100) : 0) + '% ocupación)';
 

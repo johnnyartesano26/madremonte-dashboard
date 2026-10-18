@@ -35,6 +35,71 @@ anterior al lunes → muestra el banner.
 
 ---
 
+## Dashboard de Planta — Tanques SVG (respaldo / versión anterior)
+
+> Guardado como respaldo antes de migrar al enfoque fotorrealista (imagen `tanque-3d.jpg`
+> + medidor de nivel). Si se quiere volver al SVG, copiar este código.
+
+### `tanqueSVG(f, idx)` — función generadora del tanque (SVG)
+
+```js
+function tanqueSVG(f, idx) {
+  const fill = FILL_FERM[f.estilo] || "#F0C419";
+  const pct = Math.max(0, Math.min(100, f.porcentaje || 0));
+  const innerTop = 24, innerBot = 130, H = innerBot - innerTop;
+  const fillY = innerBot - H * pct / 100;
+  const clipId = "ci" + idx;
+  const capId = "cap-t" + idx;
+  const interior = "M30," + innerTop + " L90," + innerTop + " L90,96 L60," + innerBot + " L30,96 Z";
+  const bgLabel = (pct >= 44) ? fill : EMPTY_FERM;
+  const txt = textoContraste(bgLabel);
+  return '<div class="tanque-wrap"><svg class="tanque" width="120" height="168" viewBox="0 0 120 168">'
+    + '<defs>'
+    + '<radialGradient id="' + capId + '" cx="0.38" cy="0.3" r="0.9"><stop offset="0%" stop-color="#fdfdfa"/><stop offset="42%" stop-color="#e3e8ec"/><stop offset="100%" stop-color="#9aa4ad"/></radialGradient>'
+    + '<clipPath id="' + clipId + '"><path d="' + interior + '"/></clipPath>'
+    + '</defs>'
+    + '<g clip-path="url(#' + clipId + ')">'
+    + '<rect x="28" y="20" width="64" height="118" fill="' + EMPTY_FERM + '"/>'
+    + '<rect x="31" y="22" width="5" height="112" fill="#ffffff" opacity="0.45"/>'   // brillo izquierdo
+    + '<rect class="liquido" x="28" y="' + fillY + '" width="64" height="' + (innerBot - fillY) + '" fill="' + fill + '"/>'
+    + '<ellipse class="liquido-superficie" cx="60" cy="' + fillY + '" rx="30" ry="3.5" fill="' + fill + '"/>'
+    + '</g>'
+    + '<path d="' + interior + '" fill="none" stroke="#8a9299" stroke-width="2"/>'
+    + '<ellipse cx="60" cy="' + innerTop + '" rx="30" ry="7" fill="url(#' + capId + ')" stroke="#8a9299" stroke-width="2"/>'
+    + '<circle cx="60" cy="' + (innerTop - 6) + '" r="3" fill="#8a9299"/>'
+    + '<rect x="57" y="130" width="6" height="9" rx="1" fill="#8a9299"/>'
+    + '<line x1="42" y1="96" x2="34" y2="152" stroke="#8a9299" stroke-width="3"/>'
+    + '<line x1="78" y1="96" x2="86" y2="152" stroke="#8a9299" stroke-width="3"/>'
+    + '</svg><span class="pct-label" style="color:' + txt + ';text-shadow:none;">' + pct + '%</span></div>';
+}
+```
+
+### CSS asociado al SVG (onda, tilt, sombra, crítico)
+
+```css
+/* Onda del líquido (respiración) */
+@keyframes onda-liquido {
+  0%   { transform: scaleX(1)     translateX(0);     opacity: .82; }
+  50%  { transform: scaleX(1.06)  translateX(1.6px); opacity: 1; }
+  100% { transform: scaleX(1)     translateX(0);     opacity: .82; }
+}
+.tanque .liquido-superficie { transform-origin: center; animation: onda-liquido 3.2s ease-in-out infinite; }
+
+/* Tilt 3D al hover */
+.tanque-wrap { position: relative; display: inline-block; transition: transform .5s cubic-bezier(.25,.8,.25,1); transform-style: preserve-3d; }
+.ferm:hover .tanque-wrap { transform: perspective(650px) rotateX(4deg) rotateY(-5deg); }
+
+/* Sombra proyectada en el suelo (se mueve opuesta al tilt) */
+.tanque-wrap::after { content:''; position:absolute; bottom:2px; left:50%; width:64px; height:10px; transform:translateX(-50%); background:radial-gradient(ellipse, rgba(60,40,20,.22) 0%, rgba(60,40,20,0) 70%); transition: transform .5s cubic-bezier(.25,.8,.25,1), opacity .5s ease; pointer-events:none; }
+.ferm:hover .tanque-wrap::after { transform: translateX(-40%) scaleX(.78); opacity:.6; }
+
+/* Tanque crítico en grises */
+.ferm.critico .tanque { filter: grayscale(.92) contrast(.92); opacity: .5; }
+.ferm.critico .pct-label { color: #8c7b6b !important; }
+```
+
+---
+
 ## Funcionalidades
 
 - **Encabezado dinámico**: cuartil actual (Q1–Q4), semana del cuartil, semana del año, fecha y días restantes del trimestre.
