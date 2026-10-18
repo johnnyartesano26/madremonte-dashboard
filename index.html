@@ -236,6 +236,115 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
 .botella .alarma-txt { font-size: 10px; margin-top: 6px; font-weight: 600; }
 .rojo-txt { color: var(--red); } .ambar-txt { color: var(--gold); } .verde-txt { color: #5a8a5a; }
 
+/* ═══════════════════════════════════════════════════════════════
+   ANIMACIONES PREMIUM — fermentación y almacenamiento
+   Fuente de luz única: esquina superior-izquierda.
+   Solo transform/opacity (60fps), sin reflow.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Iluminación coherente (luz desde arriba-izquierda) */
+.ferm, .barril, .botella {
+  background-image: linear-gradient(135deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 42%);
+}
+
+/* ── Tanque: onda del líquido (fermentación activa) ── */
+@keyframes onda-liquido {
+  0%   { transform: scaleX(1)     translateX(0); }
+  50%  { transform: scaleX(1.07)  translateX(1.6px); }
+  100% { transform: scaleX(1)     translateX(0); }
+}
+.tanque .liquido-superficie {
+  transform-origin: center;
+  animation: onda-liquido 3.2s ease-in-out infinite;
+}
+
+/* ── Tanque: tilt 3D al hover (máx ~5-8°) ── */
+.tanque-wrap {
+  transition: transform .5s cubic-bezier(.25,.8,.25,1);
+  transform-style: preserve-3d;
+}
+.ferm:hover .tanque-wrap {
+  transform: perspective(650px) rotateX(4deg) rotateY(-5deg);
+}
+
+/* ── Tanque crítico: escala de grises ── */
+.ferm.critico .tanque { filter: grayscale(.92) contrast(.92); opacity: .5; }
+.ferm.critico .pct-label { color: #8c7b6b !important; }
+
+/* ── Icono de advertencia con pulso suave ── */
+@keyframes pulso-alerta {
+  0%, 100% { transform: scale(1);    opacity: .82; }
+  50%      { transform: scale(1.16); opacity: 1; }
+}
+.icono-alerta {
+  animation: pulso-alerta 1.9s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(201,104,94,.5));
+}
+
+/* ── Badges píldora con relieve 3D ── */
+.badge {
+  box-shadow: inset 0 1px 2px rgba(255,255,255,.55),
+              inset 0 -2px 4px rgba(0,0,0,.06),
+              0 2px 5px rgba(60,40,20,.06);
+}
+
+/* ── Barril: rotación lenta (estado vacío, "listo para llenar") ── */
+@keyframes giro-barril {
+  0%   { transform: rotateY(0deg); }
+  100% { transform: rotateY(360deg); }
+}
+.barril-svg-wrap { position: relative; overflow: hidden; border-radius: 6px; perspective: 500px; }
+.barril.vacio .barril-svg {
+  animation: giro-barril 12s linear infinite;
+  transform-style: preserve-3d;
+}
+
+/* ── Barril: reflejo de acero que recorre la superficie ── */
+@keyframes reflejo-acero {
+  0%   { transform: translateY(-130%); }
+  100% { transform: translateY(130%); }
+}
+.barril-svg-wrap::after {
+  content: ''; position: absolute; top: 0; left: 12%; right: 12%; height: 32%;
+  background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.5) 50%, rgba(255,255,255,0) 100%);
+  animation: reflejo-acero 4.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ── Botella: reflejo glassmorphism dinámico al hover ── */
+.botella-foto { position: relative; overflow: hidden; }
+.botella-foto::after {
+  content: ''; position: absolute; top: -25%; left: -45%; width: 34%; height: 150%;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.55) 50%, rgba(255,255,255,0) 100%);
+  transform: skewX(-18deg);
+  opacity: 0; transition: left .6s ease, opacity .3s ease; pointer-events: none;
+}
+.botella:hover .botella-foto::after { left: 115%; opacity: 1; }
+
+/* ── Botella: sale hacia el usuario al hover ── */
+.botella-foto svg { transition: transform .4s cubic-bezier(.25,.8,.25,1.2); }
+.botella:hover .botella-foto svg {
+  transform: scale(1.06) rotate(-4deg) translateY(-4px);
+}
+
+/* ── Icono de advertencia con levitación suave ── */
+@keyframes levitar {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+.aviso-levitar { animation: levitar 2.6s ease-in-out infinite; }
+
+/* ── Accesibilidad: respetar prefers-reduced-motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .tanque .liquido-superficie,
+  .icono-alerta,
+  .barril.vacio .barril-svg,
+  .barril-svg-wrap::after,
+  .aviso-levitar { animation: none !important; }
+  .ferm, .barril, .botella, .tanque-wrap, .botella-foto svg,
+  .botella-foto::after { transition: none !important; }
+}
+
 /* ── Barra de capacidad ── */
 .capacidad-section {
   background: var(--bg-card); border: 1px solid var(--line);
@@ -713,13 +822,13 @@ function tanqueSVG(f, idx) {
   const interior = "M30," + innerTop + " L90," + innerTop + " L90,96 L60," + innerBot + " L30,96 Z";
   const bgLabel = (pct >= 44) ? fill : EMPTY_FERM;
   const txt = textoContraste(bgLabel);
-  return '<div class="tanque-wrap"><svg class="tanque" width="120" height="168" viewBox="0 0 120 168"><defs><clipPath id="' + clipId + '"><path d="' + interior + '"/></clipPath></defs><g clip-path="url(#' + clipId + ')"><rect x="28" y="20" width="64" height="118" fill="' + EMPTY_FERM + '"/><rect class="liquido" x="28" y="' + fillY + '" width="64" height="' + (innerBot - fillY) + '" fill="' + fill + '"/><ellipse cx="60" cy="' + fillY + '" rx="30" ry="3.5" fill="' + fill + '"/></g><path d="' + interior + '" fill="none" stroke="#8a9299" stroke-width="2"/><ellipse cx="60" cy="' + innerTop + '" rx="30" ry="7" fill="#f0ece6" stroke="#8a9299" stroke-width="2"/><circle cx="60" cy="' + (innerTop - 6) + '" r="3" fill="#8a9299"/><rect x="57" y="130" width="6" height="9" rx="1" fill="#8a9299"/><line x1="42" y1="96" x2="34" y2="152" stroke="#8a9299" stroke-width="3"/><line x1="78" y1="96" x2="86" y2="152" stroke="#8a9299" stroke-width="3"/></svg><span class="pct-label" style="color:' + txt + ';text-shadow:none;">' + pct + '%</span></div>';
+  return '<div class="tanque-wrap"><svg class="tanque" width="120" height="168" viewBox="0 0 120 168"><defs><clipPath id="' + clipId + '"><path d="' + interior + '"/></clipPath></defs><g clip-path="url(#' + clipId + ')"><rect x="28" y="20" width="64" height="118" fill="' + EMPTY_FERM + '"/><rect class="liquido" x="28" y="' + fillY + '" width="64" height="' + (innerBot - fillY) + '" fill="' + fill + '"/><ellipse class="liquido-superficie" cx="60" cy="' + fillY + '" rx="30" ry="3.5" fill="' + fill + '"/></g><path d="' + interior + '" fill="none" stroke="#8a9299" stroke-width="2"/><ellipse cx="60" cy="' + innerTop + '" rx="30" ry="7" fill="#f0ece6" stroke="#8a9299" stroke-width="2"/><circle cx="60" cy="' + (innerTop - 6) + '" r="3" fill="#8a9299"/><rect x="57" y="130" width="6" height="9" rx="1" fill="#8a9299"/><line x1="42" y1="96" x2="34" y2="152" stroke="#8a9299" stroke-width="3"/><line x1="78" y1="96" x2="86" y2="152" stroke="#8a9299" stroke-width="3"/></svg><span class="pct-label" style="color:' + txt + ';text-shadow:none;">' + pct + '%</span></div>';
 }
 
 function barrilSVG(estilo) {
   const color = colorEstilo(estilo);
   const uid = estilo.replace(/\s/g, "");
-  return '<svg width="100" height="130" viewBox="0 0 100 130"><defs><linearGradient id="steel' + uid + '" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#8a97a3"/><stop offset="18%" stop-color="#e5ebf0"/><stop offset="45%" stop-color="#c2ccd4"/><stop offset="70%" stop-color="#eef2f5"/><stop offset="100%" stop-color="#7f8b96"/></linearGradient><linearGradient id="cap' + uid + '" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="' + color + '" stop-opacity="0.7"/><stop offset="50%" stop-color="' + color + '"/><stop offset="100%" stop-color="' + color + '" stop-opacity="0.7"/></linearGradient></defs><ellipse cx="50" cy="14" rx="26" ry="6" fill="url(#cap' + uid + ')" stroke="#5b6670" stroke-width="1.5"/><rect x="24" y="14" width="52" height="8" fill="url(#cap' + uid + ')"/><rect x="46" y="4" width="8" height="8" rx="2" fill="#5b6670"/><path d="M24,22 L24,26 Q16,30 16,40 L16,92 Q16,102 24,106 L24,110 L76,110 L76,106 Q84,102 84,92 L84,40 Q84,30 76,26 L76,22 Z" fill="url(#steel' + uid + ')" stroke="#5b6670" stroke-width="1.5"/><rect x="14" y="40" width="72" height="6" rx="3" fill="#aab4bd" opacity="0.7"/><rect x="14" y="86" width="72" height="6" rx="3" fill="#aab4bd" opacity="0.7"/><rect x="30" y="30" width="5" height="76" rx="2" fill="#ffffff" opacity="0.35"/><ellipse cx="50" cy="110" rx="26" ry="6" fill="#8a97a3" stroke="#5b6670" stroke-width="1.5"/></svg>';
+  return '<div class="barril-svg-wrap"><svg class="barril-svg" width="100" height="130" viewBox="0 0 100 130"><defs><linearGradient id="steel' + uid + '" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#8a97a3"/><stop offset="18%" stop-color="#e5ebf0"/><stop offset="45%" stop-color="#c2ccd4"/><stop offset="70%" stop-color="#eef2f5"/><stop offset="100%" stop-color="#7f8b96"/></linearGradient><linearGradient id="cap' + uid + '" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="' + color + '" stop-opacity="0.7"/><stop offset="50%" stop-color="' + color + '"/><stop offset="100%" stop-color="' + color + '" stop-opacity="0.7"/></linearGradient></defs><ellipse cx="50" cy="14" rx="26" ry="6" fill="url(#cap' + uid + ')" stroke="#5b6670" stroke-width="1.5"/><rect x="24" y="14" width="52" height="8" fill="url(#cap' + uid + ')"/><rect x="46" y="4" width="8" height="8" rx="2" fill="#5b6670"/><path d="M24,22 L24,26 Q16,30 16,40 L16,92 Q16,102 24,106 L24,110 L76,110 L76,106 Q84,102 84,92 L84,40 Q84,30 76,26 L76,22 Z" fill="url(#steel' + uid + ')" stroke="#5b6670" stroke-width="1.5"/><rect x="14" y="40" width="72" height="6" rx="3" fill="#aab4bd" opacity="0.7"/><rect x="14" y="86" width="72" height="6" rx="3" fill="#aab4bd" opacity="0.7"/><rect x="30" y="30" width="5" height="76" rx="2" fill="#ffffff" opacity="0.35"/><ellipse cx="50" cy="110" rx="26" ry="6" fill="#8a97a3" stroke="#5b6670" stroke-width="1.5"/></svg></div>';
 }
 
 function botellaSVG(estilo) {
@@ -942,9 +1051,13 @@ function renderProduccion(data) {
   document.getElementById("fermentadores").innerHTML = data.fermentadores.map((f, i) => {
     totLit += f.litros || 0; totCap += f.capacidad || 0;
     const badge = f.alarma === 'amarilla' ? 'amarilla' : (f.alarma === 'roja' ? 'roja' : 'verde');
-    const badgeTxt = badge === 'verde' ? 'OK' : (badge === 'amarilla' ? 'Nivel bajo' : 'Critico');
+    const badgeTxt = badge === 'verde' ? 'OK' : (badge === 'amarilla' ? 'Nivel bajo' : 'Crítico');
+    const critico = f.alarma === 'roja';
     const borderCls = 'border-' + (f.alarma === 'roja' ? 'red' : (f.alarma === 'amarilla' ? 'amber' : 'green'));
-    return '<div class="ferm ' + borderCls + '"><div class="nombre">' + f.nombre + '</div><div class="estilo">' + (f.estilo || '—') + '</div>' + tanqueSVG(f, i) + '<div class="litros"><b>' + f.litros + '</b> L <span class="cap">/ ' + f.capacidad + ' L</span></div><span class="badge ' + badge + '">' + badgeTxt + '</span></div>';
+    const aviso = critico
+      ? '<svg class="icono-alerta" style="position:absolute; top:12px; right:12px; width:20px; height:20px;" viewBox="0 0 24 24"><path d="M12 3 L23 21 L1 21 Z" fill="#c9685e" stroke="#8c4038" stroke-width="1"/><rect x="11" y="9" width="2" height="6" rx="1" fill="#fff"/><circle cx="12" cy="17.5" r="1.2" fill="#fff"/></svg>'
+      : '';
+    return '<div class="ferm ' + borderCls + (critico ? ' critico' : '') + '">' + aviso + '<div class="nombre">' + f.nombre + '</div><div class="estilo">' + (f.estilo || '—') + '</div>' + tanqueSVG(f, i) + '<div class="litros"><b>' + f.litros + '</b> L <span class="cap">/ ' + f.capacidad + ' L</span></div><span class="badge ' + badge + '">' + badgeTxt + '</span></div>';
   }).join("");
   document.getElementById("resumen-ferm").textContent = data.fermentadores.length + ' tanques · ' + totLit + ' / ' + totCap + ' L (' + (totCap ? Math.round(totLit / totCap * 100) : 0) + '% ocupación)';
 
@@ -958,11 +1071,16 @@ function renderProduccion(data) {
   let totBot = 0;
   document.getElementById("botellas").innerHTML = data.botellas.map(b => {
     totBot += b.cantidad || 0;
-    let cls = 'verde-txt', txt = 'Stock OK';
-    if (b.cantidad <= 48) { cls = 'rojo-txt'; txt = 'Crítico (≤48)'; }
-    else if (b.cantidad <= 120) { cls = 'ambar-txt'; txt = 'Stock bajo'; }
+    let cls = 'verde-txt', txt = 'Stock OK', aviso = '';
+    if (b.cantidad <= 48) {
+      cls = 'rojo-txt'; txt = 'Crítico (≤48)';
+      aviso = '<svg class="aviso-levitar" style="position:absolute; top:6px; right:6px; width:22px; height:22px;" viewBox="0 0 24 24"><path d="M12 3 L23 21 L1 21 Z" fill="#c9685e" stroke="#8c4038" stroke-width="1"/><rect x="11" y="9" width="2" height="6" rx="1" fill="#fff"/><circle cx="12" cy="17.5" r="1.2" fill="#fff"/></svg>';
+    } else if (b.cantidad <= 120) {
+      cls = 'ambar-txt'; txt = 'Stock bajo';
+      aviso = '<svg class="aviso-levitar" style="position:absolute; top:8px; right:8px; width:20px; height:20px; opacity:.85;" viewBox="0 0 24 24"><path d="M12 3 L21 7 L12 11 L3 7 Z" fill="none" stroke="#c88a3d" stroke-width="1.6"/><path d="M3 7 L3 17 L12 21 L21 17 L21 7" fill="none" stroke="#c88a3d" stroke-width="1.6"/><path d="M12 11 L12 21" stroke="#c88a3d" stroke-width="1.6"/></svg>';
+    }
     const cajas = (b.cantidad / 24).toFixed(1);
-    return '<div class="botella"><div class="botella-foto">' + botellaSVG(b.estilo) + '</div><div class="estilo">' + b.estilo + '</div><div class="cant">' + b.cantidad + '<span>botellas · ' + cajas + ' cajas</span></div><div class="alarma-txt ' + cls + '">' + txt + '</div></div>';
+    return '<div class="botella"><div class="botella-foto">' + aviso + botellaSVG(b.estilo) + '</div><div class="estilo">' + b.estilo + '</div><div class="cant">' + b.cantidad + '<span>botellas · ' + cajas + ' cajas</span></div><div class="alarma-txt ' + cls + '">' + txt + '</div></div>';
   }).join("");
   document.getElementById("resumen-botella").textContent = totBot + ' botellas · ' + (totBot/24).toFixed(1) + ' cajas (24 u)';
 
