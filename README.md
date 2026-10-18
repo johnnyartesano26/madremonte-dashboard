@@ -100,6 +100,35 @@ function tanqueSVG(f, idx) {
 
 ---
 
+## Dashboard de Planta — Barriles SVG (respaldo / versión anterior)
+
+> Respaldo del SVG de barriles antes de migrar a la imagen fotorrealista (`barril-1.webp`).
+
+### `barrilSVG(estilo)` — función generadora del barril (SVG)
+
+```js
+function barrilSVG(estilo) {
+  const color = colorEstilo(estilo);
+  const uid = estilo.replace(/\s/g, "");
+  return '<div class="barril-svg-wrap"><svg class="barril-svg" width="100" height="130" viewBox="0 0 100 130">'
+    + '<defs>'
+    + '<linearGradient id="steel' + uid + '" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#8a97a3"/><stop offset="18%" stop-color="#e5ebf0"/><stop offset="45%" stop-color="#c2ccd4"/><stop offset="70%" stop-color="#eef2f5"/><stop offset="100%" stop-color="#7f8b96"/></linearGradient>'
+    + '<radialGradient id="cap' + uid + '" cx="0.38" cy="0.3" r="0.95"><stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/><stop offset="38%" stop-color="' + color + '"/><stop offset="100%" stop-color="' + color + '" stop-opacity="0.72"/></radialGradient>'
+    + '</defs>'
+    + '<ellipse cx="50" cy="14" rx="26" ry="6" fill="url(#cap' + uid + ')" stroke="#5b6670" stroke-width="1.5"/>'
+    + '<rect x="24" y="14" width="52" height="8" fill="url(#cap' + uid + ')"/>'
+    + '<rect x="46" y="4" width="8" height="8" rx="2" fill="#5b6670"/>'
+    + '<path d="M24,22 L24,26 Q16,30 16,40 L16,92 Q16,102 24,106 L24,110 L76,110 L76,106 Q84,102 84,92 L84,40 Q84,30 76,26 L76,22 Z" fill="url(#steel' + uid + ')" stroke="#5b6670" stroke-width="1.5"/>'
+    + '<rect x="14" y="40" width="72" height="6" rx="3" fill="#aab4bd" opacity="0.7"/>'
+    + '<rect x="14" y="86" width="72" height="6" rx="3" fill="#aab4bd" opacity="0.7"/>'
+    + '<rect x="30" y="30" width="5" height="76" rx="2" fill="#ffffff" opacity="0.35"/>'
+    + '<ellipse cx="50" cy="110" rx="26" ry="6" fill="#8a97a3" stroke="#5b6670" stroke-width="1.5"/>'
+    + '</svg></div>';
+}
+```
+
+---
+
 ## Funcionalidades
 
 - **Encabezado dinámico**: cuartil actual (Q1–Q4), semana del cuartil, semana del año, fecha y días restantes del trimestre.

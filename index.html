@@ -362,6 +362,20 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
   transform-style: preserve-3d;
 }
 
+/* ── Barril fotorrealista (imagen individual) ── */
+.barril-foto {
+  display: block; margin: 0 auto;
+  height: 130px; width: auto;
+  filter: drop-shadow(0 6px 12px rgba(60,40,20,.16));
+}
+.barril.vacio .barril-foto {
+  animation: flotar-barril 3s ease-in-out infinite;
+}
+@keyframes flotar-barril {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+
 /* ── Barril: reflejo de acero que recorre la superficie ── */
 @keyframes reflejo-acero {
   0%   { transform: translateY(-130%); }
@@ -411,6 +425,7 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
   .icono-caja-3d,
   .badge.roja::after,
   .barril.vacio .barril-svg,
+  .barril.vacio .barril-foto,
   .barril-svg-wrap::after { animation: none !important; }
   .ferm, .barril, .botella, .tanque-wrap, .botella-foto svg,
   .botella-foto::after { transition: none !important; }
@@ -907,6 +922,11 @@ function tanqueFoto(f) {
   return '<div class="tanque-foto-wrap"><img class="tanque-foto" src="tanque-3d.jpg" alt="Tanque ' + (f.estilo || '') + '" loading="lazy" />' + medidor + '</div>';
 }
 
+// ═══ Barril fotorrealista (imagen individual, color de tapa no aplica) ═══
+function barrilFoto(estilo) {
+  return '<img class="barril-foto" src="barril-1.webp" alt="Barril ' + estilo + '" loading="lazy" />';
+}
+
 function barrilSVG(estilo) {
   const color = colorEstilo(estilo);
   const uid = estilo.replace(/\s/g, "");
@@ -1155,7 +1175,7 @@ function renderProduccion(data) {
   let totBarril = 0;
   document.getElementById("barriles").innerHTML = data.barriles.map(b => {
     totBarril += b.litros || 0;
-    return '<div class="barril ' + ((b.litros || 0) <= 0 ? 'vacio' : '') + '">' + barrilSVG(b.estilo) + '<div class="estilo">' + b.estilo + '</div><div class="litros">' + b.litros + '<span> L</span></div></div>';
+    return '<div class="barril ' + ((b.litros || 0) <= 0 ? 'vacio' : '') + '">' + barrilFoto(b.estilo) + '<div class="estilo">' + b.estilo + '</div><div class="litros">' + b.litros + '<span> L</span></div></div>';
   }).join("");
   document.getElementById("resumen-barril").textContent = totBarril.toFixed(1) + ' L en barril · ' + (totBarril/30).toFixed(1) + ' barriles de 30 L';
 
