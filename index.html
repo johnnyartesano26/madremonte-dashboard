@@ -978,7 +978,7 @@ const BOTELLA_IMG = {
 function botellaFoto(estilo) {
   const img = BOTELLA_IMG[estilo];
   if (img) {
-    return '<img class="botella-foto-img" src="' + img + '" alt="Botella ' + estilo + '" loading="lazy" />';
+    return '<img class="botella-foto-img" src="' + img + '?v=3" alt="Botella ' + estilo + '" loading="lazy" />';
   }
   return botellaSVG(estilo);  // fallback al SVG para estilos sin foto
 }
