@@ -249,9 +249,9 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
 
 /* ── Tanque: onda del líquido (fermentación activa) ── */
 @keyframes onda-liquido {
-  0%   { transform: scaleX(1)     translateX(0); }
-  50%  { transform: scaleX(1.07)  translateX(1.6px); }
-  100% { transform: scaleX(1)     translateX(0); }
+  0%   { transform: scaleX(1)     translateX(0);     opacity: .82; }
+  50%  { transform: scaleX(1.06)  translateX(1.6px); opacity: 1; }
+  100% { transform: scaleX(1)     translateX(0);     opacity: .82; }
 }
 .tanque .liquido-superficie {
   transform-origin: center;
