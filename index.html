@@ -389,6 +389,12 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
     <button class="tab-btn" data-tab="actualizar">🔧 Actualizar</button>
   </nav>
 
+  <!-- ═══ ALERTA DE INVENTARIO SIN ACTUALIZAR (semanal, persiste hasta actualizar) ═══ -->
+  <div id="alerta-inventario" style="display:none; background:#8c2f2f; color:#fff; padding:12px 20px; text-align:center; font-weight:600; font-size:.92em;">
+    ⚠️ El inventario <b>no se ha actualizado esta semana</b>.
+    <a href="https://forms.gle/MP67JwVGqvfVH3GL7" target="_blank" rel="noopener" style="color:#ffd97a;font-weight:700;text-decoration:underline;">Actualizar ahora →</a>
+  </div>
+
   <main>
     <!-- ═══ PRODUCCIÓN (Pipeline Físico) ═══ -->
     <div id="tab-produccion" class="tab-content active">
@@ -953,8 +959,8 @@ function renderProduccion(data) {
   document.getElementById("botellas").innerHTML = data.botellas.map(b => {
     totBot += b.cantidad || 0;
     let cls = 'verde-txt', txt = 'Stock OK';
-    if (b.cantidad <= 24) { cls = 'rojo-txt'; txt = 'Critico (≤24)'; }
-    else if (b.cantidad <= 48) { cls = 'ambar-txt'; txt = 'Stock bajo'; }
+    if (b.cantidad <= 48) { cls = 'rojo-txt'; txt = 'Crítico (≤48)'; }
+    else if (b.cantidad <= 120) { cls = 'ambar-txt'; txt = 'Stock bajo'; }
     const cajas = (b.cantidad / 24).toFixed(1);
     return '<div class="botella"><div class="botella-foto">' + botellaSVG(b.estilo) + '</div><div class="estilo">' + b.estilo + '</div><div class="cant">' + b.cantidad + '<span>botellas · ' + cajas + ' cajas</span></div><div class="alarma-txt ' + cls + '">' + txt + '</div></div>';
   }).join("");
@@ -1488,6 +1494,29 @@ function renderHistorial(ledger) {
   renderHistorialSnapshots();
 }
 
+/* ═══════ ALERTA DE INVENTARIO SIN ACTUALIZAR (semanal) ═══════ */
+function parseFecha(str) {
+  if (!str) return null;
+  const m = String(str).match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return null;
+  return new Date(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10));
+}
+
+function actualizarAlertaInventario(fechaLecturaStr) {
+  const el = document.getElementById('alerta-inventario');
+  if (!el) return;
+  const ahora = new Date();
+  const diasDesdeLunes = (ahora.getDay() + 6) % 7; // lunes=0 .. domingo=6
+  const lunes = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - diasDesdeLunes);
+  lunes.setHours(0, 0, 0, 0);
+  const ultimaLectura = parseFecha(fechaLecturaStr);
+  // Muestra la alerta si no hay lectura o si es anterior al lunes de esta semana.
+  // Persiste hasta que el inventario se actualice en la semana.
+  if (!ultimaLectura || ultimaLectura < lunes) {
+    el.style.display = 'block';
+  }
+}
+
 /* ═══════ CARGA PRINCIPAL ═══════ */
 (async function () {
   // 1. Cargar datos brutos de planta (PRODUCCIÓN)
@@ -1505,10 +1534,12 @@ function renderHistorial(ledger) {
 
   // 2. Cargar inventario neto con deducciones de Alegra (SEMANAL)
   let dataNeto = null;
+  let fechaLecturaInventario = null;
   try {
     const netoResp = await fetch(INVENTARIO_NETO_URL + "?t=" + Date.now());
     if (netoResp.ok) {
       const neto = await netoResp.json();
+      fechaLecturaInventario = neto.fecha_lectura || neto.generado || null;
       dataNeto = JSON.parse(JSON.stringify(dataBruto));
       if (neto.barriles && neto.barriles.length > 0) {
         const barrilMap = {};
@@ -1523,6 +1554,9 @@ function renderHistorial(ledger) {
       if (neto.generado) dataNeto.generado = "Inv. neto: " + (neto.fecha_lectura || neto.generado);
     }
   } catch(e) { /* sin neto, usar brutos */ }
+
+  // Alerta semanal: avisar si el inventario no se actualizó esta semana
+  actualizarAlertaInventario(fechaLecturaInventario || (dataBruto && dataBruto.generado));
 
   // 3. Renderizar pestaña PRODUCCIÓN (datos brutos sin tocar)
   window.__dataRaw = dataRaw;
