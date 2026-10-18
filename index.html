@@ -294,6 +294,38 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
 .ferm.critico .tanque { filter: grayscale(.92) contrast(.92); opacity: .5; }
 .ferm.critico .pct-label { color: #8c7b6b !important; }
 .ferm.critico .tanque-foto { filter: grayscale(.92) contrast(.92); opacity: .5; }
+.ferm.critico .tanque-transparente { filter: grayscale(.92) contrast(.92); opacity: .55; }
+
+/* ── Tanque transparente: imagen + líquido dentro del cuerpo ── */
+.tanque-transparente-wrap {
+  position: relative; display: inline-block; width: 130px;
+  transition: transform .5s cubic-bezier(.25,.8,.25,1);
+  transform-style: preserve-3d;
+}
+.ferm:hover .tanque-transparente-wrap { transform: perspective(700px) rotateY(6deg) scale(1.03); }
+.tanque-transparente {
+  display: block;
+  width: 100%; height: auto;
+  filter: drop-shadow(0 8px 16px rgba(60,40,20,.18));
+}
+.liquido-tanque {
+  position: absolute;
+  left: 31%; right: 31%;
+  top: 12%; bottom: 10%;
+  clip-path: polygon(0% 0%, 100% 0%, 100% 64%, 50% 100%, 0% 64%);
+  overflow: hidden;
+  pointer-events: none;
+}
+.liquido-tanque-fill {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: var(--nivel, 0%);
+  background: var(--color-nivel, #F0C419);
+  opacity: .85;
+  transform-origin: top center;
+  animation: onda-liquido 3.2s ease-in-out infinite;
+  transition: height .9s cubic-bezier(.4,0,.2,1);
+}
 
 /* ── Tanque fotorrealista: imagen + medidor de nivel (varilla de vidrio) ── */
 .tanque-foto-wrap {
@@ -444,6 +476,7 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
 /* ── Accesibilidad: respetar prefers-reduced-motion ── */
 @media (prefers-reduced-motion: reduce) {
   .tanque .liquido-superficie,
+  .liquido-tanque-fill,
   .icono-alerta-3d,
   .icono-caja-3d,
   .badge.roja::after,
@@ -940,10 +973,10 @@ function tanqueSVG(f, idx) {
 function tanqueFoto(f) {
   const pct = Math.max(0, Math.min(100, f.porcentaje || 0));
   const color = FILL_FERM[f.estilo] || "#F0C419";
-  const medidor = pct > 0
-    ? '<div class="medidor-nivel"><div class="medidor-fill" style="--nivel:' + pct + '%;--color-nivel:' + color + '"></div></div>'
+  const liquido = pct > 0
+    ? '<div class="liquido-tanque"><div class="liquido-tanque-fill" style="--nivel:' + pct + '%;--color-nivel:' + color + '"></div></div>'
     : '';
-  return '<div class="tanque-foto-wrap"><img class="tanque-foto" src="tanque-3d.jpg" alt="Tanque ' + (f.estilo || '') + '" loading="lazy" />' + medidor + '</div>';
+  return '<div class="tanque-transparente-wrap"><img class="tanque-transparente" src="tanque-transparente.jpg" alt="Tanque ' + (f.estilo || '') + '" loading="lazy" />' + liquido + '</div>';
 }
 
 // ═══ Barril fotorrealista (imagen individual, color de tapa no aplica) ═══
