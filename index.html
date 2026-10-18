@@ -294,8 +294,10 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
 .ferm:hover .tanque-foto-wrap { transform: perspective(700px) rotateY(6deg) scale(1.03); }
 .tanque-foto {
   display: block;
-  width: 100%; height: 150px;
-  object-fit: contain; object-position: center;
+  max-height: 150px;
+  max-width: 100%;
+  width: auto; height: auto;
+  margin: 0 auto;
   filter: drop-shadow(0 6px 12px rgba(60,40,20,.15));
 }
 .medidor-nivel {
@@ -365,10 +367,18 @@ main { max-width: 1240px; margin: 0 auto; padding: 28px 20px; position: relative
 }
 
 /* ── Barril fotorrealista (imagen individual) ── */
+.barril-foto-box {
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
 .barril-foto {
-  display: block;
-  width: 100%; height: 130px;
-  object-fit: contain; object-position: center;
+  max-height: 100%;
+  max-width: 100%;
+  width: auto;
+  height: auto;
   filter: drop-shadow(0 6px 12px rgba(60,40,20,.16));
 }
 .barril.vacio .barril-foto {
@@ -927,7 +937,7 @@ function tanqueFoto(f) {
 
 // ═══ Barril fotorrealista (imagen individual, color de tapa no aplica) ═══
 function barrilFoto(estilo) {
-  return '<img class="barril-foto" src="barril-1.webp" alt="Barril ' + estilo + '" loading="lazy" />';
+  return '<div class="barril-foto-box"><img class="barril-foto" src="barril-1.png" alt="Barril ' + estilo + '" loading="lazy" /></div>';
 }
 
 function barrilSVG(estilo) {
