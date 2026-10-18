@@ -7,6 +7,34 @@ Dashboard de metodología Scrum para la cervecería Madre Monte, con **históric
 
 ---
 
+## Dashboard de Planta (`index.html`) — Alertas
+
+### Semáforo de botellas
+
+La pestaña **Producción** marca cada estilo de botella según su stock (`renderProduccion()`):
+
+| Botellas | Color | Texto |
+|---|---|---|
+| ≤ 48 | 🔴 rojo | Crítico (≤48) |
+| 49–120 | 🟡 ámbar | Stock bajo |
+| > 120 | 🟢 verde | Stock OK |
+
+> Umbral crítico = **48 unidades**. Se evalúa por estilo con `if (b.cantidad <= 48)`.
+
+### Alerta semanal de actualización de inventario
+
+- Un **banner rojo** ("El inventario no se ha actualizado esta semana") aparece cuando la
+  última lectura de inventario (`fecha_lectura` de `inventario_neto.json`, o `generado`)
+  es **anterior al lunes** de la semana actual.
+- **Persiste** toda la semana hasta que se actualice el inventario.
+- Incluye enlace directo al formulario de inventario.
+
+Lógica en `actualizarAlertaInventario()`: calcula el lunes de la semana (`(getDay() + 6) % 7`)
+y lo compara contra la última fecha de lectura (`parseFecha()`). Si no hay lectura o es
+anterior al lunes → muestra el banner.
+
+---
+
 ## Funcionalidades
 
 - **Encabezado dinámico**: cuartil actual (Q1–Q4), semana del cuartil, semana del año, fecha y días restantes del trimestre.
