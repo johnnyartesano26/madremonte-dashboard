@@ -1,0 +1,34 @@
+name: Keep-alive Supabase (anti-pausa)
+
+# Supabase pausa proyectos Free con +7 días sin actividad.
+# Este workflow hace una petición diaria de solo lectura (SELECT) para
+# mantener el proyecto activo, sin depender de que abran el dashboard.
+
+on:
+  schedule:
+    - cron: '0 9 * * *'   # diario 9:00 AM UTC (4:00 AM Colombia)
+  workflow_dispatch: {}
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase (SELECT de solo lectura)
+        run: |
+          URL="https://xrhuonbgjlocjusmniel.supabase.co/rest/v1/objetivos?select=id&limit=1"
+          KEY="sb_publishable_bBvT83l6Ak_7Z2DImE3Obg_DfH6z7eZ"  # anon key (pública)
+
+          for intento in 1 2 3; do
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" \
+              -H "apikey: $KEY" \
+              -H "Authorization: Bearer $KEY")
+            if [ "$CODE" = "200" ]; then
+              echo "✅ Supabase activo (HTTP $CODE) en intento $intento"
+              exit 0
+            fi
+            echo "⚠️ Intento $intento: HTTP $CODE"
+            sleep 10
+          done
+
+          echo "❌ No se pudo contactar Supabase tras 3 intentos"
+          exit 1
